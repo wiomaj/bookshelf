@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Loader2, Search } from 'lucide-react'
 import StarRating from './StarRating'
 import { LONG_MONTHS, SEASONS } from '@/lib/month'
+import { useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -38,7 +39,6 @@ async function searchOpenLibrary(query: string, language?: string): Promise<Rich
   )
   if (!res.ok) throw new Error('Open Library request failed')
   const data = await res.json()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data.docs ?? []).map((doc: any) => {
     // Fallback chain: cover_i → cover_edition_key (OLID) → first ISBN
     let cover_url: string | undefined
@@ -74,13 +74,11 @@ async function searchGoogleBooks(query: string, langRestrict?: string): Promise<
   )
   if (!res.ok) throw new Error('Google Books request failed')
   const data = await res.json()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data.items ?? []).map((item: any) => {
     const links = item.volumeInfo?.imageLinks
     const raw = links?.extraLarge ?? links?.large ?? links?.medium ?? links?.thumbnail
     // Extract ISBN-13 (preferred) or ISBN-10 for the cover fallback pass
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ids: { type: string; identifier: string }[] = item.volumeInfo?.industryIdentifiers ?? []
+      const ids: { type: string; identifier: string }[] = item.volumeInfo?.industryIdentifiers ?? []
     const isbn =
       ids.find((id) => id.type === 'ISBN_13')?.identifier ??
       ids.find((id) => id.type === 'ISBN_10')?.identifier
@@ -132,7 +130,6 @@ function rankAndDeduplicate(results: RichSuggestion[], query: string): RichSugge
 }
 
 /** Extract the best cover from a single Google Books API response. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function googleCoverFromResponse(data: any): string | undefined {
   const links = data.items?.[0]?.volumeInfo?.imageLinks as Record<string, string> | undefined
   if (!links) return undefined
@@ -223,6 +220,7 @@ export default function BookForm({
   submitLabel = 'Save',
   loading = false,
 }: BookFormProps) {
+  const t = useT()
   const [title, setTitle]     = useState(initialData?.title ?? '')
   const [author, setAuthor]   = useState(initialData?.author ?? '')
   const [year, setYear]       = useState(initialData?.year ?? currentYear)
@@ -320,7 +318,7 @@ export default function BookForm({
       {/* ── Title with autocomplete ─────────────────────────────────────────── */}
       <div className="relative" ref={suggestionsRef}>
         <label className={labelClass}>
-          Title<span style={{ color: 'var(--primary)' }}>*</span>
+          {t.titleLabel}<span style={{ color: 'var(--primary)' }}>*</span>
         </label>
 
         <div className="relative">
@@ -328,7 +326,7 @@ export default function BookForm({
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Start typing to search…"
+            placeholder={t.titlePlaceholder}
             className={inputBase + ' pr-12'}
           />
           <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[rgba(23,23,23,0.72)]">
@@ -370,19 +368,19 @@ export default function BookForm({
 
       {/* ── Author ─────────────────────────────────────────────────────────── */}
       <div>
-        <label className={labelClass}>Author</label>
+        <label className={labelClass}>{t.authorLabel}</label>
         <input
           type="text"
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
-          placeholder="Enter author name..."
+          placeholder={t.authorPlaceholder}
           className={inputBase}
         />
       </div>
 
       {/* ── When did you read it? (Month 2/3 + Year 1/3) ─────────────────── */}
       <div>
-        <label className={labelClass}>When did you read it?</label>
+        <label className={labelClass}>{t.whenDidYouRead}</label>
         <div className="grid grid-cols-3 gap-[6px]">
           <div className="col-span-2">
             <select
@@ -390,7 +388,7 @@ export default function BookForm({
               onChange={(e) => setMonth(e.target.value === '' ? null : Number(e.target.value))}
               className={inputBase + ' appearance-none cursor-pointer'}
             >
-              <option value="">— Unknown month —</option>
+              <option value="">{t.unknownMonth}</option>
               <optgroup label="Month">
                 {LONG_MONTHS.map((m, i) => (
                   <option key={i + 1} value={i + 1}>{m}</option>
@@ -419,22 +417,22 @@ export default function BookForm({
 
       {/* ── Rating ─────────────────────────────────────────────────────────── */}
       <div>
-        <label className={labelClass}>Rating</label>
+        <label className={labelClass}>{t.ratingLabel}</label>
         <StarRating rating={rating} onRate={setRating} size={36} />
         {rating > 0 && (
           <p className="text-[14px] text-[rgba(23,23,23,0.72)] mt-2">
-            {["", "Didn't like it", "It was okay", "Liked it", "Really liked it", "Loved it"][rating]}
+            {(['', ...t.ratingLabels] as string[])[rating]}
           </p>
         )}
       </div>
 
       {/* ── My Notes ───────────────────────────────────────────────────────── */}
       <div>
-        <label className={labelClass}>My Notes</label>
+        <label className={labelClass}>{t.myNotesLabel}</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="What did you think about this book?"
+          placeholder={t.notesPlaceholder}
           rows={5}
           className="w-full px-4 py-3 rounded-[12px] border-2 border-[rgba(23,23,23,0.16)]
                      focus:outline-none focus:border-[#160a9d] transition-colors
@@ -453,13 +451,13 @@ export default function BookForm({
             className="w-14 h-20 object-cover rounded-[8px] shadow-sm flex-shrink-0"
           />
           <div>
-            <p className="text-[16px] text-[#171717] font-bold mb-1">Cover preview</p>
+            <p className="text-[16px] text-[#171717] font-bold mb-1">{t.coverPreview}</p>
             <button
               type="button"
               onClick={() => setCoverUrl('')}
               className="text-[14px] text-red-500"
             >
-              Remove cover
+              {t.removeCover}
             </button>
           </div>
         </div>
@@ -482,7 +480,7 @@ export default function BookForm({
                    font-bold text-center disabled:opacity-50 disabled:cursor-not-allowed"
         style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
       >
-        {loading ? 'Saving…' : submitLabel}
+        {loading ? t.loading : submitLabel}
       </motion.button>
     </form>
   )
