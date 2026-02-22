@@ -1,73 +1,75 @@
-# React + TypeScript + Vite
+# 📚 My Bookshelf
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A personal bookshelf app to track books you've read — with cover art, ratings, notes, and a cozy reading mode.
 
-Currently, two official plugins are available:
+![Grid view](docs/screenshots/1-grid-view.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 📖 Track your reading
+Add books you've read with title, author, rating (1–5 stars), month/year, and personal notes. Books are grouped by year on the shelf.
 
-## Expanding the ESLint configuration
+### 🔍 Smart book search
+Start typing a title and get live suggestions pulled from **Open Library** and **Google Books** — complete with cover art auto-filled.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 🖼️ Grid & List view
+Switch between a visual grid of cover art and a compact list layout. Your preference is saved automatically.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+![List view](docs/screenshots/2-list-view.png)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 📄 Rich book detail page
+Each book has a dedicated detail view showing:
+- Your personal notes
+- **Released** date and **Genre** (auto-fetched from Google Books)
+- **About the book** — back-cover synopsis pulled from public APIs
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+![Book detail](docs/screenshots/6-book-detail.png)
+![Book info](docs/screenshots/7-book-detail-info.png)
+
+### 🔥 Cozy mode
+Enable Cozy mode in Settings to transform the app into a warm reading nook — animated fireplace, amber background, and orange accent color throughout.
+
+![Cozy mode](docs/screenshots/3-cozy-mode.png)
+
+### ⚙️ Settings
+Toggle Cozy mode on/off from the Settings page.
+
+![Settings](docs/screenshots/5-settings.png)
+
+---
+
+## Tech stack
+
+| Layer | Choice |
+|---|---|
+| Framework | [Next.js 15](https://nextjs.org) (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| Animations | Framer Motion |
+| Storage | `localStorage` (no backend required) |
+| Book data | [Open Library API](https://openlibrary.org/developers/api) + [Google Books API](https://developers.google.com/books) |
+
+---
+
+## Getting started
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Adding a book
+
+1. Tap **+** on the home screen
+2. Start typing the title — suggestions appear automatically
+3. Select a suggestion or fill in the fields manually
+4. Set your rating, when you read it, and any notes
+5. Tap **Add book**
+
+![Add book](docs/screenshots/4-add-book.png)
