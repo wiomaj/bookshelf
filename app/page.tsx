@@ -7,12 +7,13 @@ import { Plus, LayoutGrid, List } from 'lucide-react'
 import Link from 'next/link'
 import { getBooks } from '@/lib/bookApi'
 import YearSection from '@/components/YearSection'
-import { useApp } from '@/contexts/AppContext'
+import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 export default function HomePage() {
   const router = useRouter()
   const { viewMode, setViewMode } = useApp()
+  const t = useT()
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -35,7 +36,7 @@ export default function HomePage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-7 h-7 border-2 border-gray-200 border-t-[#171717] rounded-full animate-spin" />
-          <p className="text-[rgba(23,23,23,0.72)] text-sm">Loading your bookshelf…</p>
+          <p className="text-[rgba(23,23,23,0.72)] text-sm">{t.loadingBookshelf}</p>
         </div>
       </div>
     )
@@ -48,7 +49,7 @@ export default function HomePage() {
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-4 pt-6 pb-2">
           <h1 className="text-[#171717] text-[32px] font-black leading-8">
-            My bookshelf
+            {t.myBookshelf}
           </h1>
 
           {/* Blue circular FAB — hidden when shelf is empty */}
@@ -92,7 +93,7 @@ export default function HomePage() {
               className="font-bold text-[16px] leading-6"
               style={{ color: 'var(--primary)' }}
             >
-              Settings
+              {t.settings}
             </Link>
           </div>
         )}
@@ -117,11 +118,10 @@ export default function HomePage() {
             <div className="mt-6 w-full px-8 flex flex-col gap-6 text-center">
               <div className="flex flex-col gap-[9px]">
                 <h2 className="text-[24px] font-black text-[#171717] leading-8">
-                  Never forget a great read
+                  {t.noBooks}
                 </h2>
                 <p className="text-[16px] text-[#171717] leading-6">
-                  Log every book you finish — with your rating, notes, and when you read it.
-                  Your shelf grows with you.
+                  {t.addFirstBook}
                 </p>
               </div>
 
@@ -132,7 +132,7 @@ export default function HomePage() {
                 className="w-full py-4 rounded-full text-white text-[16px] font-bold text-center"
                 style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
               >
-                Add my first book
+                {t.addFirstBookCta}
               </motion.button>
             </div>
           </motion.div>

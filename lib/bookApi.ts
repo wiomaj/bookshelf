@@ -28,7 +28,7 @@ export async function getBooks(): Promise<Book[]> {
   const books = loadBooks()
   return books.sort((a, b) => {
     if (b.year !== a.year) return b.year - a.year
-    if (b.month !== a.month) return b.month - a.month
+    if (b.month !== a.month) return (b.month ?? 0) - (a.month ?? 0)
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   })
 }

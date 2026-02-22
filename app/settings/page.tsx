@@ -1,12 +1,14 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { X } from 'lucide-react'
-import { useApp } from '@/contexts/AppContext'
+import { X, Check } from 'lucide-react'
+import { useApp, useT } from '@/contexts/AppContext'
+import { LANGUAGES } from '@/lib/translations'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { cozyMode, setCozyMode } = useApp()
+  const { cozyMode, setCozyMode, language, setLanguage } = useApp()
+  const t = useT()
 
   return (
     <div className="min-h-screen">
@@ -25,7 +27,7 @@ export default function SettingsPage() {
 
         {/* ── Title ─────────────────────────────────────────────────────────── */}
         <div className="px-4 pb-6">
-          <h1 className="text-[32px] font-black text-[#171717] leading-8">Settings</h1>
+          <h1 className="text-[32px] font-black text-[#171717] leading-8">{t.settings}</h1>
         </div>
 
         {/* ── Settings rows ──────────────────────────────────────────────────── */}
@@ -35,10 +37,10 @@ export default function SettingsPage() {
           <div className="flex items-start gap-4">
             <div className="flex-1 flex flex-col gap-1">
               <p className="text-[18px] font-bold text-[#171717] leading-6 tracking-[-0.3px]">
-                Cozy mode
+                {t.cozyMode}
               </p>
               <p className="text-[16px] text-[#171717] leading-6">
-                Cozy mode makes your app feel like a warm living room!
+                {t.cozyModeDescription}
               </p>
             </div>
 
@@ -59,6 +61,32 @@ export default function SettingsPage() {
                 }}
               />
             </button>
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-[rgba(23,23,23,0.08)]" />
+
+          {/* Language */}
+          <div className="flex flex-col gap-3">
+            <p className="text-[18px] font-bold text-[#171717] leading-6 tracking-[-0.3px]">
+              {t.language}
+            </p>
+            <div className="flex flex-col">
+              {LANGUAGES.map((lang, i) => (
+                <button
+                  key={lang.code}
+                  onClick={() => setLanguage(lang.code)}
+                  className={`flex items-center gap-3 py-3 text-left transition-colors
+                    ${i < LANGUAGES.length - 1 ? 'border-b border-[rgba(23,23,23,0.08)]' : ''}`}
+                >
+                  <span className="text-[22px] leading-none w-8 text-center">{lang.flag}</span>
+                  <span className="flex-1 text-[16px] text-[#171717] leading-6">{lang.label}</span>
+                  {language === lang.code && (
+                    <Check size={20} strokeWidth={2.5} style={{ color: 'var(--primary)' }} />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
 
         </div>

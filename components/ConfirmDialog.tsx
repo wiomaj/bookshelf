@@ -8,6 +8,8 @@ interface ConfirmDialogProps {
   title: string
   description: string
   confirmLabel?: string
+  loadingLabel?: string
+  cancelLabel?: string
   loading?: boolean
   onConfirm: () => void
   onCancel: () => void
@@ -18,6 +20,8 @@ export default function ConfirmDialog({
   title,
   description,
   confirmLabel = 'Delete',
+  loadingLabel = 'Deleting…',
+  cancelLabel = 'Cancel',
   loading = false,
   onConfirm,
   onCancel,
@@ -69,7 +73,7 @@ export default function ConfirmDialog({
                            font-bold text-center disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
               >
-                {loading ? 'Deleting…' : confirmLabel}
+                {loading ? loadingLabel : confirmLabel}
               </motion.button>
               <motion.button
                 onClick={onCancel}
@@ -79,7 +83,7 @@ export default function ConfirmDialog({
                 className="w-full py-4 bg-[#171717]/[0.08] rounded-full text-[#171717]
                            text-[16px] font-bold text-center disabled:opacity-50"
               >
-                Cancel
+                {cancelLabel}
               </motion.button>
             </div>
           </motion.div>

@@ -10,6 +10,7 @@ import StarRating from '@/components/StarRating'
 import BookForm from '@/components/BookForm'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { formatMonthShort } from '@/lib/month'
+import { useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 /** Upgrade a cover URL to the highest resolution available for the full-width hero. */
@@ -32,6 +33,7 @@ export default function BookDetailPage() {
   const router = useRouter()
   const params = useParams()
   const id = params.id as string
+  const t = useT()
 
   const [book, setBook] = useState<Book | null>(null)
   const [loading, setLoading] = useState(true)
@@ -100,12 +102,12 @@ export default function BookDetailPage() {
         <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center">
           <BookOpen size={26} className="text-gray-300" />
         </div>
-        <h2 className="text-[18px] font-bold text-[#171717]">Book not found</h2>
+        <h2 className="text-[18px] font-bold text-[#171717]">{t.bookNotFound}</h2>
         <button
           onClick={() => router.replace('/')}
           className="flex items-center gap-1.5 text-[rgba(23,23,23,0.72)] text-[16px]"
         >
-          Back to bookshelf
+          {t.backToBookshelf}
         </button>
       </div>
     )
@@ -127,14 +129,14 @@ export default function BookDetailPage() {
           </div>
 
           <div className="px-4 pb-6">
-            <h1 className="text-[#171717] text-[32px] font-black leading-8">Edit book</h1>
+            <h1 className="text-[#171717] text-[32px] font-black leading-8">{t.editBook}</h1>
           </div>
 
           <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
             <BookForm
               initialData={book}
               onSubmit={handleUpdate}
-              submitLabel="Save Changes"
+              submitLabel={t.saveChanges}
               loading={updateLoading}
             />
           </motion.div>
@@ -227,7 +229,7 @@ export default function BookDetailPage() {
               </p>
             ) : (
               <p className="text-[rgba(23,23,23,0.72)] text-[16px] leading-6 italic">
-                No notes added.
+                {t.noNotesAdded}
               </p>
             )}
 
@@ -235,7 +237,7 @@ export default function BookDetailPage() {
             <div className="flex gap-2">
               <div className="flex flex-col gap-2 w-[150px] shrink-0">
                 <span className="text-[12px] font-extrabold uppercase leading-4">
-                  Released
+                  {t.released}
                 </span>
                 <span className="text-[16px] font-normal leading-6">
                   {formatMonthShort(book.month)
@@ -246,7 +248,7 @@ export default function BookDetailPage() {
               {(book.genre || apiGenre) && (
                 <div className="flex flex-col gap-2 flex-1 min-w-0">
                   <span className="text-[12px] font-extrabold uppercase leading-4">
-                    Genre
+                    {t.genre}
                   </span>
                   <span className="text-[16px] font-normal leading-6">
                     {book.genre || apiGenre}
@@ -258,12 +260,12 @@ export default function BookDetailPage() {
             {/* About the book */}
             <div className="flex flex-col gap-2">
               <span className="text-[12px] font-extrabold uppercase leading-4">
-                About the book
+                {t.aboutTheBook}
               </span>
               {bookDataLoading ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-gray-200 border-t-[#171717] rounded-full animate-spin" />
-                  <span className="text-[rgba(23,23,23,0.48)] text-[14px]">Loading…</span>
+                  <span className="text-[rgba(23,23,23,0.48)] text-[14px]">{t.loading}</span>
                 </div>
               ) : description ? (
                 <p className="text-[16px] font-normal leading-6">
@@ -271,7 +273,7 @@ export default function BookDetailPage() {
                 </p>
               ) : (
                 <p className="text-[rgba(23,23,23,0.48)] text-[16px] leading-6 italic">
-                  No description available.
+                  {t.noDescriptionAvailable}
                 </p>
               )}
             </div>
@@ -294,7 +296,7 @@ export default function BookDetailPage() {
             onClick={() => setShowDeleteConfirm(true)}
             className="flex-1 py-3 bg-[#171717]/[0.08] rounded-full text-[#171717] text-[16px] font-bold text-center"
           >
-            Delete book
+            {t.deleteBook}
           </motion.button>
 
           {/* Primary — Edit */}
@@ -305,16 +307,18 @@ export default function BookDetailPage() {
             className="flex-1 py-3 rounded-full text-white text-[16px] font-bold text-center"
             style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
           >
-            Edit book
+            {t.editBook}
           </motion.button>
         </div>
       </motion.div>
 
       <ConfirmDialog
         open={showDeleteConfirm}
-        title="Delete this book?"
-        description={`"${book.title}" will be permanently removed from your bookshelf.`}
-        confirmLabel="Delete"
+        title={t.deleteDialogTitle}
+        description={`"${book.title}" ${t.deleteDialogSuffix}`}
+        confirmLabel={t.deleteBook}
+        loadingLabel={t.deleting}
+        cancelLabel={t.cancel}
         loading={deleteLoading}
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteConfirm(false)}

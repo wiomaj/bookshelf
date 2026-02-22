@@ -6,10 +6,12 @@ import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { addBook } from '@/lib/bookApi'
 import BookForm from '@/components/BookForm'
+import { useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 export default function AddBookPage() {
   const router = useRouter()
+  const t = useT()
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(data: Omit<Book, 'id' | 'user_id' | 'created_at'>) {
@@ -39,7 +41,7 @@ export default function AddBookPage() {
         {/* Page title */}
         <div className="px-4 pb-6">
           <h1 className="text-[#171717] text-[32px] font-black leading-8">
-            Add a book you read
+            {t.addABook}
           </h1>
         </div>
 
@@ -50,7 +52,7 @@ export default function AddBookPage() {
         >
           <BookForm
             onSubmit={handleSubmit}
-            submitLabel="Add Book"
+            submitLabel={t.addBook}
             loading={loading}
           />
         </motion.div>
