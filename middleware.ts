@@ -42,6 +42,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  // Prevent CDN/edge caching of authenticated (private) responses
+  supabaseResponse.headers.set('Cache-Control', 'private, no-store')
+
   return supabaseResponse
 }
 

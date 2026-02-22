@@ -1,5 +1,16 @@
 import { createClient } from '@/utils/supabase/client'
+import { BookInputSchema } from '@/lib/bookSchema'
 import type { Book } from '@/types/book'
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Columns we actually need — avoids leaking unexpected future columns. */
+const BOOK_COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at'
+
+/** Never surface raw Supabase / Postgres error strings to the client. */
+function dbError(context: string): Error {
+  return new Error(`${context} failed. Please try again.`)
+}
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
@@ -8,12 +19,12 @@ export async function getBooks(): Promise<Book[]> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('books')
-    .select('*')
+    .select(BOOK_COLUMNS)
     .order('year', { ascending: false })
     .order('month', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
 
-  if (error) throw new Error(error.message)
+  if (error) throw dbError('Fetching books')
   return (data ?? []) as Book[]
 }
 
@@ -22,7 +33,7 @@ export async function getBook(id: string): Promise<Book | null> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('books')
-    .select('*')
+    .select(BOOK_COLUMNS)
     .eq('id', id)
     .single()
 
@@ -34,17 +45,20 @@ export async function getBook(id: string): Promise<Book | null> {
 export async function addBook(
   book: Omit<Book, 'id' | 'user_id' | 'created_at'>
 ): Promise<Book> {
+  // Validate + strip unknown fields before touching the DB
+  const validated = BookInputSchema.parse(book)
+
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
   const { data, error } = await supabase
     .from('books')
-    .insert({ ...book, user_id: user.id })
-    .select()
+    .insert({ ...validated, user_id: user.id })
+    .select(BOOK_COLUMNS)
     .single()
 
-  if (error) throw new Error(error.message)
+  if (error) throw dbError('Saving book')
   return data as Book
 }
 
@@ -53,15 +67,18 @@ export async function updateBook(
   id: string,
   updates: Partial<Omit<Book, 'id' | 'user_id' | 'created_at'>>
 ): Promise<Book> {
+  // Validate only the supplied fields (partial parse)
+  const validated = BookInputSchema.partial().parse(updates)
+
   const supabase = createClient()
   const { data, error } = await supabase
     .from('books')
-    .update(updates)
+    .update(validated)
     .eq('id', id)
-    .select()
+    .select(BOOK_COLUMNS)
     .single()
 
-  if (error) throw new Error(error.message)
+  if (error) throw dbError('Updating book')
   return data as Book
 }
 
@@ -73,5 +90,5 @@ export async function deleteBook(id: string): Promise<void> {
     .delete()
     .eq('id', id)
 
-  if (error) throw new Error(error.message)
+  if (error) throw dbError('Deleting book')
 }
