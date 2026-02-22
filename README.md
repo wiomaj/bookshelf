@@ -2,8 +2,6 @@
 
 A personal bookshelf app to track books you've read — with cover art, ratings, notes, and a cozy reading mode.
 
-![Grid view](docs/screenshots/1-grid-view.png)
-
 ---
 
 ## Features
@@ -17,26 +15,17 @@ Start typing a title and get live suggestions pulled from **Open Library** and *
 ### 🖼️ Grid & List view
 Switch between a visual grid of cover art and a compact list layout. Your preference is saved automatically.
 
-![List view](docs/screenshots/2-list-view.png)
-
 ### 📄 Rich book detail page
 Each book has a dedicated detail view showing:
 - Your personal notes
 - **Released** date and **Genre** (auto-fetched from Google Books)
 - **About the book** — back-cover synopsis pulled from public APIs
 
-![Book detail](docs/screenshots/6-book-detail.png)
-![Book info](docs/screenshots/7-book-detail-info.png)
-
 ### 🔥 Cozy mode
 Enable Cozy mode in Settings to transform the app into a warm reading nook — animated fireplace, amber background, and orange accent color throughout.
 
-![Cozy mode](docs/screenshots/3-cozy-mode.png)
-
 ### ⚙️ Settings
 Toggle Cozy mode on/off from the Settings page.
-
-![Settings](docs/screenshots/5-settings.png)
 
 ---
 
@@ -71,5 +60,3 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 3. Select a suggestion or fill in the fields manually
 4. Set your rating, when you read it, and any notes
 5. Tap **Add book**
-
-![Add book](docs/screenshots/4-add-book.png)
