@@ -3,6 +3,7 @@ import { Noto_Sans } from 'next/font/google'
 import './globals.css'
 import { AppProvider } from '@/contexts/AppContext'
 import CozyBody from '@/components/CozyBody'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const notoSans = Noto_Sans({
   subsets: ['latin'],
@@ -25,6 +26,7 @@ export default function RootLayout({
         <AppProvider>
           <CozyBody>{children}</CozyBody>
         </AppProvider>
+        <SpeedInsights />
       </body>
     </html>
   )

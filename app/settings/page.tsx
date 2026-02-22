@@ -1,13 +1,13 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { X, Check } from 'lucide-react'
+import { X, Check, LogOut } from 'lucide-react'
 import { useApp, useT } from '@/contexts/AppContext'
 import { LANGUAGES } from '@/lib/translations'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { cozyMode, setCozyMode, language, setLanguage } = useApp()
+  const { cozyMode, setCozyMode, language, setLanguage, user, signOut } = useApp()
   const t = useT()
 
   return (
@@ -87,6 +87,28 @@ export default function SettingsPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-[rgba(23,23,23,0.08)]" />
+
+          {/* Sign out */}
+          <div className="flex flex-col gap-1">
+            {user?.email && (
+              <p className="text-[14px] text-[rgba(23,23,23,0.48)] leading-5 mb-1">
+                Signed in as {user.email}
+              </p>
+            )}
+            <button
+              onClick={async () => {
+                await signOut()
+                router.push('/login')
+              }}
+              className="flex items-center gap-2 text-[16px] font-bold text-red-500 py-1"
+            >
+              <LogOut size={18} />
+              Sign out
+            </button>
           </div>
 
         </div>
