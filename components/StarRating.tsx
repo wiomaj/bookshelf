@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Star } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useApp } from '@/contexts/AppContext'
 
 interface StarRatingProps {
   rating: number
@@ -17,6 +18,7 @@ export default function StarRating({
   readonly = false,
   size = 20,
 }: StarRatingProps) {
+  const { cozyMode } = useApp()
   // `hovered` tracks which star the cursor is over, for the preview highlight
   const [hovered, setHovered] = useState(0)
 
@@ -44,7 +46,7 @@ export default function StarRating({
               className={
                 isActive
                   ? 'fill-amber-400 text-amber-400 transition-colors'
-                  : 'text-gray-200 transition-colors'
+                  : cozyMode ? 'text-[#171717] transition-colors' : 'text-gray-200 transition-colors'
               }
             />
           </motion.button>

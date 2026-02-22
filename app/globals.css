@@ -16,3 +16,31 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/* ── Cozy mode animations ─────────────────────────────────────────────────── */
+@keyframes cozy-flicker {
+  0%,  100% { transform: rotate(-2deg)  scaleX(1)    scaleY(1);    opacity: 0.90; }
+  20%        { transform: rotate(1deg)   scaleX(0.95) scaleY(1.05); opacity: 1;    }
+  40%        { transform: rotate(-1deg)  scaleX(1.04) scaleY(0.96); opacity: 0.85; }
+  60%        { transform: rotate(2deg)   scaleX(0.97) scaleY(1.03); opacity: 0.95; }
+  80%        { transform: rotate(-0.5deg) scaleX(1.02) scaleY(0.99); opacity: 0.90; }
+}
+
+@keyframes cozy-ember {
+  0%   { transform: translateY(0)     translateX(0);   opacity: 0.9; }
+  100% { transform: translateY(-90px) translateX(8px); opacity: 0;   }
+}
+
+@keyframes cozy-glow {
+  0%,  100% { opacity: 0.65; transform: translateX(-50%) scale(1);   }
+  50%        { opacity: 1;    transform: translateX(-50%) scale(1.12); }
+}
+
+
+/* ── Cozy mode primary-color override for focused inputs ─────────────────── */
+/* Overrides the hardcoded Tailwind focus:border-[#160a9d] class              */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary, #160a9d);
+}
+

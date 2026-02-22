@@ -23,7 +23,7 @@ export default function AddBookPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       <div className="max-w-[393px] mx-auto">
 
         {/* Header — X close button on the right */}

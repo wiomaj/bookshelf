@@ -19,6 +19,9 @@ type BookSuggestion = {
   cover_url?: string
 }
 
+// Internal type that carries ISBNs for the cover fallback pass
+type RichSuggestion = BookSuggestion & { isbn?: string }
+
 interface BookFormProps {
   initialData?: Partial<Book>
   onSubmit: (data: Omit<Book, 'id' | 'user_id' | 'created_at'>) => Promise<void>
@@ -28,45 +31,66 @@ interface BookFormProps {
 
 // ─── Book Search APIs ─────────────────────────────────────────────────────────
 
-async function searchOpenLibrary(query: string, language?: string): Promise<BookSuggestion[]> {
+async function searchOpenLibrary(query: string, language?: string): Promise<RichSuggestion[]> {
   const lang = language ? `&language=${encodeURIComponent(language)}` : ''
   const res = await fetch(
-    `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&fields=title,author_name,cover_i&limit=7${lang}`
+    `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&fields=title,author_name,cover_i,cover_edition_key,isbn&limit=10${lang}`
   )
   if (!res.ok) throw new Error('Open Library request failed')
   const data = await res.json()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data.docs ?? []).map((doc: any) => ({
-    title: doc.title ?? '',
-    author: doc.author_name?.[0] ?? 'Unknown Author',
-    cover_url: doc.cover_i
-      ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`
-      : undefined,
-  }))
+  return (data.docs ?? []).map((doc: any) => {
+    // Fallback chain: cover_i → cover_edition_key (OLID) → first ISBN
+    let cover_url: string | undefined
+    if (doc.cover_i) {
+      cover_url = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`
+    } else if (doc.cover_edition_key) {
+      cover_url = `https://covers.openlibrary.org/b/olid/${doc.cover_edition_key}-L.jpg`
+    } else if (doc.isbn?.[0]) {
+      cover_url = `https://covers.openlibrary.org/b/isbn/${doc.isbn[0]}-L.jpg`
+    }
+    return {
+      title: doc.title ?? '',
+      author: doc.author_name?.[0] ?? 'Unknown Author',
+      cover_url,
+      // Carry ISBN-13 (preferred) or ISBN-10 for the Google Books fallback pass
+      isbn: doc.isbn?.find((n: string) => n.length === 13) ?? doc.isbn?.[0],
+    }
+  })
 }
 
-async function searchGoogleBooks(query: string, langRestrict?: string): Promise<BookSuggestion[]> {
+/** Normalise a raw Google Books image URL to a high-res https version. */
+function normaliseGoogleCover(raw: string): string {
+  return raw
+    .replace('http:', 'https:')
+    .replace(/zoom=\d+/, 'zoom=0')
+    .replace(/&fife=[^&]*/g, '') + '&fife=w600'
+}
+
+async function searchGoogleBooks(query: string, langRestrict?: string): Promise<RichSuggestion[]> {
   const lang = langRestrict ? `&langRestrict=${encodeURIComponent(langRestrict)}` : ''
   const res = await fetch(
-    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=7${lang}`
+    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=10${lang}`
   )
   if (!res.ok) throw new Error('Google Books request failed')
   const data = await res.json()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data.items ?? []).map((item: any) => ({
-    title: item.volumeInfo?.title ?? '',
-    author: item.volumeInfo?.authors?.[0] ?? 'Unknown Author',
-    cover_url: (() => {
-      const links = item.volumeInfo?.imageLinks
-      const raw = links?.extraLarge ?? links?.large ?? links?.medium ?? links?.thumbnail
-      if (!raw) return undefined
-      // Upgrade to https, maximise zoom, and request a larger fife size for cards
-      return raw
-        .replace('http:', 'https:')
-        .replace(/zoom=\d+/, 'zoom=0')
-        .replace(/&fife=[^&]*/g, '') + '&fife=w600'
-    })(),
-  }))
+  return (data.items ?? []).map((item: any) => {
+    const links = item.volumeInfo?.imageLinks
+    const raw = links?.extraLarge ?? links?.large ?? links?.medium ?? links?.thumbnail
+    // Extract ISBN-13 (preferred) or ISBN-10 for the cover fallback pass
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ids: { type: string; identifier: string }[] = item.volumeInfo?.industryIdentifiers ?? []
+    const isbn =
+      ids.find((id) => id.type === 'ISBN_13')?.identifier ??
+      ids.find((id) => id.type === 'ISBN_10')?.identifier
+    return {
+      title: item.volumeInfo?.title ?? '',
+      author: item.volumeInfo?.authors?.[0] ?? 'Unknown Author',
+      cover_url: raw ? normaliseGoogleCover(raw) : undefined,
+      isbn,
+    }
+  })
 }
 
 /** Score how well a title matches the query — higher is better. */
@@ -83,26 +107,64 @@ function relevanceScore(title: string, query: string): number {
   return Math.round((matched / words.length) * 20)
 }
 
-function rankAndDeduplicate(results: BookSuggestion[], query: string): BookSuggestion[] {
-  // Deduplicate by normalised title, keeping the entry with a cover if available
-  const map = new Map<string, BookSuggestion>()
+function rankAndDeduplicate(results: RichSuggestion[], query: string): RichSuggestion[] {
+  // Deduplicate by normalised title, keeping the richest entry (cover > isbn)
+  const map = new Map<string, RichSuggestion>()
   for (const s of results) {
     const key = s.title.toLowerCase().trim()
     const existing = map.get(key)
-    if (!existing || (!existing.cover_url && s.cover_url)) map.set(key, s)
+    if (!existing) {
+      map.set(key, s)
+    } else {
+      // Prefer whichever has a cover; also merge in isbn if missing
+      const better = !existing.cover_url && s.cover_url ? s : existing
+      map.set(key, { ...better, isbn: better.isbn ?? s.isbn ?? existing.isbn })
+    }
   }
 
   return [...map.values()]
     .sort((a, b) => {
       const scoreDiff = relevanceScore(b.title, query) - relevanceScore(a.title, query)
       if (scoreDiff !== 0) return scoreDiff
-      // Tie-break: prefer entries that have a cover image
       return (b.cover_url ? 1 : 0) - (a.cover_url ? 1 : 0)
     })
     .slice(0, 8)
 }
 
+/** Extract the best cover from a single Google Books API response. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function googleCoverFromResponse(data: any): string | undefined {
+  const links = data.items?.[0]?.volumeInfo?.imageLinks as Record<string, string> | undefined
+  if (!links) return undefined
+  const raw = links.extraLarge ?? links.large ?? links.medium ?? links.thumbnail
+  return raw ? normaliseGoogleCover(raw) : undefined
+}
+
+/** Query Google Books by exact ISBN — more precise than a title search. */
+async function fetchCoverByISBN(isbn: string): Promise<string | undefined> {
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}&maxResults=1`
+    )
+    if (!res.ok) return undefined
+    return googleCoverFromResponse(await res.json())
+  } catch { return undefined }
+}
+
+/** Query Google Books with intitle: + inauthor: — hits different index entries than a plain search. */
+async function fetchCoverByTitleAuthor(title: string, author: string): Promise<string | undefined> {
+  try {
+    const q = `intitle:"${title}" inauthor:"${author}"`
+    const res = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=1`
+    )
+    if (!res.ok) return undefined
+    return googleCoverFromResponse(await res.json())
+  } catch { return undefined }
+}
+
 async function searchAllSources(query: string): Promise<BookSuggestion[]> {
+  // ── Pass 1: parallel title search across all sources ──────────────────────
   const [olGlobal, olGerman, googleGlobal, googleGerman] = await Promise.allSettled([
     searchOpenLibrary(query),
     searchOpenLibrary(query, 'ger'),
@@ -110,14 +172,47 @@ async function searchAllSources(query: string): Promise<BookSuggestion[]> {
     searchGoogleBooks(query, 'de'),
   ])
 
-  const combined: BookSuggestion[] = [
-    ...(olGlobal.status    === 'fulfilled' ? olGlobal.value    : []),
-    ...(olGerman.status    === 'fulfilled' ? olGerman.value    : []),
+  const combined: RichSuggestion[] = [
+    ...(olGlobal.status     === 'fulfilled' ? olGlobal.value     : []),
+    ...(olGerman.status     === 'fulfilled' ? olGerman.value     : []),
     ...(googleGlobal.status === 'fulfilled' ? googleGlobal.value : []),
     ...(googleGerman.status === 'fulfilled' ? googleGerman.value : []),
   ]
 
-  return rankAndDeduplicate(combined, query)
+  const ranked = rankAndDeduplicate(combined, query)
+
+  // ── Pass 2: multi-source fallback for every coverless entry ──────────────
+  // For each entry without a cover, try ISBN lookup AND intitle:/inauthor: query
+  // in parallel — take whichever responds first with a cover.
+  const needsCover = ranked.filter((r) => !r.cover_url)
+  if (needsCover.length > 0) {
+    const coverResults = await Promise.allSettled(
+      needsCover.map(async (r) => {
+        const attempts: Promise<string | undefined>[] = []
+        if (r.isbn) attempts.push(fetchCoverByISBN(r.isbn))
+        if (r.author && r.author !== 'Unknown Author') {
+          attempts.push(fetchCoverByTitleAuthor(r.title, r.author))
+        }
+        if (attempts.length === 0) return undefined
+        // Run all attempts in parallel, return the first cover found
+        const results = await Promise.allSettled(attempts)
+        for (const res of results) {
+          if (res.status === 'fulfilled' && res.value) return res.value
+        }
+        return undefined
+      })
+    )
+    coverResults.forEach((result, i) => {
+      if (result.status === 'fulfilled' && result.value) {
+        const key = needsCover[i].title.toLowerCase().trim()
+        const idx = ranked.findIndex((r) => r.title.toLowerCase().trim() === key)
+        if (idx !== -1) ranked[idx].cover_url = result.value
+      }
+    })
+  }
+
+  // Strip internal isbn field before returning
+  return ranked.map(({ isbn: _isbn, ...rest }) => rest)
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -134,9 +229,9 @@ export default function BookForm({
   const [month, setMonth]     = useState<number | null>(initialData?.month ?? null)
   const [rating, setRating]   = useState(initialData?.rating ?? 0)
   const [notes, setNotes]     = useState(initialData?.notes ?? '')
-  const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
   // Preserve genre if it exists (not shown in UI, still saved)
   const genreRef = useRef(initialData?.genre)
+  const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
 
   const [suggestions, setSuggestions]     = useState<BookSuggestion[]>([])
   const [searchLoading, setSearchLoading] = useState(false)
@@ -211,9 +306,10 @@ export default function BookForm({
   }
 
   // ── Shared styles ───────────────────────────────────────────────────────────
+  // focus:border is handled by the CSS variable rule in globals.css
   const inputBase =
     'w-full px-4 h-[60px] rounded-[12px] border-2 border-[rgba(23,23,23,0.16)] ' +
-    'focus:outline-none focus:border-[#160a9d] transition-colors ' +
+    'focus:outline-none transition-colors ' +
     'text-[16px] text-[#171717] bg-white placeholder:text-[rgba(23,23,23,0.72)]'
 
   const labelClass = 'block text-[#171717] text-[18px] font-bold leading-6 mb-2'
@@ -224,7 +320,7 @@ export default function BookForm({
       {/* ── Title with autocomplete ─────────────────────────────────────────── */}
       <div className="relative" ref={suggestionsRef}>
         <label className={labelClass}>
-          Title<span className="text-[#160a9d]">*</span>
+          Title<span style={{ color: 'var(--primary)' }}>*</span>
         </label>
 
         <div className="relative">
@@ -382,9 +478,9 @@ export default function BookForm({
         disabled={loading}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="w-full py-4 bg-[#160a9d] rounded-full text-white text-[16px]
-                   font-bold text-center disabled:opacity-50 disabled:cursor-not-allowed
-                   shadow-[0_8px_24px_rgba(22,10,157,0.45),0_2px_6px_rgba(22,10,157,0.22)]"
+        className="w-full py-4 rounded-full text-white text-[16px]
+                   font-bold text-center disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
       >
         {loading ? 'Saving…' : submitLabel}
       </motion.button>
