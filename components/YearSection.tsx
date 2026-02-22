@@ -4,18 +4,22 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import BookCard from './BookCard'
+import BookListItem from './BookListItem'
 import type { Book } from '@/types/book'
+import type { ViewMode } from '@/contexts/AppContext'
 
 interface YearSectionProps {
   year: number
   books: Book[]
   defaultOpen?: boolean
+  viewMode?: ViewMode
 }
 
 export default function YearSection({
   year,
   books,
   defaultOpen = true,
+  viewMode = 'grid',
 }: YearSectionProps) {
   const [isOpen, setIsOpen] = useState(() => {
     if (typeof window === 'undefined') return defaultOpen
@@ -88,11 +92,19 @@ export default function YearSection({
             className={expanded ? 'overflow-visible' : 'overflow-hidden'}
             onAnimationComplete={() => { if (isOpen) setExpanded(true) }}
           >
-            <div className="grid grid-cols-2 gap-x-[13px] gap-y-3 px-4 pb-4">
-              {books.map((book) => (
-                <BookCard key={book.id} book={book} />
-              ))}
-            </div>
+            {viewMode === 'list' ? (
+              <div className="flex flex-col gap-[13px] px-4 pb-4">
+                {books.map((book) => (
+                  <BookListItem key={book.id} book={book} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-x-[13px] gap-y-3 px-4 pb-4">
+                {books.map((book) => (
+                  <BookCard key={book.id} book={book} />
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

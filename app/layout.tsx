@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Noto_Sans } from 'next/font/google'
 import './globals.css'
+import { AppProvider } from '@/contexts/AppContext'
+import CozyBody from '@/components/CozyBody'
 
 const notoSans = Noto_Sans({
   subsets: ['latin'],
@@ -19,8 +21,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${notoSans.className} bg-white antialiased min-h-screen`}>
-        {children}
+      <body className={notoSans.className}>
+        <AppProvider>
+          <CozyBody>{children}</CozyBody>
+        </AppProvider>
       </body>
     </html>
   )

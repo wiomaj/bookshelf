@@ -65,9 +65,9 @@ export default function ConfirmDialog({
                 disabled={loading}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-full py-4 bg-[#160a9d] rounded-full text-white text-[16px]
-                           font-bold text-center disabled:opacity-50 disabled:cursor-not-allowed
-                           shadow-[0_8px_24px_rgba(22,10,157,0.45),0_2px_6px_rgba(22,10,157,0.22)]"
+                className="w-full py-4 rounded-full text-white text-[16px]
+                           font-bold text-center disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
               >
                 {loading ? 'Deleting…' : confirmLabel}
               </motion.button>
