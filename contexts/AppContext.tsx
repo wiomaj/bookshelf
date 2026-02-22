@@ -41,20 +41,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (l && VALID_LOCALES.includes(l)) setLanguageState(l)
     } catch { /* ignore */ }
 
-    // Bootstrap auth state
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
-      setIsAuthLoading(false)
-    })
+    // Bootstrap auth state — guard against missing env vars (build without secrets)
+    let subscription: { unsubscribe: () => void } | null = null
+    try {
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        setUser(user)
+        setIsAuthLoading(false)
+      })
 
-    // Keep in sync with sign in / sign out events
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      // Keep in sync with sign in / sign out events
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user ?? null)
+        setIsAuthLoading(false)
+      })
+      subscription = data.subscription
+    } catch {
+      // Supabase not configured — treat as unauthenticated
       setIsAuthLoading(false)
-    })
+    }
 
-    return () => subscription.unsubscribe()
+    return () => subscription?.unsubscribe()
   }, [])
 
   function setViewMode(mode: ViewMode) {
