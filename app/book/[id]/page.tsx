@@ -5,12 +5,13 @@ import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { BookOpen, X } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
+import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
 import StarRating from '@/components/StarRating'
 import BookForm from '@/components/BookForm'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { formatMonthShort } from '@/lib/month'
-import { useT } from '@/contexts/AppContext'
+import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 /** Upgrade a cover URL to the highest resolution available for the full-width hero. */
@@ -33,6 +34,7 @@ export default function BookDetailPage() {
   const router = useRouter()
   const params = useParams()
   const id = params.id as string
+  const { user } = useApp()
   const t = useT()
 
   const [book, setBook] = useState<Book | null>(null)
@@ -47,7 +49,8 @@ export default function BookDetailPage() {
   const [bookDataLoading, setBookDataLoading] = useState(false)
 
   useEffect(() => {
-    getBook(id).then((b) => {
+    if (!user) return
+    getBook(supabase, user.id, id).then((b) => {
       if (!b) setNotFound(true)
       else {
         setBook(b)
@@ -60,13 +63,13 @@ export default function BookDetailPage() {
       }
       setLoading(false)
     })
-  }, [id])
+  }, [id, user])
 
   async function handleUpdate(data: Omit<Book, 'id' | 'user_id' | 'created_at'>) {
-    if (!book) return
+    if (!book || !user) return
     setUpdateLoading(true)
     try {
-      const updated = await updateBook(book.id, data)
+      const updated = await updateBook(supabase, user.id, book.id, data)
       setBook(updated)
       setIsEditing(false)
     } finally {
@@ -75,10 +78,10 @@ export default function BookDetailPage() {
   }
 
   async function handleDelete() {
-    if (!book) return
+    if (!book || !user) return
     setDeleteLoading(true)
     try {
-      await deleteBook(book.id)
+      await deleteBook(supabase, user.id, book.id)
       router.replace('/')
     } finally {
       setDeleteLoading(false)

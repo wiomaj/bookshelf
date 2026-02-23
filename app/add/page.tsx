@@ -5,19 +5,22 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { addBook } from '@/lib/bookApi'
+import { supabase } from '@/lib/supabase'
 import BookForm from '@/components/BookForm'
-import { useT } from '@/contexts/AppContext'
+import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 export default function AddBookPage() {
   const router = useRouter()
+  const { user } = useApp()
   const t = useT()
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(data: Omit<Book, 'id' | 'user_id' | 'created_at'>) {
+    if (!user) return
     setLoading(true)
     try {
-      await addBook(data)
+      await addBook(supabase, user.id, data)
       router.push('/')
     } finally {
       setLoading(false)

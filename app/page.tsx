@@ -6,23 +6,25 @@ import { motion } from 'framer-motion'
 import { Plus, LayoutGrid, List } from 'lucide-react'
 import Link from 'next/link'
 import { getBooks } from '@/lib/bookApi'
+import { supabase } from '@/lib/supabase'
 import YearSection from '@/components/YearSection'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 export default function HomePage() {
   const router = useRouter()
-  const { viewMode, setViewMode } = useApp()
+  const { viewMode, setViewMode, user } = useApp()
   const t = useT()
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getBooks()
+    if (!user) return
+    getBooks(supabase, user.id)
       .then(setBooks)
       .catch(console.error)
       .finally(() => setLoading(false))
-  }, [])
+  }, [user])
 
   const booksByYear = books.reduce<Record<number, Book[]>>((acc, book) => {
     acc[book.year] = [...(acc[book.year] ?? []), book]

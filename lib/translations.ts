@@ -53,6 +53,18 @@ export type Translations = {
   cozyMode: string
   cozyModeDescription: string
   language: string
+  signOut: string
+  // Auth
+  email: string
+  password: string
+  confirmPassword: string
+  signIn: string
+  signUp: string
+  signingIn: string
+  signingUp: string
+  noAccount: string
+  haveAccount: string
+  passwordMismatch: string
 }
 
 const en: Translations = {
@@ -94,6 +106,17 @@ const en: Translations = {
   cozyMode: 'Cozy mode',
   cozyModeDescription: 'Cozy mode makes your app feel like a warm living room!',
   language: 'Language',
+  signOut: 'Sign out',
+  email: 'Email',
+  password: 'Password',
+  confirmPassword: 'Confirm password',
+  signIn: 'Sign in',
+  signUp: 'Create account',
+  signingIn: 'Signing in…',
+  signingUp: 'Creating account…',
+  noAccount: "Don't have an account?",
+  haveAccount: 'Already have an account?',
+  passwordMismatch: 'Passwords do not match.',
 }
 
 const de: Translations = {
@@ -135,6 +158,17 @@ const de: Translations = {
   cozyMode: 'Gemütlichkeitsmodus',
   cozyModeDescription: 'Der Gemütlichkeitsmodus lässt die App wie ein warmes Wohnzimmer wirken!',
   language: 'Sprache',
+  signOut: 'Abmelden',
+  email: 'E-Mail',
+  password: 'Passwort',
+  confirmPassword: 'Passwort bestätigen',
+  signIn: 'Anmelden',
+  signUp: 'Konto erstellen',
+  signingIn: 'Anmelden…',
+  signingUp: 'Konto erstellen…',
+  noAccount: 'Noch kein Konto?',
+  haveAccount: 'Bereits ein Konto?',
+  passwordMismatch: 'Passwörter stimmen nicht überein.',
 }
 
 const fr: Translations = {
@@ -176,6 +210,17 @@ const fr: Translations = {
   cozyMode: 'Mode cosy',
   cozyModeDescription: "Le mode cosy donne à l'application l'ambiance d'un salon chaleureux !",
   language: 'Langue',
+  signOut: 'Se déconnecter',
+  email: 'E-mail',
+  password: 'Mot de passe',
+  confirmPassword: 'Confirmer le mot de passe',
+  signIn: 'Se connecter',
+  signUp: 'Créer un compte',
+  signingIn: 'Connexion…',
+  signingUp: 'Création du compte…',
+  noAccount: 'Pas encore de compte ?',
+  haveAccount: 'Déjà un compte ?',
+  passwordMismatch: 'Les mots de passe ne correspondent pas.',
 }
 
 const es: Translations = {
@@ -217,6 +262,17 @@ const es: Translations = {
   cozyMode: 'Modo acogedor',
   cozyModeDescription: '¡El modo acogedor hace que la app parezca una sala de estar cálida!',
   language: 'Idioma',
+  signOut: 'Cerrar sesión',
+  email: 'Correo electrónico',
+  password: 'Contraseña',
+  confirmPassword: 'Confirmar contraseña',
+  signIn: 'Iniciar sesión',
+  signUp: 'Crear cuenta',
+  signingIn: 'Iniciando sesión…',
+  signingUp: 'Creando cuenta…',
+  noAccount: '¿No tienes cuenta?',
+  haveAccount: '¿Ya tienes cuenta?',
+  passwordMismatch: 'Las contraseñas no coinciden.',
 }
 
 const pl: Translations = {
@@ -258,6 +314,17 @@ const pl: Translations = {
   cozyMode: 'Tryb przytulny',
   cozyModeDescription: 'Tryb przytulny sprawia, że aplikacja wygląda jak ciepły salon!',
   language: 'Język',
+  signOut: 'Wyloguj się',
+  email: 'E-mail',
+  password: 'Hasło',
+  confirmPassword: 'Potwierdź hasło',
+  signIn: 'Zaloguj się',
+  signUp: 'Utwórz konto',
+  signingIn: 'Logowanie…',
+  signingUp: 'Tworzenie konta…',
+  noAccount: 'Nie masz konta?',
+  haveAccount: 'Masz już konto?',
+  passwordMismatch: 'Hasła nie są zgodne.',
 }
 
 export const translations: Record<Locale, Translations> = { en, de, fr, es, pl }

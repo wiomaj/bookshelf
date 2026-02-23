@@ -7,7 +7,7 @@ import { LANGUAGES } from '@/lib/translations'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { cozyMode, setCozyMode, language, setLanguage } = useApp()
+  const { cozyMode, setCozyMode, language, setLanguage, signOut } = useApp()
   const t = useT()
 
   return (
@@ -88,6 +88,17 @@ export default function SettingsPage() {
               ))}
             </div>
           </div>
+
+          {/* Divider */}
+          <div className="h-px bg-[rgba(23,23,23,0.08)]" />
+
+          {/* Sign out */}
+          <button
+            onClick={async () => { await signOut(); router.replace('/login') }}
+            className="text-left text-[18px] font-bold text-red-500 leading-6 tracking-[-0.3px] py-1"
+          >
+            {t.signOut}
+          </button>
 
         </div>
       </div>
