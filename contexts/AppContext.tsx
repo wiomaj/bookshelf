@@ -19,7 +19,7 @@ interface AppContextValue {
   setLanguage: (lang: Locale) => void
   user: User | null
   isAuthLoading: boolean
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>
+  signIn: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>
   signUp: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>
   signOut: () => Promise<void>
 }
@@ -86,9 +86,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   // ── Auth methods ─────────────────────────────────────────────────────────────
-  async function signIn(email: string, password: string): Promise<{ error: string | null }> {
+  async function signIn(email: string, password: string): Promise<{ error: string | null; needsConfirmation: boolean }> {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error: error?.message ?? null }
+    return { error: error?.message ?? null, needsConfirmation: false }
   }
 
   async function signUp(email: string, password: string): Promise<{ error: string | null; needsConfirmation: boolean }> {
