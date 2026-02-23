@@ -16,12 +16,11 @@ export default function HomePage() {
   const t = useT()
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     getBooks()
       .then(setBooks)
-      .catch(() => setLoadError(true))
+      .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
 
@@ -38,23 +37,6 @@ export default function HomePage() {
         <div className="flex flex-col items-center gap-3">
           <div className="w-7 h-7 border-2 border-gray-200 border-t-[#171717] rounded-full animate-spin" />
           <p className="text-[rgba(23,23,23,0.72)] text-sm">{t.loadingBookshelf}</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (loadError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-8">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <p className="text-[#171717] font-bold text-lg">{t.errorLoadingBooks}</p>
-          <button
-            onClick={() => { setLoadError(false); setLoading(true); getBooks().then(setBooks).catch(() => setLoadError(true)).finally(() => setLoading(false)) }}
-            className="text-sm font-medium underline"
-            style={{ color: 'var(--primary)' }}
-          >
-            {t.tryAgain}
-          </button>
         </div>
       </div>
     )

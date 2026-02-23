@@ -53,9 +53,6 @@ export type Translations = {
   cozyMode: string
   cozyModeDescription: string
   language: string
-  // Error states
-  errorLoadingBooks: string
-  tryAgain: string
 }
 
 const en: Translations = {
@@ -97,8 +94,6 @@ const en: Translations = {
   cozyMode: 'Cozy mode',
   cozyModeDescription: 'Cozy mode makes your app feel like a warm living room!',
   language: 'Language',
-  errorLoadingBooks: 'Could not load your bookshelf',
-  tryAgain: 'Try again',
 }
 
 const de: Translations = {
@@ -140,8 +135,6 @@ const de: Translations = {
   cozyMode: 'Gemütlichkeitsmodus',
   cozyModeDescription: 'Der Gemütlichkeitsmodus lässt die App wie ein warmes Wohnzimmer wirken!',
   language: 'Sprache',
-  errorLoadingBooks: 'Bücherregal konnte nicht geladen werden',
-  tryAgain: 'Erneut versuchen',
 }
 
 const fr: Translations = {
@@ -183,8 +176,6 @@ const fr: Translations = {
   cozyMode: 'Mode cosy',
   cozyModeDescription: "Le mode cosy donne à l'application l'ambiance d'un salon chaleureux !",
   language: 'Langue',
-  errorLoadingBooks: 'Impossible de charger votre bibliothèque',
-  tryAgain: 'Réessayer',
 }
 
 const es: Translations = {
@@ -226,8 +217,6 @@ const es: Translations = {
   cozyMode: 'Modo acogedor',
   cozyModeDescription: '¡El modo acogedor hace que la app parezca una sala de estar cálida!',
   language: 'Idioma',
-  errorLoadingBooks: 'No se pudo cargar tu estantería',
-  tryAgain: 'Intentar de nuevo',
 }
 
 const pl: Translations = {
@@ -269,8 +258,6 @@ const pl: Translations = {
   cozyMode: 'Tryb przytulny',
   cozyModeDescription: 'Tryb przytulny sprawia, że aplikacja wygląda jak ciepły salon!',
   language: 'Język',
-  errorLoadingBooks: 'Nie udało się załadować półki',
-  tryAgain: 'Spróbuj ponownie',
 }
 
 export const translations: Record<Locale, Translations> = { en, de, fr, es, pl }
