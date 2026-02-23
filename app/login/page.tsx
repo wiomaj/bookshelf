@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { useApp, useT } from '@/contexts/AppContext'
 
 export default function LoginPage() {
@@ -51,13 +50,12 @@ export default function LoginPage() {
   if (signUpSuccess) {
     return (
       <div className="min-h-screen flex flex-col items-center px-8 pt-5">
-        <Image
-          src="/reading-illustration.png"
+        <img
+          src="/reading-illustration.svg"
           alt=""
           width={200}
           height={200}
           className="shrink-0"
-          priority
         />
         <div className="flex flex-col gap-6 w-full max-w-[329px] mt-6">
           <div className="flex flex-col gap-[9px] text-center">
@@ -84,13 +82,12 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col items-center px-8 pt-5">
 
       {/* Illustration */}
-      <Image
-        src="/reading-illustration.png"
+      <img
+        src="/reading-illustration.svg"
         alt=""
         width={200}
         height={200}
         className="shrink-0"
-        priority
       />
 
       {/* Content */}

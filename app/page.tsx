@@ -50,9 +50,20 @@ export default function HomePage() {
 
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-4 pt-6 pb-2">
-          <h1 className="text-[#171717] text-[32px] font-black leading-8">
-            {t.myBookshelf}
-          </h1>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-[#171717] text-[32px] font-black leading-8">
+              {t.myBookshelf}
+            </h1>
+            {books.length === 0 && (
+              <Link
+                href="/settings"
+                className="font-bold text-[16px] leading-6"
+                style={{ color: 'var(--primary)' }}
+              >
+                {t.settings}
+              </Link>
+            )}
+          </div>
 
           {/* Blue circular FAB — hidden when shelf is empty */}
           {books.length > 0 && (
