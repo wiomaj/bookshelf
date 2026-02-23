@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [signUpSuccess, setSignUpSuccess] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -29,7 +30,11 @@ export default function LoginPage() {
       : await signUp(email, password)
     setLoading(false)
 
-    if (result.error) setError(result.error)
+    if (result.error) {
+      setError(result.error)
+    } else if (mode === 'signup') {
+      setSignUpSuccess(true)
+    }
   }
 
   const inputClass = `
@@ -39,6 +44,28 @@ export default function LoginPage() {
     focus:outline-none focus:border-[rgba(23,23,23,0.4)]
     transition-colors
   `
+
+  if (signUpSuccess) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6">
+        <div className="w-full max-w-[361px] flex flex-col gap-6 text-center">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-[#171717] text-[32px] font-black leading-8">{t.checkYourEmail}</h1>
+            <p className="text-[rgba(23,23,23,0.56)] text-[16px] leading-6">
+              {t.checkYourEmailDesc}
+            </p>
+          </div>
+          <button
+            onClick={() => { setSignUpSuccess(false); setMode('signin') }}
+            className="w-full py-4 rounded-full text-white text-[16px] font-bold"
+            style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+          >
+            {t.backToSignIn}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6">
@@ -108,7 +135,7 @@ export default function LoginPage() {
           {mode === 'signin' ? t.noAccount : t.haveAccount}{' '}
           <button
             type="button"
-            onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(null) }}
+            onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(null); setSignUpSuccess(false) }}
             className="font-bold underline text-[#171717]"
           >
             {mode === 'signin' ? t.signUp : t.signIn}

@@ -65,6 +65,9 @@ export type Translations = {
   noAccount: string
   haveAccount: string
   passwordMismatch: string
+  checkYourEmail: string
+  checkYourEmailDesc: string
+  backToSignIn: string
 }
 
 const en: Translations = {
@@ -117,6 +120,9 @@ const en: Translations = {
   noAccount: "Don't have an account?",
   haveAccount: 'Already have an account?',
   passwordMismatch: 'Passwords do not match.',
+  checkYourEmail: 'Check your email',
+  checkYourEmailDesc: 'We sent you a confirmation link. Click it to activate your account, then come back to sign in.',
+  backToSignIn: 'Back to sign in',
 }
 
 const de: Translations = {
@@ -169,6 +175,9 @@ const de: Translations = {
   noAccount: 'Noch kein Konto?',
   haveAccount: 'Bereits ein Konto?',
   passwordMismatch: 'Passwörter stimmen nicht überein.',
+  checkYourEmail: 'Prüfe deine E-Mail',
+  checkYourEmailDesc: 'Wir haben dir einen Bestätigungslink geschickt. Klick ihn an, um dein Konto zu aktivieren, und melde dich dann an.',
+  backToSignIn: 'Zurück zur Anmeldung',
 }
 
 const fr: Translations = {
@@ -221,6 +230,9 @@ const fr: Translations = {
   noAccount: 'Pas encore de compte ?',
   haveAccount: 'Déjà un compte ?',
   passwordMismatch: 'Les mots de passe ne correspondent pas.',
+  checkYourEmail: 'Vérifiez vos e-mails',
+  checkYourEmailDesc: 'Nous vous avons envoyé un lien de confirmation. Cliquez dessus pour activer votre compte, puis revenez vous connecter.',
+  backToSignIn: 'Retour à la connexion',
 }
 
 const es: Translations = {
@@ -273,6 +285,9 @@ const es: Translations = {
   noAccount: '¿No tienes cuenta?',
   haveAccount: '¿Ya tienes cuenta?',
   passwordMismatch: 'Las contraseñas no coinciden.',
+  checkYourEmail: 'Revisa tu correo',
+  checkYourEmailDesc: 'Te enviamos un enlace de confirmación. Haz clic en él para activar tu cuenta y vuelve a iniciar sesión.',
+  backToSignIn: 'Volver a iniciar sesión',
 }
 
 const pl: Translations = {
@@ -325,6 +340,9 @@ const pl: Translations = {
   noAccount: 'Nie masz konta?',
   haveAccount: 'Masz już konto?',
   passwordMismatch: 'Hasła nie są zgodne.',
+  checkYourEmail: 'Sprawdź swoją pocztę',
+  checkYourEmailDesc: 'Wysłaliśmy Ci link potwierdzający. Kliknij go, aby aktywować konto, a następnie wróć, aby się zalogować.',
+  backToSignIn: 'Wróć do logowania',
 }
 
 export const translations: Record<Locale, Translations> = { en, de, fr, es, pl }
