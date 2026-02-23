@@ -68,6 +68,12 @@ export type Translations = {
   checkYourEmail: string
   checkYourEmailDesc: string
   backToSignIn: string
+  // Login page
+  loginTitle: string
+  loginSubtitle: string
+  signUpPageTitle: string
+  signUpPageSubtitle: string
+  logIn: string
   // My Account
   myAccount: string
   changePassword: string
@@ -133,6 +139,11 @@ const en: Translations = {
   checkYourEmail: 'Check your email',
   checkYourEmailDesc: 'We sent you a confirmation link. Click it to activate your account, then come back to sign in.',
   backToSignIn: 'Back to sign in',
+  loginTitle: 'Login to your bookshelf!',
+  loginSubtitle: "Track the books you've read!",
+  signUpPageTitle: 'Create your account!',
+  signUpPageSubtitle: 'Start tracking your books today!',
+  logIn: 'Log In',
   myAccount: 'My Account',
   changePassword: 'Change password',
   newPassword: 'New password',
@@ -197,6 +208,11 @@ const de: Translations = {
   checkYourEmail: 'Prüfe deine E-Mail',
   checkYourEmailDesc: 'Wir haben dir einen Bestätigungslink geschickt. Klick ihn an, um dein Konto zu aktivieren, und melde dich dann an.',
   backToSignIn: 'Zurück zur Anmeldung',
+  loginTitle: 'Melde dich an!',
+  loginSubtitle: 'Verfolge die Bücher, die du gelesen hast!',
+  signUpPageTitle: 'Erstelle dein Konto!',
+  signUpPageSubtitle: 'Fang noch heute an, deine Bücher zu verfolgen!',
+  logIn: 'Anmelden',
   myAccount: 'Mein Konto',
   changePassword: 'Passwort ändern',
   newPassword: 'Neues Passwort',
@@ -261,6 +277,11 @@ const fr: Translations = {
   checkYourEmail: 'Vérifiez vos e-mails',
   checkYourEmailDesc: 'Nous vous avons envoyé un lien de confirmation. Cliquez dessus pour activer votre compte, puis revenez vous connecter.',
   backToSignIn: 'Retour à la connexion',
+  loginTitle: 'Connectez-vous à votre bibliothèque !',
+  loginSubtitle: 'Suivez les livres que vous avez lus !',
+  signUpPageTitle: 'Créez votre compte !',
+  signUpPageSubtitle: 'Commencez à suivre vos lectures dès aujourd\'hui !',
+  logIn: 'Se connecter',
   myAccount: 'Mon compte',
   changePassword: 'Changer le mot de passe',
   newPassword: 'Nouveau mot de passe',
@@ -325,6 +346,11 @@ const es: Translations = {
   checkYourEmail: 'Revisa tu correo',
   checkYourEmailDesc: 'Te enviamos un enlace de confirmación. Haz clic en él para activar tu cuenta y vuelve a iniciar sesión.',
   backToSignIn: 'Volver a iniciar sesión',
+  loginTitle: '¡Inicia sesión en tu estantería!',
+  loginSubtitle: '¡Lleva un seguimiento de los libros que has leído!',
+  signUpPageTitle: '¡Crea tu cuenta!',
+  signUpPageSubtitle: '¡Empieza a registrar tus lecturas hoy!',
+  logIn: 'Iniciar sesión',
   myAccount: 'Mi cuenta',
   changePassword: 'Cambiar contraseña',
   newPassword: 'Nueva contraseña',
@@ -389,6 +415,11 @@ const pl: Translations = {
   checkYourEmail: 'Sprawdź swoją pocztę',
   checkYourEmailDesc: 'Wysłaliśmy Ci link potwierdzający. Kliknij go, aby aktywować konto, a następnie wróć, aby się zalogować.',
   backToSignIn: 'Wróć do logowania',
+  loginTitle: 'Zaloguj się do swojej półki!',
+  loginSubtitle: 'Śledź książki, które przeczytałeś!',
+  signUpPageTitle: 'Utwórz swoje konto!',
+  signUpPageSubtitle: 'Zacznij śledzić swoje lektury już dziś!',
+  logIn: 'Zaloguj się',
   myAccount: 'Moje konto',
   changePassword: 'Zmień hasło',
   newPassword: 'Nowe hasło',

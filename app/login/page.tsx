@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useApp, useT } from '@/contexts/AppContext'
 
 export default function LoginPage() {
@@ -35,31 +36,41 @@ export default function LoginPage() {
     } else if (mode === 'signup' && result.needsConfirmation) {
       setSignUpSuccess(true)
     }
-    // if signup succeeded with no confirmation needed, onAuthStateChange handles redirect
   }
 
   const inputClass = `
-    w-full px-4 py-3 rounded-2xl border border-[rgba(23,23,23,0.12)]
+    w-full h-[60px] px-4 rounded-xl
+    border-2 border-[rgba(23,23,23,0.16)]
     bg-white text-[#171717] text-[16px] leading-6
-    placeholder:text-[rgba(23,23,23,0.35)]
+    placeholder:text-[rgba(23,23,23,0.45)]
     focus:outline-none focus:border-[rgba(23,23,23,0.4)]
     transition-colors
   `
 
+  // ── Check your email screen ────────────────────────────────────────────────
   if (signUpSuccess) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-6">
-        <div className="w-full max-w-[361px] flex flex-col gap-6 text-center">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-[#171717] text-[32px] font-black leading-8">{t.checkYourEmail}</h1>
-            <p className="text-[rgba(23,23,23,0.56)] text-[16px] leading-6">
-              {t.checkYourEmailDesc}
-            </p>
+      <div className="min-h-screen flex flex-col items-center px-8 pt-5">
+        <Image
+          src="/reading-illustration.png"
+          alt=""
+          width={200}
+          height={200}
+          className="shrink-0"
+          priority
+        />
+        <div className="flex flex-col gap-6 w-full max-w-[329px] mt-6">
+          <div className="flex flex-col gap-[9px] text-center">
+            <h1 className="text-[24px] font-black text-[#171717] leading-8">{t.checkYourEmail}</h1>
+            <p className="text-[16px] text-[rgba(23,23,23,0.56)] leading-6">{t.checkYourEmailDesc}</p>
           </div>
           <button
             onClick={() => { setSignUpSuccess(false); setMode('signin') }}
             className="w-full py-4 rounded-full text-white text-[16px] font-bold"
-            style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+            style={{
+              backgroundColor: 'var(--primary)',
+              boxShadow: '0px 6px 14px -12px rgba(22,10,157,0.32)',
+            }}
           >
             {t.backToSignIn}
           </button>
@@ -68,22 +79,35 @@ export default function LoginPage() {
     )
   }
 
+  // ── Sign in / Sign up ──────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6">
-      <div className="w-full max-w-[361px] flex flex-col gap-8">
+    <div className="min-h-screen flex flex-col items-center px-8 pt-5">
 
-        {/* Title */}
-        <div className="flex flex-col gap-2">
-          <h1 className="text-[#171717] text-[32px] font-black leading-8">
-            {mode === 'signin' ? t.signIn : t.signUp}
+      {/* Illustration */}
+      <Image
+        src="/reading-illustration.png"
+        alt=""
+        width={200}
+        height={200}
+        className="shrink-0"
+        priority
+      />
+
+      {/* Content */}
+      <div className="flex flex-col gap-6 w-full max-w-[329px] mt-6">
+
+        {/* Title + subtitle */}
+        <div className="flex flex-col gap-[9px] text-center text-[#171717]">
+          <h1 className="text-[24px] font-black leading-8">
+            {mode === 'signin' ? t.loginTitle : t.signUpPageTitle}
           </h1>
-          <p className="text-[rgba(23,23,23,0.56)] text-[16px] leading-6">
-            My Bookshelf
+          <p className="text-[16px] leading-6">
+            {mode === 'signin' ? t.loginSubtitle : t.signUpPageSubtitle}
           </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
           <input
             type="email"
             required
@@ -115,33 +139,37 @@ export default function LoginPage() {
           )}
 
           {error && (
-            <p className="text-red-500 text-[14px] leading-5 px-1">{error}</p>
+            <p className="text-red-500 text-[14px] leading-5 px-1 pt-1">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 mt-1 rounded-full text-white text-[16px] font-bold disabled:opacity-60 transition-opacity"
-            style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+            className="w-full py-4 mt-2 rounded-full text-white text-[16px] font-bold disabled:opacity-60 transition-opacity"
+            style={{
+              backgroundColor: 'var(--primary)',
+              boxShadow: '0px 6px 14px -12px rgba(22,10,157,0.32)',
+            }}
           >
             {loading
               ? (mode === 'signin' ? t.signingIn : t.signingUp)
-              : (mode === 'signin' ? t.signIn : t.signUp)
+              : (mode === 'signin' ? t.logIn : t.signUp)
             }
           </button>
         </form>
 
         {/* Toggle mode */}
-        <p className="text-center text-[15px] text-[rgba(23,23,23,0.56)]">
+        <p className="text-center text-[16px] text-[#171717]">
           {mode === 'signin' ? t.noAccount : t.haveAccount}{' '}
           <button
             type="button"
-            onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(null); setSignUpSuccess(false) }}
-            className="font-bold underline text-[#171717]"
+            onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(null) }}
+            className="font-bold text-[#171717]"
           >
             {mode === 'signin' ? t.signUp : t.signIn}
           </button>
         </p>
+
       </div>
     </div>
   )
