@@ -68,6 +68,16 @@ export type Translations = {
   checkYourEmail: string
   checkYourEmailDesc: string
   backToSignIn: string
+  // My Account
+  myAccount: string
+  changePassword: string
+  newPassword: string
+  confirmNewPassword: string
+  savePassword: string
+  savingPassword: string
+  passwordChangedSuccess: string
+  deleteAccount: string
+  deleteAccountDesc: string
 }
 
 const en: Translations = {
@@ -123,6 +133,15 @@ const en: Translations = {
   checkYourEmail: 'Check your email',
   checkYourEmailDesc: 'We sent you a confirmation link. Click it to activate your account, then come back to sign in.',
   backToSignIn: 'Back to sign in',
+  myAccount: 'My Account',
+  changePassword: 'Change password',
+  newPassword: 'New password',
+  confirmNewPassword: 'Confirm new password',
+  savePassword: 'Save password',
+  savingPassword: 'Saving…',
+  passwordChangedSuccess: 'Password changed successfully.',
+  deleteAccount: 'Delete account',
+  deleteAccountDesc: 'This will permanently delete your account and all your books. This cannot be undone.',
 }
 
 const de: Translations = {
@@ -178,6 +197,15 @@ const de: Translations = {
   checkYourEmail: 'Prüfe deine E-Mail',
   checkYourEmailDesc: 'Wir haben dir einen Bestätigungslink geschickt. Klick ihn an, um dein Konto zu aktivieren, und melde dich dann an.',
   backToSignIn: 'Zurück zur Anmeldung',
+  myAccount: 'Mein Konto',
+  changePassword: 'Passwort ändern',
+  newPassword: 'Neues Passwort',
+  confirmNewPassword: 'Neues Passwort bestätigen',
+  savePassword: 'Passwort speichern',
+  savingPassword: 'Speichern…',
+  passwordChangedSuccess: 'Passwort erfolgreich geändert.',
+  deleteAccount: 'Konto löschen',
+  deleteAccountDesc: 'Dein Konto und alle deine Bücher werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.',
 }
 
 const fr: Translations = {
@@ -233,6 +261,15 @@ const fr: Translations = {
   checkYourEmail: 'Vérifiez vos e-mails',
   checkYourEmailDesc: 'Nous vous avons envoyé un lien de confirmation. Cliquez dessus pour activer votre compte, puis revenez vous connecter.',
   backToSignIn: 'Retour à la connexion',
+  myAccount: 'Mon compte',
+  changePassword: 'Changer le mot de passe',
+  newPassword: 'Nouveau mot de passe',
+  confirmNewPassword: 'Confirmer le nouveau mot de passe',
+  savePassword: 'Enregistrer le mot de passe',
+  savingPassword: 'Enregistrement…',
+  passwordChangedSuccess: 'Mot de passe modifié avec succès.',
+  deleteAccount: 'Supprimer le compte',
+  deleteAccountDesc: 'Votre compte et tous vos livres seront supprimés définitivement. Cette action est irréversible.',
 }
 
 const es: Translations = {
@@ -288,6 +325,15 @@ const es: Translations = {
   checkYourEmail: 'Revisa tu correo',
   checkYourEmailDesc: 'Te enviamos un enlace de confirmación. Haz clic en él para activar tu cuenta y vuelve a iniciar sesión.',
   backToSignIn: 'Volver a iniciar sesión',
+  myAccount: 'Mi cuenta',
+  changePassword: 'Cambiar contraseña',
+  newPassword: 'Nueva contraseña',
+  confirmNewPassword: 'Confirmar nueva contraseña',
+  savePassword: 'Guardar contraseña',
+  savingPassword: 'Guardando…',
+  passwordChangedSuccess: 'Contraseña cambiada correctamente.',
+  deleteAccount: 'Eliminar cuenta',
+  deleteAccountDesc: 'Tu cuenta y todos tus libros se eliminarán permanentemente. Esta acción no se puede deshacer.',
 }
 
 const pl: Translations = {
@@ -343,6 +389,15 @@ const pl: Translations = {
   checkYourEmail: 'Sprawdź swoją pocztę',
   checkYourEmailDesc: 'Wysłaliśmy Ci link potwierdzający. Kliknij go, aby aktywować konto, a następnie wróć, aby się zalogować.',
   backToSignIn: 'Wróć do logowania',
+  myAccount: 'Moje konto',
+  changePassword: 'Zmień hasło',
+  newPassword: 'Nowe hasło',
+  confirmNewPassword: 'Potwierdź nowe hasło',
+  savePassword: 'Zapisz hasło',
+  savingPassword: 'Zapisywanie…',
+  passwordChangedSuccess: 'Hasło zostało pomyślnie zmienione.',
+  deleteAccount: 'Usuń konto',
+  deleteAccountDesc: 'Twoje konto i wszystkie książki zostaną trwale usunięte. Tej operacji nie można cofnąć.',
 }
 
 export const translations: Record<Locale, Translations> = { en, de, fr, es, pl }

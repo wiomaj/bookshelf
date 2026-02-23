@@ -22,6 +22,8 @@ interface AppContextValue {
   signIn: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>
   signUp: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>
   signOut: () => Promise<void>
+  changePassword: (newPassword: string) => Promise<{ error: string | null }>
+  deleteAccount: () => Promise<{ error: string | null }>
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -100,6 +102,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
   }
 
+  async function changePassword(newPassword: string): Promise<{ error: string | null }> {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    return { error: error?.message ?? null }
+  }
+
+  async function deleteAccount(): Promise<{ error: string | null }> {
+    const { error } = await supabase.rpc('delete_user')
+    if (!error) await supabase.auth.signOut()
+    return { error: error?.message ?? null }
+  }
+
   // ── Loading screen while session restores ────────────────────────────────────
   if (isAuthLoading) {
     return (
@@ -115,7 +128,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       cozyMode, setCozyMode,
       language, setLanguage,
       user, isAuthLoading,
-      signIn, signUp, signOut,
+      signIn, signUp, signOut, changePassword, deleteAccount,
     }}>
       {children}
     </AppContext.Provider>
