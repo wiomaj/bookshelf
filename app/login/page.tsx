@@ -32,9 +32,10 @@ export default function LoginPage() {
 
     if (result.error) {
       setError(result.error)
-    } else if (mode === 'signup') {
+    } else if (mode === 'signup' && result.needsConfirmation) {
       setSignUpSuccess(true)
     }
+    // if signup succeeded with no confirmation needed, onAuthStateChange handles redirect
   }
 
   const inputClass = `

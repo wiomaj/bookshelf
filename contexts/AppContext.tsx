@@ -20,7 +20,7 @@ interface AppContextValue {
   user: User | null
   isAuthLoading: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>
+  signUp: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>
   signOut: () => Promise<void>
 }
 
@@ -91,9 +91,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null }
   }
 
-  async function signUp(email: string, password: string): Promise<{ error: string | null }> {
-    const { error } = await supabase.auth.signUp({ email, password })
-    return { error: error?.message ?? null }
+  async function signUp(email: string, password: string): Promise<{ error: string | null; needsConfirmation: boolean }> {
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    return { error: error?.message ?? null, needsConfirmation: !data.session }
   }
 
   async function signOut(): Promise<void> {
