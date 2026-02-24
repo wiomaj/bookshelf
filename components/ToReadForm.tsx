@@ -6,6 +6,7 @@ import { Camera, Loader2, Search } from 'lucide-react'
 import ISBNScanner from './ISBNScanner'
 import { useT } from '@/contexts/AppContext'
 import { LONG_MONTHS, SEASONS } from '@/lib/month'
+import { normaliseGoogleCover } from '@/lib/bookMetadata'
 
 const currentYear = new Date().getFullYear()
 
@@ -52,11 +53,11 @@ async function searchBooks(query: string): Promise<BookSuggestion[]> {
   if (gRes.status === 'fulfilled') {
     for (const item of gRes.value.items ?? []) {
       const links = item.volumeInfo?.imageLinks
-      const raw = links?.thumbnail ?? links?.smallThumbnail
+      const raw = links?.extraLarge ?? links?.large ?? links?.medium ?? links?.thumbnail ?? links?.smallThumbnail
       results.push({
         title: item.volumeInfo?.title ?? '',
         author: item.volumeInfo?.authors?.[0] ?? '',
-        cover_url: raw ? raw.replace('http:', 'https:') : undefined,
+        cover_url: raw ? normaliseGoogleCover(raw) : undefined,
       })
     }
   }
@@ -130,12 +131,25 @@ export default function ToReadForm({
     setAuthor(s.author)
     if (s.cover_url) setCoverUrl(s.cover_url)
     setShowSuggestions(false)
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[ToReadForm] suggestion selected:', {
+        title: s.title,
+        cover_url: s.cover_url ?? '(none)',
+      })
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     if (!title.trim()) { setError('Title is required'); return }
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[ToReadForm] submitting book:', {
+        title: title.trim(),
+        cover_url: coverUrl.trim() || '(none)',
+      })
+    }
+
     try {
       await onSubmit({ title: title.trim(), author: author.trim(), month, year, cover_url: coverUrl.trim() || undefined })
     } catch (err: unknown) {

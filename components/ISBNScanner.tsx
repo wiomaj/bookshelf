@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
+import { fetchBookByISBN } from '@/lib/bookMetadata'
 
 type BookSuggestion = {
   title: string
@@ -49,13 +50,9 @@ export default function ISBNScanner({ onScanned, onClose }: ISBNScannerProps) {
             setScanState('looking-up')
 
             try {
-              const res = await fetch(
-                `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}&maxResults=1`
-              )
-              const data = await res.json()
-              const item = data.items?.[0]
+              const book = await fetchBookByISBN(isbn)
 
-              if (!item) {
+              if (!book) {
                 setScanState('not-found')
                 // Allow retry after 2s
                 setTimeout(() => {
@@ -65,18 +62,7 @@ export default function ISBNScanner({ onScanned, onClose }: ISBNScannerProps) {
                 return
               }
 
-              const info = item.volumeInfo
-              const links = info?.imageLinks as Record<string, string> | undefined
-              const raw = links?.extraLarge ?? links?.large ?? links?.medium ?? links?.thumbnail
-              const cover_url = raw
-                ? raw.replace('http:', 'https:').replace(/zoom=\d+/, 'zoom=0').replace(/&fife=[^&]*/g, '') + '&fife=w600'
-                : undefined
-
-              onScanned({
-                title: info?.title ?? '',
-                author: info?.authors?.[0] ?? '',
-                cover_url,
-              })
+              onScanned(book)
             } catch {
               setScanState('error')
               setErrorMsg('Could not look up book. Try again.')
