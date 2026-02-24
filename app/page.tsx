@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, LayoutGrid, List, BookOpen, BookMarked, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { getReadBooks, getToReadBooks } from '@/lib/bookApi'
@@ -23,6 +23,13 @@ export default function HomePage() {
   const [toReadBooks, setToReadBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
   const [flashMessage, setFlashMessage] = useState<string | null>(null)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    function onScroll() { setScrolled(window.scrollY > 80) }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   useEffect(() => {
     if (!user) return
@@ -71,7 +78,7 @@ export default function HomePage() {
   const fabRoute = activeTab === 'read' ? '/add' : '/to-read/add'
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="relative min-h-screen pb-20">
 
       {/* ── Lavender header bubble ──────────────────────────────────────── */}
       <div
@@ -93,25 +100,25 @@ export default function HomePage() {
             fill="white"
           />
         </svg>
+      </div>
 
-        {/* FAB — wrapper handles centering; Framer Motion only scales */}
-        <div
-          className="absolute z-10 left-1/2 -translate-x-1/2"
-          style={{ top: 48 }}
+      {/* FAB — outside overflow-hidden header so shadow isn't clipped */}
+      <div
+        className="absolute z-50 left-1/2 -translate-x-1/2"
+        style={{ top: 48 }}
+      >
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => router.push(fabRoute)}
+          className="p-3 rounded-full block"
+          style={{
+            backgroundColor: 'var(--primary)',
+            boxShadow: 'var(--btn-shadow)',
+          }}
         >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push(fabRoute)}
-            className="p-3 rounded-full block"
-            style={{
-              backgroundColor: 'var(--primary)',
-              boxShadow: 'var(--btn-shadow)',
-            }}
-          >
-            <Plus size={24} className="text-white" strokeWidth={2.5} />
-          </motion.button>
-        </div>
+          <Plus size={24} className="text-white" strokeWidth={2.5} />
+        </motion.button>
       </div>
 
       {/* ── Flash message ───────────────────────────────────────────────── */}
@@ -249,6 +256,63 @@ export default function HomePage() {
           <ToReadList books={toReadBooks} />
         )
       )}
+
+      {/* ── Scroll-triggered top action bar ────────────────────────────── */}
+      <AnimatePresence>
+        {scrolled && (
+          <motion.div
+            key="topbar"
+            initial={{ y: -44, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -44, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            className="fixed top-0 left-0 right-0 h-[44px] bg-white z-50 flex items-center px-4"
+            style={{ borderBottom: '1px solid #b9b9b9' }}
+          >
+            {/* Title */}
+            <span className="flex-1 text-[#171717] text-[18px] font-bold leading-6 tracking-[-0.3px]">
+              {activeTab === 'read' ? t.readBooksTitle : t.toReadBooksTitle}
+            </span>
+
+            {/* FAB — centered absolutely so title/controls don't push it */}
+            <div className="absolute left-1/2 -translate-x-1/2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push(fabRoute)}
+                className="p-3 rounded-full block"
+                style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+              >
+                <Plus size={24} className="text-white" strokeWidth={2.5} />
+              </motion.button>
+            </div>
+
+            {/* Grid / list toggle — Read tab only */}
+            {activeTab === 'read' && books.length > 0 && (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-[6px] rounded-lg transition-colors ${
+                    viewMode === 'grid' ? 'text-[#171717]' : 'text-[rgba(23,23,23,0.35)]'
+                  }`}
+                  aria-label="Grid view"
+                >
+                  <LayoutGrid size={20} />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-[6px] rounded-lg transition-colors ${
+                    viewMode === 'list' ? 'text-[#171717]' : 'text-[rgba(23,23,23,0.35)]'
+                  }`}
+                  aria-label="List view"
+                >
+                  <List size={20} />
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Bottom navigation bar ───────────────────────────────────────── */}
       <nav
