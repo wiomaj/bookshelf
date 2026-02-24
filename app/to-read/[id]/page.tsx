@@ -184,7 +184,24 @@ export default function ToReadDetailPage() {
             <p className="text-[16px] font-normal leading-6 whitespace-pre-wrap">{book.notes}</p>
           )}
 
-          {/* Released + Genre */}
+          {/* About the book — API description */}
+          <div className="flex flex-col gap-2">
+            <span className="text-[12px] font-extrabold uppercase leading-4">{t.aboutTheBook}</span>
+            {bookDataLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-gray-200 border-t-[#171717] rounded-full animate-spin" />
+                <span className="text-[rgba(23,23,23,0.48)] text-[14px]">{t.loading}</span>
+              </div>
+            ) : description ? (
+              <p className="text-[16px] font-normal leading-6">{description}</p>
+            ) : (
+              <p className="text-[rgba(23,23,23,0.48)] text-[16px] leading-6 italic">
+                {t.noDescriptionAvailable}
+              </p>
+            )}
+          </div>
+
+          {/* Released + Genre — below About the book, matching Figma order */}
           {(publishedYear || displayGenre) && (
             <div className="flex gap-2">
               {publishedYear && (
@@ -202,22 +219,6 @@ export default function ToReadDetailPage() {
             </div>
           )}
 
-          {/* About the book */}
-          <div className="flex flex-col gap-2">
-            <span className="text-[12px] font-extrabold uppercase leading-4">{t.aboutTheBook}</span>
-            {bookDataLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-gray-200 border-t-[#171717] rounded-full animate-spin" />
-                <span className="text-[rgba(23,23,23,0.48)] text-[14px]">{t.loading}</span>
-              </div>
-            ) : description ? (
-              <p className="text-[16px] font-normal leading-6">{description}</p>
-            ) : (
-              <p className="text-[rgba(23,23,23,0.48)] text-[16px] leading-6 italic">
-                {t.noDescriptionAvailable}
-              </p>
-            )}
-          </div>
         </motion.div>
 
       </div>
