@@ -18,7 +18,6 @@ type ScanState = 'scanning' | 'looking-up' | 'not-found' | 'error'
 
 export default function ISBNScanner({ onScanned, onClose }: ISBNScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const readerRef = useRef<import('@zxing/browser').BrowserMultiFormatReader | null>(null)
   const [scanState, setScanState] = useState<ScanState>('scanning')
   const [errorMsg, setErrorMsg] = useState('')
   const doneRef = useRef(false)
@@ -27,19 +26,18 @@ export default function ISBNScanner({ onScanned, onClose }: ISBNScannerProps) {
     let controls: { stop: () => void } | null = null
 
     async function start() {
-      const { BrowserMultiFormatReader, NotFoundException } = await import('@zxing/browser')
+      const { BrowserMultiFormatReader } = await import('@zxing/browser')
 
       const reader = new BrowserMultiFormatReader()
-      readerRef.current = reader
 
       try {
         controls = await reader.decodeFromVideoDevice(
           undefined, // use default (back) camera
           videoRef.current!,
-          async (result, err) => {
+          async (result, _err) => {
             // Skip frames without a result or already done
             if (doneRef.current) return
-            if (err instanceof NotFoundException || !result) return
+            if (!result) return
 
             const isbn = result.getText()
             // Only handle EAN-13 / EAN-8 / UPC-A (book barcodes)
@@ -101,7 +99,6 @@ export default function ISBNScanner({ onScanned, onClose }: ISBNScannerProps) {
     return () => {
       doneRef.current = true
       controls?.stop()
-      readerRef.current?.reset()
     }
   }, [onScanned])
 
