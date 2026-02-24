@@ -81,7 +81,7 @@ function ToReadYearSection({ year, books }: YearSectionProps) {
     setIsOpen(!isOpen)
   }
 
-  const yearLabel = year === 0 ? 'Unknown' : String(year)
+  const yearLabel = year === 0 ? 'Unknown' : (formatAcquiredDate(year, null) ?? String(year))
   const count = books.length
 
   return (
