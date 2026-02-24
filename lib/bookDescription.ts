@@ -5,6 +5,7 @@
 export type BookData = {
   description?: string
   genre?: string
+  publishedYear?: string
 }
 
 export async function fetchBookData(
@@ -25,10 +26,12 @@ export async function fetchBookData(
         const info = item.volumeInfo ?? {}
         const desc: string | undefined = info.description
         const cats: string[] | undefined = info.categories
+        const published: string | undefined = info.publishedDate
         const result: BookData = {}
         if (desc && desc.length > 30) result.description = stripHtml(desc)
         if (cats?.length) result.genre = cats[0].split(' / ')[0].trim()
-        if (result.description || result.genre) return result
+        if (published) result.publishedYear = published.slice(0, 4)
+        if (result.description || result.genre || result.publishedYear) return result
       }
     }
   } catch {
