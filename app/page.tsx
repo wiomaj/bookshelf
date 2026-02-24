@@ -120,10 +120,9 @@ export default function HomePage() {
         {/* ── Tabs ────────────────────────────────────────────────────────── */}
         <div className="flex items-center gap-2 px-4 pt-3 pb-1">
           {(['read', 'to_read'] as Tab[]).map((tab) => {
-            const count = tab === 'read' ? books.length : toReadBooks.length
             const label = tab === 'read'
-              ? (count > 0 ? `${t.tabRead} (${count})` : t.tabRead)
-              : (count > 0 ? `${t.tabToRead} (${count})` : t.tabToRead)
+              ? t.tabRead
+              : (toReadBooks.length > 0 ? `${t.tabToRead} (${toReadBooks.length})` : t.tabToRead)
             return (
               <button
                 key={tab}
