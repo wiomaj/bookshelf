@@ -96,7 +96,7 @@ export default function ToReadDetailPage() {
       <div className="min-h-screen pb-8">
 
         {/* ── Hero: full-width cover + gradient overlay ────────────────────── */}
-        <div className="relative w-full h-[230px] overflow-hidden bg-gray-200">
+        <div className="relative w-full min-h-[230px] bg-gray-200">
           {book.cover_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -113,20 +113,20 @@ export default function ToReadDetailPage() {
           {/* Gradient overlay: transparent top → dark bottom */}
           <div
             className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%)' }}
+            style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.75) 100%)' }}
           />
 
-          {/* X close button — top right */}
+          {/* X close button — top right, always above content */}
           <button
             onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'to_read'); router.push('/') }}
-            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center"
+            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center z-10"
             aria-label="Close"
           >
             <X size={24} className="text-white" strokeWidth={2} />
           </button>
 
-          {/* Title + tags + author — bottom of hero */}
-          <div className="absolute bottom-0 left-0 right-0 px-4 pb-6 flex flex-col gap-2">
+          {/* Title + tags + author — flows naturally, padded below X button */}
+          <div className="relative z-[1] pt-12 px-4 pb-6 flex flex-col gap-2">
             <div className="flex items-end gap-2 flex-wrap">
               <h1 className="text-[24px] font-black text-white leading-8">{book.title}</h1>
               <div className="flex items-center gap-1 mb-[2px]">
