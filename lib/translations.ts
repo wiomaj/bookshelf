@@ -86,6 +86,7 @@ export type Translations = {
   deleteAccount: string
   deleteAccountDesc: string
   // To Read tab
+  readBooksTitle: string
   tabRead: string
   tabToRead: string
   toReadEmptyTitle: string
@@ -164,6 +165,7 @@ const en: Translations = {
   passwordChangedSuccess: 'Password changed successfully.',
   deleteAccount: 'Delete account',
   deleteAccountDesc: 'This will permanently delete your account and all your books. This cannot be undone.',
+  readBooksTitle: 'Read books',
   tabRead: 'Read',
   tabToRead: 'To Read',
   toReadEmptyTitle: 'Books you own, but haven\'t read',
@@ -242,6 +244,7 @@ const de: Translations = {
   passwordChangedSuccess: 'Passwort erfolgreich geändert.',
   deleteAccount: 'Konto löschen',
   deleteAccountDesc: 'Dein Konto und alle deine Bücher werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.',
+  readBooksTitle: 'Gelesene Bücher',
   tabRead: 'Gelesen',
   tabToRead: 'Leseliste',
   toReadEmptyTitle: 'Bücher, die du besitzt, aber noch nicht gelesen hast',
@@ -320,6 +323,7 @@ const fr: Translations = {
   passwordChangedSuccess: 'Mot de passe modifié avec succès.',
   deleteAccount: 'Supprimer le compte',
   deleteAccountDesc: 'Votre compte et tous vos livres seront supprimés définitivement. Cette action est irréversible.',
+  readBooksTitle: 'Livres lus',
   tabRead: 'Lus',
   tabToRead: 'À lire',
   toReadEmptyTitle: 'Livres possédés, mais pas encore lus',
@@ -398,6 +402,7 @@ const es: Translations = {
   passwordChangedSuccess: 'Contraseña cambiada correctamente.',
   deleteAccount: 'Eliminar cuenta',
   deleteAccountDesc: 'Tu cuenta y todos tus libros se eliminarán permanentemente. Esta acción no se puede deshacer.',
+  readBooksTitle: 'Libros leídos',
   tabRead: 'Leídos',
   tabToRead: 'Por leer',
   toReadEmptyTitle: 'Libros que tienes, pero aún no has leído',
@@ -476,6 +481,7 @@ const pl: Translations = {
   passwordChangedSuccess: 'Hasło zostało pomyślnie zmienione.',
   deleteAccount: 'Usuń konto',
   deleteAccountDesc: 'Twoje konto i wszystkie książki zostaną trwale usunięte. Tej operacji nie można cofnąć.',
+  readBooksTitle: 'Przeczytane książki',
   tabRead: 'Przeczytane',
   tabToRead: 'Do przeczytania',
   toReadEmptyTitle: 'Książki, które masz, ale jeszcze nie przeczytałeś',
