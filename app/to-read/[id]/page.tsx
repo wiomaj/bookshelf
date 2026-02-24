@@ -99,7 +99,7 @@ export default function ToReadDetailPage() {
 
           {/* X close button — top right */}
           <button
-            onClick={() => router.back()}
+            onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'to_read'); router.push('/') }}
             className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center"
             aria-label="Close"
           >

@@ -49,6 +49,12 @@ export default function HomePage() {
   }, [user])
 
   useEffect(() => {
+    const returnTab = sessionStorage.getItem('bookshelf_returnTab')
+    if (returnTab === 'to_read') {
+      sessionStorage.removeItem('bookshelf_returnTab')
+      setActiveTab('to_read')
+    }
+
     const flash = sessionStorage.getItem('bookshelf_flash')
     if (flash) {
       sessionStorage.removeItem('bookshelf_flash')
