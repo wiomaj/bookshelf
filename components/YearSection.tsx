@@ -63,8 +63,8 @@ export default function YearSection({
       >
         <span className="text-[#171717] text-[16px] font-bold leading-6">
           {year}
-          <span className="font-normal text-[rgba(23,23,23,0.40)]">
-            {' '}|{' '}{books.length} {books.length === 1 ? 'book' : 'books'}
+          <span className="font-medium text-[12px] text-[#7c7c7c]">
+            {'  '}{books.length} {books.length === 1 ? 'book' : 'books'}
           </span>
         </span>
 

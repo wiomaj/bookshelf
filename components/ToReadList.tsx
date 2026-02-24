@@ -93,8 +93,8 @@ function ToReadYearSection({ year, books }: YearSectionProps) {
       >
         <span className="text-[#171717] text-[16px] font-bold leading-6">
           {yearLabel}
-          <span className="font-normal text-[rgba(23,23,23,0.40)]">
-            {' '}|{' '}{count} {count === 1 ? 'book' : 'books'}
+          <span className="font-medium text-[12px] text-[#7c7c7c]">
+            {'  '}{count} {count === 1 ? 'book' : 'books'}
           </span>
         </span>
         <motion.div
