@@ -29,7 +29,6 @@ export default function AddBookPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-[393px] mx-auto">
 
         {/* Header — X close button on the right */}
         <div className="flex items-center justify-end h-[60px] px-3">
@@ -59,7 +58,6 @@ export default function AddBookPage() {
             loading={loading}
           />
         </motion.div>
-      </div>
     </div>
   )
 }

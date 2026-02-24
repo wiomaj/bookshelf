@@ -99,7 +99,7 @@ export default function YearSection({
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-x-[13px] gap-y-3 px-4 pb-4">
+              <div className="grid grid-cols-2 min-[500px]:grid-cols-3 gap-x-[13px] gap-y-3 px-4 pb-4">
                 {books.map((book) => (
                   <BookCard key={book.id} book={book} />
                 ))}

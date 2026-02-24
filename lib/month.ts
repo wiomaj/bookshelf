@@ -11,11 +11,26 @@ export const LONG_MONTHS = [
 ]
 
 // 13–16 are season codes stored when the user can't remember the exact month.
+// Season definitions: Dec–Feb = Winter, Mar–May = Spring, Jun–Aug = Summer, Sep–Nov = Fall.
 export const SEASONS: Record<number, string> = {
   13: 'Spring',
   14: 'Summer',
   15: 'Fall',
   16: 'Winter',
+}
+
+/**
+ * Returns a numeric sort key so books can be ordered by time within a year.
+ * Season codes are mapped to their midpoint month so they interleave correctly
+ * with specific months when sorting descending (newest first).
+ *   Spring (Mar–May)  → 4   Summer (Jun–Aug) → 7
+ *   Fall   (Sep–Nov)  → 10  Winter (Dec–Feb) → 1
+ * null/unknown → 0 (sorts last).
+ */
+export function monthSortKey(month: number | null | undefined): number {
+  if (!month) return 0
+  const midpoints: Record<number, number> = { 13: 4, 14: 7, 15: 10, 16: 1 }
+  return midpoints[month] ?? month
 }
 
 /**

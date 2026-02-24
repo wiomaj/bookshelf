@@ -70,8 +70,7 @@ export default function SettingsPage() {
   // ── Change Password sub-view ───────────────────────────────────────────────
   if (view === 'changePassword') {
     return (
-      <div className="min-h-screen">
-        <div className="max-w-[393px] mx-auto flex flex-col">
+      <div className="min-h-screen flex flex-col">
 
           {/* Header */}
           <div className="flex items-center justify-between p-3 h-[60px]">
@@ -126,15 +125,13 @@ export default function SettingsPage() {
               {cpLoading ? t.savingPassword : t.savePassword}
             </button>
           </form>
-        </div>
       </div>
     )
   }
 
   // ── Main settings view ─────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen">
-      <div className="max-w-[393px] mx-auto flex flex-col">
+    <div className="min-h-screen flex flex-col">
 
         {/* Header */}
         <div className="flex items-center justify-end p-3 h-[60px]">
@@ -237,13 +234,12 @@ export default function SettingsPage() {
             </button>
 
           </div>
-        </div>
       </div>
 
       {/* Delete account confirmation dialog */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-8">
-          <div className="w-full max-w-[393px] bg-white rounded-3xl p-6 flex flex-col gap-5">
+          <div className="w-full max-w-[400px] bg-white rounded-3xl p-6 flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <h2 className="text-[24px] font-black text-[#171717] leading-8">{t.deleteAccount}?</h2>
               <p className="text-[16px] text-[rgba(23,23,23,0.56)] leading-6">{t.deleteAccountDesc}</p>

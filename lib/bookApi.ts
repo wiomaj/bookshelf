@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Book } from '@/types/book'
+import { monthSortKey } from '@/lib/month'
 
 const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at'
 
@@ -10,11 +11,18 @@ export async function getBooks(supabase: SupabaseClient, userId: string): Promis
     .select(COLUMNS)
     .eq('user_id', userId)
     .order('year', { ascending: false })
-    .order('month', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
 
   if (error) throw new Error(error.message)
-  return data as Book[]
+
+  // Sort in JS so season codes (13–16) sort by their midpoint month rather than
+  // their raw numeric value, which would incorrectly place them above real months.
+  return (data as Book[]).sort((a, b) => {
+    if (b.year !== a.year) return b.year - a.year
+    const diff = monthSortKey(b.month) - monthSortKey(a.month)
+    if (diff !== 0) return diff
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  })
 }
 
 /** Single book by id. Returns null if not found. */

@@ -17,6 +17,7 @@ export default function HomePage() {
   const t = useT()
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
+  const [flashMessage, setFlashMessage] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -25,6 +26,18 @@ export default function HomePage() {
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [user])
+
+  useEffect(() => {
+    const flash = sessionStorage.getItem('bookshelf_flash')
+    if (flash) {
+      sessionStorage.removeItem('bookshelf_flash')
+      const message = flash === 'changesSaved' ? t.changesSaved : null
+      if (message) {
+        setFlashMessage(message)
+        setTimeout(() => setFlashMessage(null), 3000)
+      }
+    }
+  }, [])
 
   const booksByYear = books.reduce<Record<number, Book[]>>((acc, book) => {
     acc[book.year] = [...(acc[book.year] ?? []), book]
@@ -46,7 +59,18 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-[393px] mx-auto">
+
+        {/* ── Flash message ────────────────────────────────────────────────── */}
+        {flashMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            className="mx-4 mt-4 px-4 py-3 rounded-2xl bg-[#171717] text-white text-[14px] font-semibold text-center"
+          >
+            {flashMessage}
+          </motion.div>
+        )}
 
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-4 pt-6 pb-2">
@@ -161,7 +185,6 @@ export default function HomePage() {
             ))}
           </div>
         )}
-      </div>
     </div>
   )
 }

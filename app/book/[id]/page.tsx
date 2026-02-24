@@ -69,9 +69,9 @@ export default function BookDetailPage() {
     if (!book || !user) return
     setUpdateLoading(true)
     try {
-      const updated = await updateBook(supabase, user.id, book.id, data)
-      setBook(updated)
-      setIsEditing(false)
+      await updateBook(supabase, user.id, book.id, data)
+      sessionStorage.setItem('bookshelf_flash', 'changesSaved')
+      router.replace('/')
     } finally {
       setUpdateLoading(false)
     }
@@ -119,19 +119,16 @@ export default function BookDetailPage() {
   // ── Edit mode ────────────────────────────────────────────────────────────────
   if (isEditing) {
     return (
-      <div className="min-h-screen">
-        <div className="max-w-[393px] mx-auto">
-          {/* Header — back + title */}
-          <div className="flex items-center gap-2 h-[60px] px-3">
-            <button
-              onClick={() => setIsEditing(false)}
-              className="w-9 h-9 flex items-center justify-center text-[#171717]"
-            >
-              <X size={24} />
-            </button>
-          </div>
+      <div className="min-h-screen relative">
+          {/* Close button — top right */}
+          <button
+            onClick={() => setIsEditing(false)}
+            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center text-[#171717] z-10"
+          >
+            <X size={24} />
+          </button>
 
-          <div className="px-4 pb-6">
+          <div className="px-4 pt-12 pb-6">
             <h1 className="text-[#171717] text-[32px] font-black leading-8">{t.editBook}</h1>
           </div>
 
@@ -143,7 +140,6 @@ export default function BookDetailPage() {
               loading={updateLoading}
             />
           </motion.div>
-        </div>
       </div>
     )
   }
@@ -151,8 +147,7 @@ export default function BookDetailPage() {
   // ── View mode ────────────────────────────────────────────────────────────────
   return (
     <>
-      <div className="min-h-screen pb-[100px]">
-        <div className="max-w-[393px] mx-auto">
+      <div className="min-h-screen">
 
           {/* ── Hero cover (230px) ──────────────────────────────────────── */}
           <motion.div
@@ -281,39 +276,36 @@ export default function BookDetailPage() {
               )}
             </div>
           </motion.div>
-        </div>
+
+          {/* ── Bottom CTAs ────────────────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+            className="px-4 pt-3 pb-6 flex gap-3"
+          >
+            {/* Secondary — Delete */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowDeleteConfirm(true)}
+              className="flex-1 py-3 bg-[#171717]/[0.08] rounded-full text-[#171717] text-[16px] font-bold text-center"
+            >
+              {t.deleteBook}
+            </motion.button>
+
+            {/* Primary — Edit */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsEditing(true)}
+              className="flex-1 py-3 rounded-full text-white text-[16px] font-bold text-center"
+              style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+            >
+              {t.editBook}
+            </motion.button>
+          </motion.div>
       </div>
-
-      {/* ── Fixed bottom CTAs ──────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 28 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-        className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-6"
-      >
-        <div className="max-w-[393px] mx-auto flex gap-3">
-          {/* Secondary — Delete */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowDeleteConfirm(true)}
-            className="flex-1 py-3 bg-[#171717]/[0.08] rounded-full text-[#171717] text-[16px] font-bold text-center"
-          >
-            {t.deleteBook}
-          </motion.button>
-
-          {/* Primary — Edit */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsEditing(true)}
-            className="flex-1 py-3 rounded-full text-white text-[16px] font-bold text-center"
-            style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
-          >
-            {t.editBook}
-          </motion.button>
-        </div>
-      </motion.div>
 
       <ConfirmDialog
         open={showDeleteConfirm}

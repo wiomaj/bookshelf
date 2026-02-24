@@ -236,11 +236,21 @@ export default function BookForm({
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [error, setError] = useState('')
 
-  const debounceRef    = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const suggestionsRef = useRef<HTMLDivElement>(null)
+  const debounceRef        = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const suggestionsRef     = useRef<HTMLDivElement>(null)
+  const skipNextSearchRef  = useRef(false)
+  const [titleFocused, setTitleFocused] = useState(false)
 
   // ── Debounced autocomplete ──────────────────────────────────────────────────
   useEffect(() => {
+    // Only search after the user has tapped/focused the title field
+    if (!titleFocused) return
+
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false
+      return
+    }
+
     if (title.length < 3) {
       setSuggestions([])
       setShowSuggestions(false)
@@ -261,7 +271,7 @@ export default function BookForm({
     }, 400)
 
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
-  }, [title])
+  }, [title, titleFocused])
 
   // ── Close dropdown on outside click ────────────────────────────────────────
   useEffect(() => {
@@ -275,6 +285,7 @@ export default function BookForm({
   }, [])
 
   function selectSuggestion(s: BookSuggestion) {
+    skipNextSearchRef.current = true
     setTitle(s.title)
     setAuthor(s.author)
     if (s.cover_url) setCoverUrl(s.cover_url)
@@ -326,6 +337,7 @@ export default function BookForm({
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onFocus={() => setTitleFocused(true)}
             placeholder={t.titlePlaceholder}
             className={inputBase + ' pr-12'}
           />
