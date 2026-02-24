@@ -171,8 +171,8 @@ export default function BookDetailPage() {
               )}
             </div>
 
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />
+            {/* Gradient overlay: covers full image top → bottom */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0)] to-[rgba(0,0,0,0.7)]" />
 
             {/* Edit + Close buttons — top right */}
             <div className="absolute top-3 right-3 flex items-center gap-1">
