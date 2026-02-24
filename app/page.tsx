@@ -26,9 +26,11 @@ export default function HomePage() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    function onScroll() { setScrolled(window.scrollY > 80) }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const el = document.getElementById('scroll-container')
+    if (!el) return
+    function onScroll() { setScrolled(el.scrollTop > 80) }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
   }, [])
 
   useEffect(() => {
