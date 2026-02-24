@@ -94,21 +94,24 @@ export default function HomePage() {
           />
         </svg>
 
-        {/* FAB — absolutely centred, top-48 matches Figma */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => router.push(fabRoute)}
-          className="absolute z-10 p-3 rounded-full -translate-x-1/2"
-          style={{
-            left: '50%',
-            top: 58,
-            backgroundColor: 'var(--primary)',
-            boxShadow: 'var(--btn-shadow)',
-          }}
+        {/* FAB — wrapper handles centering; Framer Motion only scales */}
+        <div
+          className="absolute z-10 left-1/2 -translate-x-1/2"
+          style={{ top: 48 }}
         >
-          <Plus size={24} className="text-white" strokeWidth={2.5} />
-        </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => router.push(fabRoute)}
+            className="p-3 rounded-full block"
+            style={{
+              backgroundColor: 'var(--primary)',
+              boxShadow: 'var(--btn-shadow)',
+            }}
+          >
+            <Plus size={24} className="text-white" strokeWidth={2.5} />
+          </motion.button>
+        </div>
       </div>
 
       {/* ── Flash message ───────────────────────────────────────────────── */}
