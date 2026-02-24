@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { BookOpen, X } from 'lucide-react'
+import { BookOpen, Pencil, X } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
@@ -174,20 +174,35 @@ export default function BookDetailPage() {
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />
 
-            {/* Close button — top right over the image */}
-            <button
-              onClick={() => router.back()}
-              className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center text-white"
-            >
-              <X size={24} />
-            </button>
+            {/* Edit + Close buttons — top right */}
+            <div className="absolute top-3 right-3 flex items-center gap-1">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="w-9 h-9 flex items-center justify-center text-white"
+                aria-label="Edit"
+              >
+                <Pencil size={20} strokeWidth={2} />
+              </button>
+              <button
+                onClick={() => router.back()}
+                className="w-9 h-9 flex items-center justify-center text-white"
+                aria-label="Close"
+              >
+                <X size={24} />
+              </button>
+            </div>
 
             {/* Info block at the bottom of the hero */}
             <div className="absolute bottom-0 left-0 w-full px-4 pb-6 flex flex-col gap-2">
-              {/* Stars + month/year tag on the same row */}
-              <div className="flex items-center gap-3">
-                <StarRating rating={book.rating} readonly size={20} />
-                <div className="rounded-[8px] px-2 py-1
+              {/* Stars */}
+              <StarRating rating={book.rating} readonly size={20} />
+
+              {/* Title + month/year tag on the same row */}
+              <div className="flex items-end gap-2 flex-wrap">
+                <h1 className="text-white text-[24px] font-black leading-8">
+                  {book.title}
+                </h1>
+                <div className="rounded-[8px] px-2 py-1 mb-[2px]
                                bg-white/[0.18] backdrop-blur-xl
                                border border-white/[0.32]
                                shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(0,0,0,0.10)]">
@@ -198,11 +213,6 @@ export default function BookDetailPage() {
                   </span>
                 </div>
               </div>
-
-              {/* Title */}
-              <h1 className="text-white text-[32px] font-black leading-8">
-                {book.title}
-              </h1>
 
               {/* Author */}
               {book.author && (
@@ -277,32 +287,20 @@ export default function BookDetailPage() {
             </div>
           </motion.div>
 
-          {/* ── Bottom CTAs ────────────────────────────────────────────────── */}
+          {/* ── Bottom CTA ──────────────────────────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-            className="px-4 pt-3 pb-6 flex gap-3"
+            className="px-4 pt-3 pb-6"
           >
-            {/* Secondary — Delete */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex-1 py-3 bg-[#171717]/[0.08] rounded-full text-[#171717] text-[16px] font-bold text-center"
+              className="px-6 py-2 bg-[#171717]/[0.08] rounded-full text-[#171717] text-[16px] font-bold"
             >
               {t.deleteBook}
-            </motion.button>
-
-            {/* Primary — Edit */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsEditing(true)}
-              className="flex-1 py-3 rounded-full text-white text-[16px] font-bold text-center"
-              style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
-            >
-              {t.editBook}
             </motion.button>
           </motion.div>
       </div>
