@@ -14,6 +14,8 @@ export type Translations = {
   loadingBookshelf: string
   noBooks: string
   addFirstBook: string
+  addFirstBookBullet1: string
+  addFirstBookBullet2: string
   addFirstBookCta: string
   settings: string
   // Add / edit pages
@@ -101,8 +103,10 @@ export type Translations = {
 const en: Translations = {
   myBookshelf: 'My bookshelf',
   loadingBookshelf: 'Loading your bookshelf…',
-  noBooks: 'Never forget a great read',
-  addFirstBook: 'Log every book you finish — with your rating, notes, and when you read it. Your shelf grows with you.',
+  noBooks: 'Welcome to your bookshelf!',
+  addFirstBook: 'Track the books you\'ve read:',
+  addFirstBookBullet1: '📘 Remember over time what you read',
+  addFirstBookBullet2: '📘 Add personal ratings',
   addFirstBookCta: 'Add my first book',
   settings: 'Settings',
   addABook: 'Add a book you read',
@@ -181,8 +185,10 @@ const en: Translations = {
 const de: Translations = {
   myBookshelf: 'Mein Bücherregal',
   loadingBookshelf: 'Bücherregal wird geladen…',
-  noBooks: 'Dein Regal ist leer',
-  addFirstBook: 'Füge ein Buch hinzu, das du gelesen hast.',
+  noBooks: 'Willkommen in deinem Bücherregal!',
+  addFirstBook: 'Verfolge deine gelesenen Bücher:',
+  addFirstBookBullet1: '📘 Erinnere dich, was du gelesen hast',
+  addFirstBookBullet2: '📘 Persönliche Bewertungen hinzufügen',
   addFirstBookCta: 'Erstes Buch hinzufügen',
   settings: 'Einstellungen',
   addABook: 'Buch hinzufügen',
@@ -261,8 +267,10 @@ const de: Translations = {
 const fr: Translations = {
   myBookshelf: 'Ma bibliothèque',
   loadingBookshelf: 'Chargement…',
-  noBooks: 'Votre étagère est vide',
-  addFirstBook: 'Ajoutez un livre que vous avez lu pour commencer.',
+  noBooks: 'Bienvenue dans ta bibliothèque !',
+  addFirstBook: 'Suis les livres que tu as lus :',
+  addFirstBookBullet1: '📘 Souviens-toi de tes lectures',
+  addFirstBookBullet2: '📘 Ajoute des évaluations personnelles',
   addFirstBookCta: 'Ajouter votre premier livre',
   settings: 'Paramètres',
   addABook: 'Ajouter un livre lu',
@@ -341,8 +349,10 @@ const fr: Translations = {
 const es: Translations = {
   myBookshelf: 'Mi estantería',
   loadingBookshelf: 'Cargando tu estantería…',
-  noBooks: 'Tu estantería está vacía',
-  addFirstBook: 'Añade un libro que hayas leído para empezar.',
+  noBooks: '¡Bienvenido a tu estantería!',
+  addFirstBook: 'Lleva el registro de tus lecturas:',
+  addFirstBookBullet1: '📘 Recuerda lo que leíste con el tiempo',
+  addFirstBookBullet2: '📘 Añade valoraciones personales',
   addFirstBookCta: 'Añadir tu primer libro',
   settings: 'Ajustes',
   addABook: 'Añadir un libro leído',
@@ -421,8 +431,10 @@ const es: Translations = {
 const pl: Translations = {
   myBookshelf: 'Moja półka',
   loadingBookshelf: 'Ładowanie półki…',
-  noBooks: 'Twoja półka jest pusta',
-  addFirstBook: 'Dodaj książkę, którą przeczytałeś, aby zacząć.',
+  noBooks: 'Witaj na swojej półce!',
+  addFirstBook: 'Śledź przeczytane przez siebie książki:',
+  addFirstBookBullet1: '📘 Pamiętaj, co czytałeś',
+  addFirstBookBullet2: '📘 Dodaj osobiste oceny',
   addFirstBookCta: 'Dodaj pierwszą książkę',
   settings: 'Ustawienia',
   addABook: 'Dodaj przeczytaną książkę',

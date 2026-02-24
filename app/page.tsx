@@ -174,11 +174,13 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center"
           >
-            <div className="mt-[101px] w-[200px] h-[200px] overflow-hidden relative shrink-0">
+            {/* Cozy cat illustration */}
+            <div className="mt-[80px] w-[200px] h-[200px] relative shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt=""
-                className="absolute inset-[5%_0] w-full h-full object-contain"
-                src="https://www.figma.com/api/mcp/asset/33555f04-f9e5-4652-b095-20ae0c278236"
+                className="w-full h-full object-contain"
+                src="https://www.figma.com/api/mcp/asset/b91dc9ef-f060-45b8-92ae-566d469ad8b1"
               />
             </div>
 
@@ -187,9 +189,11 @@ export default function HomePage() {
                 <h2 className="text-[24px] font-black text-[#171717] leading-8">
                   {t.noBooks}
                 </h2>
-                <p className="text-[16px] text-[#171717] leading-6">
-                  {t.addFirstBook}
-                </p>
+                <div className="text-[16px] text-[#171717] leading-6 flex flex-col gap-1">
+                  <p>{t.addFirstBook}</p>
+                  <p>{t.addFirstBookBullet1}</p>
+                  <p>{t.addFirstBookBullet2}</p>
+                </div>
               </div>
 
               <motion.button
@@ -197,7 +201,7 @@ export default function HomePage() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => router.push('/add')}
                 className="w-full py-4 rounded-full text-white text-[16px] font-bold text-center"
-                style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+                style={{ backgroundColor: '#171717' }}
               >
                 {t.addFirstBookCta}
               </motion.button>
