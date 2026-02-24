@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { X, BookOpen } from 'lucide-react'
 import { getBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
+import { fetchBookData } from '@/lib/bookDescription'
 import { useApp, useT } from '@/contexts/AppContext'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import type { Book } from '@/types/book'
@@ -34,10 +35,27 @@ export default function ToReadDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
+  // API-fetched metadata
+  const [description, setDescription] = useState<string | undefined>(undefined)
+  const [apiGenre, setApiGenre] = useState<string | undefined>(undefined)
+  const [publishedYear, setPublishedYear] = useState<string | undefined>(undefined)
+  const [bookDataLoading, setBookDataLoading] = useState(false)
+
   useEffect(() => {
     if (!user || !id) return
     getBook(supabase, user.id, id)
-      .then(setBook)
+      .then(b => {
+        setBook(b)
+        if (b) {
+          setBookDataLoading(true)
+          fetchBookData(b.title, b.author).then(data => {
+            setDescription(data.description)
+            setApiGenre(data.genre)
+            setPublishedYear(data.publishedYear)
+            setBookDataLoading(false)
+          })
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [user, id])
@@ -71,10 +89,11 @@ export default function ToReadDetailPage() {
   }
 
   const { dateTag, durationTag } = getAddedTags(book.created_at)
+  const displayGenre = book.genre || apiGenre
 
   return (
     <>
-      <div className="min-h-screen">
+      <div className="min-h-screen pb-8">
 
         {/* ── Hero: full-width cover + gradient overlay ────────────────────── */}
         <div className="relative w-full h-[230px] overflow-hidden bg-gray-200">
@@ -110,7 +129,6 @@ export default function ToReadDetailPage() {
           <div className="absolute bottom-0 left-0 right-0 px-4 pb-6 flex flex-col gap-2">
             <div className="flex items-end gap-2 flex-wrap">
               <h1 className="text-[24px] font-black text-white leading-8">{book.title}</h1>
-              {/* Tags */}
               <div className="flex items-center gap-1 mb-[2px]">
                 <span
                   className="px-2 py-1 rounded-[8px] text-[12px] font-extrabold text-[#171717] uppercase leading-4"
@@ -135,7 +153,8 @@ export default function ToReadDetailPage() {
         {/* ── CTA buttons — side by side ───────────────────────────────────── */}
         <div className="flex gap-3 px-4 pt-4">
           <motion.button
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setShowDeleteConfirm(true)}
             className="flex-1 py-3 rounded-full text-[16px] font-bold text-[#171717] text-center"
             style={{ backgroundColor: 'rgba(23,23,23,0.08)' }}
@@ -143,43 +162,64 @@ export default function ToReadDetailPage() {
             {t.deleteBook}
           </motion.button>
           <motion.button
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => router.push(`/book/${book.id}`)}
             className="flex-1 py-3 rounded-full text-[16px] font-bold text-white text-center"
-            style={{ backgroundColor: '#171717' }}
+            style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
           >
             {t.markAsRead}
           </motion.button>
         </div>
 
         {/* ── Details section ──────────────────────────────────────────────── */}
-        <div className="px-4 pt-6 flex flex-col gap-6">
-
-          {/* About the book / notes */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          className="px-4 pt-6 flex flex-col gap-6 text-[#171717]"
+        >
+          {/* My notes */}
           {book.notes && (
-            <div className="flex flex-col gap-2">
-              <p className="text-[12px] font-extrabold text-[#171717] uppercase leading-4 tracking-wide">
-                {t.aboutTheBook}
-              </p>
-              <p className="text-[16px] text-[#171717] leading-6">{book.notes}</p>
-            </div>
+            <p className="text-[16px] font-normal leading-6 whitespace-pre-wrap">{book.notes}</p>
           )}
 
-          {/* Released + Genre row */}
-          {(book.genre) && (
+          {/* Released + Genre */}
+          {(publishedYear || displayGenre) && (
             <div className="flex gap-2">
-              {book.genre && (
-                <div className="flex flex-col gap-2">
-                  <p className="text-[12px] font-extrabold text-[#171717] uppercase leading-4 tracking-wide">
-                    {t.genre}
-                  </p>
-                  <p className="text-[16px] text-[#171717] leading-6">{book.genre}</p>
+              {publishedYear && (
+                <div className="flex flex-col gap-2 w-[150px] shrink-0">
+                  <span className="text-[12px] font-extrabold uppercase leading-4">{t.released}</span>
+                  <span className="text-[16px] font-normal leading-6">{publishedYear}</span>
+                </div>
+              )}
+              {displayGenre && (
+                <div className="flex flex-col gap-2 flex-1 min-w-0">
+                  <span className="text-[12px] font-extrabold uppercase leading-4">{t.genre}</span>
+                  <span className="text-[16px] font-normal leading-6">{displayGenre}</span>
                 </div>
               )}
             </div>
           )}
 
-        </div>
+          {/* About the book */}
+          <div className="flex flex-col gap-2">
+            <span className="text-[12px] font-extrabold uppercase leading-4">{t.aboutTheBook}</span>
+            {bookDataLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-gray-200 border-t-[#171717] rounded-full animate-spin" />
+                <span className="text-[rgba(23,23,23,0.48)] text-[14px]">{t.loading}</span>
+              </div>
+            ) : description ? (
+              <p className="text-[16px] font-normal leading-6">{description}</p>
+            ) : (
+              <p className="text-[rgba(23,23,23,0.48)] text-[16px] leading-6 italic">
+                {t.noDescriptionAvailable}
+              </p>
+            )}
+          </div>
+        </motion.div>
+
       </div>
 
       <ConfirmDialog
