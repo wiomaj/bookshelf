@@ -76,45 +76,39 @@ export default function HomePage() {
       {/* ── Lavender header bubble ──────────────────────────────────────── */}
       <div
         className="relative w-full overflow-hidden"
-        style={{ backgroundColor: '#d0daf3', height: 164 }}
+        style={{ backgroundColor: '#d0daf3', height: 100 }}
       >
-        {/* Decorative circle — back */}
-        <div
-          className="absolute rounded-full pointer-events-none"
-          style={{
-            width: 1249,
-            height: 1248,
-            backgroundColor: 'rgba(176, 192, 236, 0.5)',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            top: 72,
-          }}
-        />
-        {/* Decorative circle — front */}
-        <div
-          className="absolute rounded-full pointer-events-none"
-          style={{
-            width: 1249,
-            height: 1248,
-            backgroundColor: 'rgba(176, 192, 236, 0.3)',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            top: 32,
-          }}
-        />
+        {/* Decorative circles — inlined from Figma asset */}
+        <svg
+          viewBox="0 0 1249 1586"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden
+          className="absolute pointer-events-none -translate-x-1/2"
+          style={{ width: 1249, height: 1586, left: '50%', top: 28 }}
+        >
+          <ellipse cx="624.5" cy="624" rx="624.5" ry="624" fill="#c4caf0" />
+          <path
+            d="M917.079 1586H338.079V111H335C421.556 65.6543 520.069 40 624.579 40C729.089 40 827.602 65.6543 914.158 111H917.079V1586Z"
+            fill="white"
+          />
+        </svg>
 
-        {/* FAB — centred inside bubble */}
-        <div className="relative z-10 flex justify-center pt-[52px]">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push(fabRoute)}
-            className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
-          >
-            <Plus size={24} className="text-white" strokeWidth={2.5} />
-          </motion.button>
-        </div>
+        {/* FAB — absolutely centred, top-48 matches Figma */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => router.push(fabRoute)}
+          className="absolute z-10 p-3 rounded-full -translate-x-1/2"
+          style={{
+            left: '50%',
+            top: 28,
+            backgroundColor: 'var(--primary)',
+            boxShadow: 'var(--btn-shadow)',
+          }}
+        >
+          <Plus size={24} className="text-white" strokeWidth={2.5} />
+        </motion.button>
       </div>
 
       {/* ── Flash message ───────────────────────────────────────────────── */}
@@ -132,7 +126,7 @@ export default function HomePage() {
       {/* ── Title row ───────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 pt-5 pb-2">
         <h1 className="text-[#171717] text-[24px] font-black leading-8">
-          {activeTab === 'read' ? t.tabRead : t.tabToRead}
+          {activeTab === 'read' ? t.readBooksTitle : t.tabToRead}
         </h1>
 
         {/* Grid / list toggle — Read tab only, when books exist */}
