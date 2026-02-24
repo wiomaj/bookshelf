@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { X, Check, ChevronRight, ChevronLeft } from 'lucide-react'
+import { ChevronRight, ChevronLeft, ChevronDown, BookOpen, BookMarked, Settings, Check } from 'lucide-react'
+import Link from 'next/link'
 import { useApp, useT } from '@/contexts/AppContext'
 import { LANGUAGES } from '@/lib/translations'
 
@@ -14,6 +15,7 @@ export default function SettingsPage() {
   const t = useT()
 
   const [view, setView] = useState<View>('settings')
+  const [langOpen, setLangOpen] = useState(false)
 
   // Change password state
   const [newPassword, setNewPassword] = useState('')
@@ -26,6 +28,8 @@ export default function SettingsPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  const currentLang = LANGUAGES.find(l => l.code === language)
 
   const inputClass = `
     w-full px-4 py-3 rounded-2xl border border-[rgba(23,23,23,0.12)]
@@ -67,176 +71,212 @@ export default function SettingsPage() {
     }
   }
 
-  // ── Change Password sub-view ───────────────────────────────────────────────
+  // ── Bottom navigation bar ────────────────────────────────────────────────────
+  const BottomNav = () => (
+    <nav
+      className="fixed bottom-0 left-0 right-0 h-16 bg-white flex items-center z-50"
+      style={{ borderTop: '1px solid #b9b9b9' }}
+    >
+      <Link
+        href="/"
+        className="flex flex-col items-center justify-center gap-[3px] flex-1 h-full text-[rgba(23,23,23,0.4)]"
+      >
+        <BookOpen size={24} strokeWidth={1.5} />
+        <span className="text-[11px] font-semibold">{t.tabRead}</span>
+      </Link>
+
+      <Link
+        href="/"
+        className="flex flex-col items-center justify-center gap-[3px] flex-1 h-full text-[rgba(23,23,23,0.4)]"
+      >
+        <BookMarked size={24} strokeWidth={1.5} />
+        <span className="text-[11px] font-semibold">{t.tabToRead}</span>
+      </Link>
+
+      <button className="flex flex-col items-center justify-center gap-[3px] flex-1 h-full text-[#171717]">
+        <Settings size={24} strokeWidth={2} />
+        <span className="text-[11px] font-semibold">{t.settings}</span>
+      </button>
+    </nav>
+  )
+
+  // ── Change Password sub-view ─────────────────────────────────────────────────
   if (view === 'changePassword') {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pb-20">
 
-          {/* Header */}
-          <div className="flex items-center justify-between p-3 h-[60px]">
-            <button
-              onClick={() => { setView('settings'); setCpError(null); setCpSuccess(false); setNewPassword(''); setConfirmNewPassword('') }}
-              className="p-[6px] w-[36px] flex items-center justify-center text-[#171717]"
-              aria-label="Back"
-            >
-              <ChevronLeft size={24} />
-            </button>
-          </div>
-
-          {/* Title */}
-          <div className="px-4 pb-6">
-            <h1 className="text-[32px] font-black text-[#171717] leading-8">{t.changePassword}</h1>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleChangePassword} className="px-4 flex flex-col gap-3">
-            <input
-              type="password"
-              required
-              autoComplete="new-password"
-              placeholder={t.newPassword}
-              value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
-              className={inputClass}
-            />
-            <input
-              type="password"
-              required
-              autoComplete="new-password"
-              placeholder={t.confirmNewPassword}
-              value={confirmNewPassword}
-              onChange={e => setConfirmNewPassword(e.target.value)}
-              className={inputClass}
-            />
-
-            {cpError && (
-              <p className="text-red-500 text-[14px] leading-5 px-1">{cpError}</p>
-            )}
-            {cpSuccess && (
-              <p className="text-green-600 text-[14px] leading-5 px-1">{t.passwordChangedSuccess}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={cpLoading}
-              className="w-full py-4 mt-1 rounded-full text-white text-[16px] font-bold disabled:opacity-60 transition-opacity"
-              style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
-            >
-              {cpLoading ? t.savingPassword : t.savePassword}
-            </button>
-          </form>
-      </div>
-    )
-  }
-
-  // ── Main settings view ─────────────────────────────────────────────────────
-  return (
-    <div className="min-h-screen flex flex-col">
-
-        {/* Header */}
-        <div className="flex items-center justify-end p-3 h-[60px]">
+        {/* Back header */}
+        <div className="flex items-center p-3 h-[60px]">
           <button
-            onClick={() => router.back()}
+            onClick={() => { setView('settings'); setCpError(null); setCpSuccess(false); setNewPassword(''); setConfirmNewPassword('') }}
             className="p-[6px] w-[36px] flex items-center justify-center text-[#171717]"
-            aria-label="Close settings"
+            aria-label="Back"
           >
-            <X size={24} />
+            <ChevronLeft size={24} />
           </button>
         </div>
 
         {/* Title */}
         <div className="px-4 pb-6">
-          <h1 className="text-[32px] font-black text-[#171717] leading-8">{t.settings}</h1>
+          <h1 className="text-[24px] font-black text-[#171717] leading-8">{t.changePassword}</h1>
         </div>
 
-        <div className="px-4 pb-10 flex flex-col gap-6">
+        {/* Form */}
+        <form onSubmit={handleChangePassword} className="px-4 flex flex-col gap-3">
+          <input
+            type="password"
+            required
+            autoComplete="new-password"
+            placeholder={t.newPassword}
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+            className={inputClass}
+          />
+          <input
+            type="password"
+            required
+            autoComplete="new-password"
+            placeholder={t.confirmNewPassword}
+            value={confirmNewPassword}
+            onChange={e => setConfirmNewPassword(e.target.value)}
+            className={inputClass}
+          />
 
-          {/* Cozy mode */}
-          <div className="flex items-start gap-4">
-            <div className="flex-1 flex flex-col gap-1">
-              <p className="text-[18px] font-bold text-[#171717] leading-6 tracking-[-0.3px]">{t.cozyMode}</p>
-              <p className="text-[16px] text-[#171717] leading-6">{t.cozyModeDescription}</p>
-            </div>
-            <button
-              onClick={() => setCozyMode(!cozyMode)}
-              className="relative w-[51px] h-[31px] rounded-[100px] shrink-0 transition-colors duration-300"
-              style={{ backgroundColor: cozyMode ? '#34C759' : 'rgba(120,120,128,0.16)' }}
-              aria-pressed={cozyMode}
-              aria-label="Toggle cozy mode"
-            >
-              <div
-                className="absolute top-[2px] w-[27px] h-[27px] bg-white rounded-[100px] transition-transform duration-300"
-                style={{
-                  transform: cozyMode ? 'translateX(22px)' : 'translateX(2px)',
-                  boxShadow: '0px 0px 0px 0px rgba(0,0,0,0.04), 0px 3px 8px 0px rgba(0,0,0,0.15), 0px 3px 1px 0px rgba(0,0,0,0.06)',
-                }}
-              />
-            </button>
-          </div>
+          {cpError && (
+            <p className="text-red-500 text-[14px] leading-5 px-1">{cpError}</p>
+          )}
+          {cpSuccess && (
+            <p className="text-green-600 text-[14px] leading-5 px-1">{t.passwordChangedSuccess}</p>
+          )}
 
-          {/* Divider */}
-          <div className="h-px bg-[rgba(23,23,23,0.08)]" />
+          <button
+            type="submit"
+            disabled={cpLoading}
+            className="w-full py-4 mt-1 rounded-full text-white text-[16px] font-bold disabled:opacity-60 transition-opacity"
+            style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+          >
+            {cpLoading ? t.savingPassword : t.savePassword}
+          </button>
+        </form>
 
-          {/* Language */}
-          <div className="flex flex-col gap-3">
-            <p className="text-[18px] font-bold text-[#171717] leading-6 tracking-[-0.3px]">{t.language}</p>
-            <div className="flex flex-col">
-              {LANGUAGES.map((lang, i) => (
-                <button
-                  key={lang.code}
-                  onClick={() => setLanguage(lang.code)}
-                  className={`flex items-center gap-3 py-3 text-left transition-colors
-                    ${i < LANGUAGES.length - 1 ? 'border-b border-[rgba(23,23,23,0.08)]' : ''}`}
-                >
-                  <span className="text-[22px] leading-none w-8 text-center">{lang.flag}</span>
-                  <span className="flex-1 text-[16px] text-[#171717] leading-6">{lang.label}</span>
-                  {language === lang.code && (
-                    <Check size={20} strokeWidth={2.5} style={{ color: 'var(--primary)' }} />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
+        <BottomNav />
+      </div>
+    )
+  }
 
-          {/* Divider */}
-          <div className="h-px bg-[rgba(23,23,23,0.08)]" />
+  // ── Main settings view ───────────────────────────────────────────────────────
+  return (
+    <div className="min-h-screen flex flex-col pb-20">
 
-          {/* My Account section */}
-          <p className="text-[24px] font-black text-[#171717] leading-8">{t.myAccount}</p>
-
-          <div className="flex flex-col -mt-2">
-
-            {/* Change password */}
-            <button
-              onClick={() => setView('changePassword')}
-              className="flex items-center gap-3 p-4 w-full text-left border-b border-[rgba(23,23,23,0.08)]"
-            >
-              <span className="flex-1 text-[16px] font-bold text-[#171717] leading-6">{t.changePassword}</span>
-              <ChevronRight size={24} className="text-[#171717] shrink-0" />
-            </button>
-
-            {/* Sign out */}
-            <button
-              onClick={async () => { await signOut(); router.replace('/login') }}
-              className="flex items-center gap-3 p-4 w-full text-left border-b border-[rgba(23,23,23,0.08)]"
-            >
-              <span className="flex-1 text-[16px] font-bold text-[#171717] leading-6">{t.signOut}</span>
-              <ChevronRight size={24} className="text-[#171717] shrink-0" />
-            </button>
-
-            {/* Delete account */}
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-3 p-4 w-full text-left"
-            >
-              <span className="flex-1 text-[16px] font-bold text-red-500 leading-6">{t.deleteAccount}</span>
-              <ChevronRight size={24} className="text-red-500 shrink-0" />
-            </button>
-
-          </div>
+      {/* Title */}
+      <div className="px-4 pt-6 pb-4">
+        <h1 className="text-[24px] font-black text-[#171717] leading-8">{t.settings}</h1>
       </div>
 
-      {/* Delete account confirmation dialog */}
+      <div className="px-4 pb-10 flex flex-col gap-6">
+
+        {/* ── Cozy mode ──────────────────────────────────────────────────── */}
+        <div className="flex items-start gap-2">
+          <div className="flex-1 flex flex-col gap-2">
+            <p className="text-[18px] font-bold text-[#171717] leading-6 tracking-[-0.3px]">{t.cozyMode}</p>
+            <p className="text-[16px] text-[#171717] leading-6">{t.cozyModeDescription}</p>
+          </div>
+          <button
+            onClick={() => setCozyMode(!cozyMode)}
+            className="relative w-[51px] h-[31px] rounded-[100px] shrink-0 transition-colors duration-300"
+            style={{ backgroundColor: cozyMode ? '#34C759' : 'rgba(120,120,128,0.16)' }}
+            aria-pressed={cozyMode}
+            aria-label="Toggle cozy mode"
+          >
+            <div
+              className="absolute top-[2px] w-[27px] h-[27px] bg-white rounded-[100px] transition-transform duration-300"
+              style={{
+                transform: cozyMode ? 'translateX(22px)' : 'translateX(2px)',
+                boxShadow: '0px 0px 0px 0px rgba(0,0,0,0.04), 0px 3px 8px 0px rgba(0,0,0,0.15), 0px 3px 1px 0px rgba(0,0,0,0.06)',
+              }}
+            />
+          </button>
+        </div>
+
+        {/* ── Language dropdown ───────────────────────────────────────────── */}
+        <div className="flex flex-col gap-2">
+          <p className="text-[18px] font-bold text-[#171717] leading-6 tracking-[-0.3px]">{t.language}</p>
+          <div className="relative">
+            <button
+              onClick={() => setLangOpen(o => !o)}
+              className="w-full h-[60px] flex items-center justify-between px-4 py-3 rounded-[12px] bg-white"
+              style={{ border: '2px solid rgba(23,23,23,0.16)' }}
+            >
+              <span className="text-[16px] text-[#171717] leading-6">
+                {currentLang?.flag}&nbsp;&nbsp;{currentLang?.label}
+              </span>
+              <ChevronDown
+                size={24}
+                className="text-[#171717] transition-transform duration-200"
+                style={{ transform: langOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              />
+            </button>
+
+            {langOpen && (
+              <div
+                className="absolute top-full left-0 right-0 mt-1 bg-white rounded-[12px] z-10 overflow-hidden"
+                style={{ border: '2px solid rgba(23,23,23,0.16)' }}
+              >
+                {LANGUAGES.map((lang, i) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => { setLanguage(lang.code); setLangOpen(false) }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors active:bg-[rgba(23,23,23,0.04)] ${
+                      i < LANGUAGES.length - 1 ? 'border-b border-[rgba(23,23,23,0.08)]' : ''
+                    }`}
+                  >
+                    <span className="text-[18px] leading-none">{lang.flag}</span>
+                    <span className="flex-1 text-[16px] text-[#171717] leading-6">{lang.label}</span>
+                    {language === lang.code && (
+                      <Check size={18} strokeWidth={2.5} style={{ color: 'var(--primary)' }} />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Divider ─────────────────────────────────────────────────────── */}
+        <div className="h-px bg-[#e0e0e0]" />
+
+        {/* ── My Account ──────────────────────────────────────────────────── */}
+        <p className="text-[24px] font-black text-[#171717] leading-8">{t.myAccount}</p>
+
+        <div className="flex flex-col -mt-2">
+          <button
+            onClick={() => setView('changePassword')}
+            className="flex items-center p-4 w-full text-left"
+          >
+            <span className="flex-1 text-[16px] font-bold text-[#171717] leading-6">{t.changePassword}</span>
+            <ChevronRight size={24} className="text-[#171717] shrink-0" />
+          </button>
+
+          <button
+            onClick={async () => { await signOut(); router.replace('/login') }}
+            className="flex items-center p-4 w-full text-left"
+          >
+            <span className="flex-1 text-[16px] font-bold text-[#171717] leading-6">{t.signOut}</span>
+            <ChevronRight size={24} className="text-[#171717] shrink-0" />
+          </button>
+
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center p-4 w-full text-left"
+          >
+            <span className="flex-1 text-[16px] font-bold text-[#171717] leading-6">{t.deleteAccount}</span>
+            <ChevronRight size={24} className="text-[#171717] shrink-0" />
+          </button>
+        </div>
+
+      </div>
+
+      {/* ── Delete account confirmation dialog ──────────────────────────────── */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-8">
           <div className="w-full max-w-[400px] bg-white rounded-3xl p-6 flex flex-col gap-5">
@@ -268,6 +308,8 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+
+      <BottomNav />
     </div>
   )
 }
