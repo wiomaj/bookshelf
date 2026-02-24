@@ -126,7 +126,7 @@ export default function HomePage() {
       {/* ── Title row ───────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 pt-5 pb-2">
         <h1 className="text-[#171717] text-[24px] font-black leading-8">
-          {activeTab === 'read' ? t.readBooksTitle : t.tabToRead}
+          {activeTab === 'read' ? t.readBooksTitle : t.toReadBooksTitle}
         </h1>
 
         {/* Grid / list toggle — Read tab only, when books exist */}
