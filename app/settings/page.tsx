@@ -269,8 +269,8 @@ export default function SettingsPage() {
             onClick={() => setShowDeleteConfirm(true)}
             className="flex items-center p-4 w-full text-left"
           >
-            <span className="flex-1 text-[16px] font-bold text-[#171717] leading-6">{t.deleteAccount}</span>
-            <ChevronRight size={24} className="text-[#171717] shrink-0" />
+            <span className="flex-1 text-[16px] font-bold text-red-500 leading-6">{t.deleteAccount}</span>
+            <ChevronRight size={24} className="text-red-500 shrink-0" />
           </button>
         </div>
 
