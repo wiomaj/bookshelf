@@ -276,8 +276,8 @@ export default function HomePage() {
               {activeTab === 'read' ? t.readBooksTitle : t.toReadBooksTitle}
             </span>
 
-            {/* FAB — centered absolutely so title/controls don't push it */}
-            <div className="absolute left-1/2 -translate-x-1/2">
+            {/* FAB — centered + 8 px from top so shadow isn't clipped */}
+            <div className="absolute left-1/2 -translate-x-1/2" style={{ top: 8 }}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
