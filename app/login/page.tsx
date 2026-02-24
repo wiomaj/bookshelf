@@ -51,7 +51,7 @@ export default function LoginPage() {
     return (
       <div className="min-h-screen flex flex-col items-center px-8 pt-5">
         <img
-          src="/reading-illustration.svg"
+          src="https://www.figma.com/api/mcp/asset/08931233-4b71-4f5b-9798-90acd70ceff5"
           alt=""
           width={200}
           height={200}
@@ -83,7 +83,7 @@ export default function LoginPage() {
 
       {/* Illustration */}
       <img
-        src="/reading-illustration.svg"
+        src="https://www.figma.com/api/mcp/asset/08931233-4b71-4f5b-9798-90acd70ceff5"
         alt=""
         width={200}
         height={200}
