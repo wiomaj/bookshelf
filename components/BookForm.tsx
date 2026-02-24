@@ -8,6 +8,7 @@ import ISBNScanner from './ISBNScanner'
 import { LONG_MONTHS, SEASONS } from '@/lib/month'
 import { useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
+import { normaliseGoogleCover, googleCoverFromResponse } from '@/lib/bookMetadata'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -60,13 +61,6 @@ async function searchOpenLibrary(query: string, language?: string): Promise<Rich
   })
 }
 
-/** Normalise a raw Google Books image URL to a high-res https version. */
-function normaliseGoogleCover(raw: string): string {
-  return raw
-    .replace('http:', 'https:')
-    .replace(/zoom=\d+/, 'zoom=0')
-    .replace(/&fife=[^&]*/g, '') + '&fife=w600'
-}
 
 async function searchGoogleBooks(query: string, langRestrict?: string): Promise<RichSuggestion[]> {
   const lang = langRestrict ? `&langRestrict=${encodeURIComponent(langRestrict)}` : ''
@@ -130,13 +124,6 @@ function rankAndDeduplicate(results: RichSuggestion[], query: string): RichSugge
     .slice(0, 8)
 }
 
-/** Extract the best cover from a single Google Books API response. */
-function googleCoverFromResponse(data: any): string | undefined {
-  const links = data.items?.[0]?.volumeInfo?.imageLinks as Record<string, string> | undefined
-  if (!links) return undefined
-  const raw = links.extraLarge ?? links.large ?? links.medium ?? links.thumbnail
-  return raw ? normaliseGoogleCover(raw) : undefined
-}
 
 /** Query Google Books by exact ISBN — more precise than a title search. */
 async function fetchCoverByISBN(isbn: string): Promise<string | undefined> {
@@ -292,6 +279,12 @@ export default function BookForm({
     setAuthor(s.author)
     if (s.cover_url) setCoverUrl(s.cover_url)
     setShowSuggestions(false)
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[BookForm] suggestion selected:', {
+        title: s.title,
+        cover_url: s.cover_url ?? '(none)',
+      })
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -299,6 +292,13 @@ export default function BookForm({
     setError('')
     if (!title.trim()) { setError('Title is required'); return }
     if (rating === 0)  { setError('Please add a star rating'); return }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[BookForm] submitting book:', {
+        title: title.trim(),
+        cover_url: coverUrl.trim() || '(none)',
+      })
+    }
 
     try {
       await onSubmit({
