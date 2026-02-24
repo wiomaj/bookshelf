@@ -102,6 +102,14 @@ describe('googleCoverFromResponse', () => {
 })
 
 // ─── fetchBookByISBN ─────────────────────────────────────────────────────────
+// OpenLibrary fallback uses the Search API (/search.json?q={isbn}) — same
+// endpoint used by the manual title-search flow — NOT the Books API.
+// OL Search API response shape: { docs: [{ title, author_name, cover_i, … }] }
+
+/** Helper: build a mock OL Search API response for a single doc */
+function olSearchResponse(doc: Record<string, unknown>) {
+  return { ok: true, json: async () => ({ docs: [doc] }) }
+}
 
 describe('fetchBookByISBN', () => {
   beforeEach(() => {
@@ -114,9 +122,9 @@ describe('fetchBookByISBN', () => {
       json: async () => ({
         items: [{
           volumeInfo: {
-            title:       'Nineteen Eighty-Four',
-            authors:     ['George Orwell'],
-            imageLinks:  { thumbnail: 'http://books.google.com/c.jpg?zoom=1' },
+            title:      'Nineteen Eighty-Four',
+            authors:    ['George Orwell'],
+            imageLinks: { thumbnail: 'http://books.google.com/c.jpg?zoom=1' },
           },
         }],
       }),
@@ -132,82 +140,100 @@ describe('fetchBookByISBN', () => {
     expect(result!.cover_url).toContain('&fife=w600')
   })
 
-  it('falls back to OpenLibrary cover when Google Books has no imageLinks', async () => {
+  it('does NOT call OpenLibrary when Google Books already has a cover', async () => {
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        items: [{
+          volumeInfo: {
+            title:      'Nineteen Eighty-Four',
+            authors:    ['George Orwell'],
+            imageLinks: { thumbnail: 'http://books.google.com/c.jpg?zoom=1' },
+          },
+        }],
+      }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    await fetchBookByISBN(MOCK_ISBN)
+    expect(mockFetch).toHaveBeenCalledTimes(1) // only Google Books
+  })
+
+  it('falls back to OpenLibrary Search API cover when Google Books has no imageLinks', async () => {
     const mockFetch = vi.fn()
     // Call 1 — Google Books: item found, but no imageLinks
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        items: [{
-          volumeInfo: { title: 'Nineteen Eighty-Four', authors: ['George Orwell'] },
-        }],
+        items: [{ volumeInfo: { title: 'Nineteen Eighty-Four', authors: ['George Orwell'] } }],
       }),
     })
-    // Call 2 — OpenLibrary Books API: has cover
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        [`ISBN:${MOCK_ISBN}`]: {
-          title:   'Nineteen Eighty-Four',
-          authors: [{ name: 'George Orwell' }],
-          cover:   { large: 'https://covers.openlibrary.org/b/id/8575741-L.jpg' },
-        },
-      }),
-    })
+    // Call 2 — OpenLibrary Search API: cover_i present
+    mockFetch.mockResolvedValueOnce(
+      olSearchResponse({ title: 'Nineteen Eighty-Four', author_name: ['George Orwell'], cover_i: 8575741 })
+    )
     vi.stubGlobal('fetch', mockFetch)
 
     const result = await fetchBookByISBN(MOCK_ISBN)
     expect(result).not.toBeNull()
-    expect(result!.cover_url).toContain('openlibrary.org')
+    expect(result!.cover_url).toBe('https://covers.openlibrary.org/b/id/8575741-L.jpg')
     expect(result!.title).toBe('Nineteen Eighty-Four')
+  })
+
+  it('falls back to cover_edition_key when cover_i is absent', async () => {
+    const mockFetch = vi.fn()
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ items: [] }) })
+    mockFetch.mockResolvedValueOnce(
+      olSearchResponse({ title: 'Some Book', author_name: ['Author'], cover_edition_key: 'OL12345M' })
+    )
+    vi.stubGlobal('fetch', mockFetch)
+
+    const result = await fetchBookByISBN(MOCK_ISBN)
+    expect(result!.cover_url).toContain('/olid/OL12345M-L.jpg')
+  })
+
+  it('falls back to first ISBN cover URL when cover_i and cover_edition_key are absent', async () => {
+    const mockFetch = vi.fn()
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ items: [] }) })
+    mockFetch.mockResolvedValueOnce(
+      olSearchResponse({ title: 'Some Book', author_name: ['Author'], isbn: ['9780451524935', '0451524934'] })
+    )
+    vi.stubGlobal('fetch', mockFetch)
+
+    const result = await fetchBookByISBN(MOCK_ISBN)
+    expect(result!.cover_url).toContain('/isbn/9780451524935-L.jpg')
   })
 
   it('uses OpenLibrary for title + author + cover when Google Books has no items', async () => {
     const mockFetch = vi.fn()
-    // Call 1 — Google Books: empty
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ items: undefined }) })
-    // Call 2 — OpenLibrary: full data
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        [`ISBN:${MOCK_ISBN}`]: {
-          title:   'Nineteen Eighty-Four',
-          authors: [{ name: 'George Orwell' }],
-          cover:   { large: 'https://covers.openlibrary.org/b/id/8575741-L.jpg' },
-        },
-      }),
-    })
+    mockFetch.mockResolvedValueOnce(
+      olSearchResponse({ title: 'Nineteen Eighty-Four', author_name: ['George Orwell'], cover_i: 8575741 })
+    )
     vi.stubGlobal('fetch', mockFetch)
 
     const result = await fetchBookByISBN(MOCK_ISBN)
     expect(result).not.toBeNull()
     expect(result!.title).toBe('Nineteen Eighty-Four')
-    expect(result!.cover_url).toContain('openlibrary.org')
+    expect(result!.cover_url).toContain('/id/8575741-L.jpg')
   })
 
   it('returns null when both sources return nothing', async () => {
     const mockFetch = vi.fn()
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ items: undefined }) })
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ docs: [] }) })
     vi.stubGlobal('fetch', mockFetch)
 
     const result = await fetchBookByISBN(MOCK_ISBN)
     expect(result).toBeNull()
   })
 
-  it('still returns OpenLibrary data when Google Books fetch throws a network error', async () => {
+  it('still tries OpenLibrary when Google Books fetch throws a network error', async () => {
     const mockFetch = vi.fn()
     mockFetch.mockRejectedValueOnce(new Error('Network error'))
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        [`ISBN:${MOCK_ISBN}`]: {
-          title:   'Nineteen Eighty-Four',
-          authors: [{ name: 'George Orwell' }],
-          cover:   { medium: 'https://covers.openlibrary.org/b/id/8575741-M.jpg' },
-        },
-      }),
-    })
+    mockFetch.mockResolvedValueOnce(
+      olSearchResponse({ title: 'Nineteen Eighty-Four', author_name: ['George Orwell'], cover_i: 8575741 })
+    )
     vi.stubGlobal('fetch', mockFetch)
 
     const result = await fetchBookByISBN(MOCK_ISBN)
@@ -216,62 +242,39 @@ describe('fetchBookByISBN', () => {
     expect(result!.cover_url).toContain('openlibrary.org')
   })
 
-  it('uses medium cover from OpenLibrary when large is absent', async () => {
-    const mockFetch = vi.fn()
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ items: [] }) })
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        [`ISBN:${MOCK_ISBN}`]: {
-          title:   'Some Book',
-          authors: [{ name: 'Some Author' }],
-          // Only medium — no large
-          cover:   { medium: 'https://covers.openlibrary.org/b/id/999-M.jpg' },
-        },
-      }),
-    })
-    vi.stubGlobal('fetch', mockFetch)
-
-    const result = await fetchBookByISBN(MOCK_ISBN)
-    expect(result!.cover_url).toContain('-M.jpg')
-  })
-
   // ── Regression test ─────────────────────────────────────────────────────────
-  it('REGRESSION: ISBN scan cover is present in the returned suggestion when Google Books has no imageLinks', async () => {
-    // This is the exact failure mode that triggered this fix:
-    // Google Books returns the book but omits imageLinks → ISBNScanner used to
-    // return cover_url: undefined → no cover shown after scanning.
+  it('REGRESSION: ISBN scan cover is present when Google Books omits imageLinks', async () => {
+    // The original bug: Google Books returns book metadata but no imageLinks.
+    // The old Books API fallback often returned empty {} for the same ISBN.
+    // The new Search API fallback reliably returns cover_i for most books.
     const mockFetch = vi.fn()
-    // Google Books: item present, imageLinks absent
+    // Google Books: item present, imageLinks absent (the bug trigger)
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         items: [{
           volumeInfo: {
-            title:   'An Old Classic',
-            authors: ['Classic Author'],
-            // imageLinks deliberately absent — this is the bug trigger
+            title: 'Fühl dich wohl in deinem Zuhause',
+            authors: ['Frida Ramstedt'],
+            // imageLinks deliberately absent
           },
         }],
       }),
     })
-    // OpenLibrary: provides the cover
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        [`ISBN:${MOCK_ISBN}`]: {
-          title:   'An Old Classic',
-          authors: [{ name: 'Classic Author' }],
-          cover:   { large: 'https://covers.openlibrary.org/b/id/11111-L.jpg' },
-        },
-      }),
-    })
+    // OpenLibrary Search API: has cover_i (what the Books API was missing)
+    mockFetch.mockResolvedValueOnce(
+      olSearchResponse({
+        title: 'Fühl dich wohl in deinem Zuhause',
+        author_name: ['Frida Ramstedt'],
+        cover_i: 12345678,
+      })
+    )
     vi.stubGlobal('fetch', mockFetch)
 
-    const suggestion = await fetchBookByISBN(MOCK_ISBN)
+    const suggestion = await fetchBookByISBN('9783442484027')
 
-    // The core regression assertion: cover_url MUST be defined
+    // Core regression assertion: cover_url MUST be defined
     expect(suggestion?.cover_url).toBeDefined()
-    expect(suggestion?.cover_url).toContain('openlibrary.org')
+    expect(suggestion?.cover_url).toBe('https://covers.openlibrary.org/b/id/12345678-L.jpg')
   })
 })
