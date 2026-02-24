@@ -119,23 +119,29 @@ export default function HomePage() {
 
         {/* ── Tabs ────────────────────────────────────────────────────────── */}
         <div className="flex items-center gap-2 px-4 pt-3 pb-1">
-          {(['read', 'to_read'] as Tab[]).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-1.5 rounded-full text-[14px] font-bold transition-colors ${
-                activeTab === tab
-                  ? 'text-white'
-                  : 'text-[rgba(23,23,23,0.55)] bg-[rgba(23,23,23,0.06)]'
-              }`}
-              style={activeTab === tab ? { backgroundColor: 'var(--primary)' } : {}}
-            >
-              {tab === 'read' ? t.tabRead : t.tabToRead}
-            </button>
-          ))}
+          {(['read', 'to_read'] as Tab[]).map((tab) => {
+            const count = tab === 'read' ? books.length : toReadBooks.length
+            const label = tab === 'read'
+              ? (count > 0 ? `${t.tabRead} (${count})` : t.tabRead)
+              : (count > 0 ? `${t.tabToRead} (${count})` : t.tabToRead)
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-1.5 rounded-full text-[14px] font-bold transition-colors ${
+                  activeTab === tab
+                    ? 'text-white'
+                    : 'text-[rgba(23,23,23,0.55)] bg-[rgba(23,23,23,0.06)]'
+                }`}
+                style={activeTab === tab ? { backgroundColor: 'var(--primary)' } : {}}
+              >
+                {label}
+              </button>
+            )
+          })}
         </div>
 
-        {/* ── Toolbar (grid/list toggle + Settings) — Read tab only ───────── */}
+        {/* ── Toolbar: Read tab (grid/list + Settings) ─────────────────────── */}
         {activeTab === 'read' && books.length > 0 && (
           <div className="flex items-center gap-1 px-4 pt-3 pb-1">
             <button
@@ -157,6 +163,19 @@ export default function HomePage() {
               <List size={24} />
             </button>
             <span className="text-[#171717] font-bold mx-2 select-none">|</span>
+            <Link
+              href="/settings"
+              className="font-bold text-[16px] leading-6"
+              style={{ color: 'var(--primary)' }}
+            >
+              {t.settings}
+            </Link>
+          </div>
+        )}
+
+        {/* ── Toolbar: To Read tab (Settings only) ─────────────────────────── */}
+        {activeTab === 'to_read' && toReadBooks.length > 0 && (
+          <div className="px-4 pt-3 pb-1">
             <Link
               href="/settings"
               className="font-bold text-[16px] leading-6"
