@@ -102,7 +102,7 @@ export default function HomePage() {
           className="absolute z-10 p-3 rounded-full -translate-x-1/2"
           style={{
             left: '50%',
-            top: 28,
+            top: 58,
             backgroundColor: 'var(--primary)',
             boxShadow: 'var(--btn-shadow)',
           }}
