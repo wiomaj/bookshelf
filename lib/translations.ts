@@ -93,6 +93,7 @@ export type Translations = {
   addToReadingList: string
   markAsRead: string
   toReadNotesPlaceholder: string
+  whenDidYouGetIt: string
 }
 
 const en: Translations = {
@@ -165,11 +166,12 @@ const en: Translations = {
   deleteAccountDesc: 'This will permanently delete your account and all your books. This cannot be undone.',
   tabRead: 'Read',
   tabToRead: 'To Read',
-  toReadEmptyTitle: 'Nothing here yet',
-  toReadEmptyCopy: 'Add books you want to read next.',
+  toReadEmptyTitle: 'Books you own, but haven\'t read',
+  toReadEmptyCopy: 'Track books sitting on your shelf waiting to be read.',
   addToReadingList: 'Add to reading list',
   markAsRead: 'Mark as Read',
   toReadNotesPlaceholder: 'Why do you want to read this?',
+  whenDidYouGetIt: 'When did you get it?',
 }
 
 const de: Translations = {
@@ -242,10 +244,11 @@ const de: Translations = {
   deleteAccountDesc: 'Dein Konto und alle deine Bücher werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.',
   tabRead: 'Gelesen',
   tabToRead: 'Leseliste',
-  toReadEmptyTitle: 'Noch nichts hier',
-  toReadEmptyCopy: 'Füge Bücher hinzu, die du lesen möchtest.',
+  toReadEmptyTitle: 'Bücher, die du besitzt, aber noch nicht gelesen hast',
+  toReadEmptyCopy: 'Behalte Bücher im Blick, die auf deinem Regal auf dich warten.',
   addToReadingList: 'Zur Leseliste hinzufügen',
   markAsRead: 'Als gelesen markieren',
+  whenDidYouGetIt: 'Wann hast du es bekommen?',
   toReadNotesPlaceholder: 'Warum möchtest du das lesen?',
 }
 
@@ -319,10 +322,11 @@ const fr: Translations = {
   deleteAccountDesc: 'Votre compte et tous vos livres seront supprimés définitivement. Cette action est irréversible.',
   tabRead: 'Lus',
   tabToRead: 'À lire',
-  toReadEmptyTitle: 'Rien ici pour l\'instant',
-  toReadEmptyCopy: 'Ajoutez des livres que vous souhaitez lire.',
+  toReadEmptyTitle: 'Livres possédés, mais pas encore lus',
+  toReadEmptyCopy: 'Suivez les livres qui attendent sur votre étagère.',
   addToReadingList: 'Ajouter à la liste',
   markAsRead: 'Marquer comme lu',
+  whenDidYouGetIt: 'Quand l\'avez-vous reçu ?',
   toReadNotesPlaceholder: 'Pourquoi voulez-vous le lire ?',
 }
 
@@ -396,10 +400,11 @@ const es: Translations = {
   deleteAccountDesc: 'Tu cuenta y todos tus libros se eliminarán permanentemente. Esta acción no se puede deshacer.',
   tabRead: 'Leídos',
   tabToRead: 'Por leer',
-  toReadEmptyTitle: 'Nada aquí todavía',
-  toReadEmptyCopy: 'Añade libros que quieras leer.',
+  toReadEmptyTitle: 'Libros que tienes, pero aún no has leído',
+  toReadEmptyCopy: 'Lleva un registro de los libros que esperan en tu estantería.',
   addToReadingList: 'Añadir a la lista',
   markAsRead: 'Marcar como leído',
+  whenDidYouGetIt: '¿Cuándo lo conseguiste?',
   toReadNotesPlaceholder: '¿Por qué quieres leerlo?',
 }
 
@@ -473,10 +478,11 @@ const pl: Translations = {
   deleteAccountDesc: 'Twoje konto i wszystkie książki zostaną trwale usunięte. Tej operacji nie można cofnąć.',
   tabRead: 'Przeczytane',
   tabToRead: 'Do przeczytania',
-  toReadEmptyTitle: 'Nic tu jeszcze nie ma',
-  toReadEmptyCopy: 'Dodaj książki, które chcesz przeczytać.',
+  toReadEmptyTitle: 'Książki, które masz, ale jeszcze nie przeczytałeś',
+  toReadEmptyCopy: 'Śledź książki czekające na swojej półce.',
   addToReadingList: 'Dodaj do listy',
   markAsRead: 'Oznacz jako przeczytane',
+  whenDidYouGetIt: 'Kiedy ją dostałeś?',
   toReadNotesPlaceholder: 'Dlaczego chcesz to przeczytać?',
 }
 

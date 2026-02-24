@@ -5,6 +5,9 @@ import { motion } from 'framer-motion'
 import { Camera, Loader2, Search } from 'lucide-react'
 import ISBNScanner from './ISBNScanner'
 import { useT } from '@/contexts/AppContext'
+import { LONG_MONTHS, SEASONS } from '@/lib/month'
+
+const currentYear = new Date().getFullYear()
 
 type BookSuggestion = {
   title: string
@@ -15,7 +18,8 @@ type BookSuggestion = {
 export type ToReadFormData = {
   title: string
   author: string
-  notes?: string
+  month: number | null
+  year: number
   cover_url?: string
 }
 
@@ -26,7 +30,7 @@ interface ToReadFormProps {
   loading?: boolean
 }
 
-// ─── Book Search (reused from BookForm) ──────────────────────────────────────
+// ─── Book Search ──────────────────────────────────────────────────────────────
 
 async function searchBooks(query: string): Promise<BookSuggestion[]> {
   const [olRes, gRes] = await Promise.allSettled([
@@ -57,7 +61,6 @@ async function searchBooks(query: string): Promise<BookSuggestion[]> {
     }
   }
 
-  // Deduplicate by title
   const seen = new Set<string>()
   return results.filter(r => {
     const key = r.title.toLowerCase().trim()
@@ -78,7 +81,8 @@ export default function ToReadForm({
   const t = useT()
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [author, setAuthor] = useState(initialData?.author ?? '')
-  const [notes, setNotes] = useState(initialData?.notes ?? '')
+  const [month, setMonth] = useState<number | null>(initialData?.month ?? null)
+  const [year, setYear] = useState<number>(initialData?.year ?? 0)
   const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
 
   const [suggestions, setSuggestions] = useState<BookSuggestion[]>([])
@@ -133,7 +137,7 @@ export default function ToReadForm({
     setError('')
     if (!title.trim()) { setError('Title is required'); return }
     try {
-      await onSubmit({ title: title.trim(), author: author.trim(), notes: notes.trim() || undefined, cover_url: coverUrl.trim() || undefined })
+      await onSubmit({ title: title.trim(), author: author.trim(), month, year, cover_url: coverUrl.trim() || undefined })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     }
@@ -221,19 +225,42 @@ export default function ToReadForm({
         />
       </div>
 
-      {/* ── Notes ──────────────────────────────────────────────────────────── */}
+      {/* ── When did you get it? (Month 2/3 + Year 1/3) ────────────────────── */}
       <div>
-        <label className={labelClass}>{t.myNotesLabel}</label>
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder={t.toReadNotesPlaceholder}
-          rows={4}
-          className="w-full px-4 py-3 rounded-[12px] border-2 border-[rgba(23,23,23,0.16)]
-                     focus:outline-none transition-colors
-                     text-[16px] text-[#171717] bg-white
-                     placeholder:text-[rgba(23,23,23,0.72)] resize-none"
-        />
+        <label className={labelClass}>{t.whenDidYouGetIt}</label>
+        <div className="grid grid-cols-3 gap-[6px]">
+          <div className="col-span-2">
+            <select
+              value={month ?? ''}
+              onChange={(e) => setMonth(e.target.value === '' ? null : Number(e.target.value))}
+              className={inputBase + ' appearance-none cursor-pointer'}
+            >
+              <option value="">{t.unknownMonth}</option>
+              <optgroup label="Month">
+                {LONG_MONTHS.map((m, i) => (
+                  <option key={i + 1} value={i + 1}>{m}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Season">
+                {Object.entries(SEASONS).map(([code, label]) => (
+                  <option key={code} value={code}>{label}</option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+          <div>
+            <select
+              value={year === 0 ? '' : year}
+              onChange={(e) => setYear(e.target.value === '' ? 0 : Number(e.target.value))}
+              className={inputBase + ' appearance-none cursor-pointer'}
+            >
+              <option value="">—</option>
+              {Array.from({ length: 30 }, (_, i) => currentYear - i).map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* ── Cover preview ──────────────────────────────────────────────────── */}

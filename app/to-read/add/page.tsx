@@ -1,13 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft } from 'lucide-react'
+import { X } from 'lucide-react'
 import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
 import { addBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { useApp, useT } from '@/contexts/AppContext'
-import { useState } from 'react'
 
 export default function ToReadAddPage() {
   const router = useRouter()
@@ -22,11 +22,10 @@ export default function ToReadAddPage() {
       await addBook(supabase, user.id, {
         title: data.title,
         author: data.author,
-        notes: data.notes,
         cover_url: data.cover_url,
         status: 'to_read',
-        year: 0,
-        month: null,
+        year: data.year,
+        month: data.month,
         rating: 0,
       })
       router.push('/')
@@ -37,26 +36,35 @@ export default function ToReadAddPage() {
 
   return (
     <div className="min-h-screen">
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 px-4 pt-6 pb-4">
-        <motion.button
-          whileTap={{ scale: 0.9 }}
+
+      {/* Header — X close button on the right */}
+      <div className="flex items-center justify-end h-[60px] px-3">
+        <button
           onClick={() => router.back()}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-[rgba(23,23,23,0.06)]"
+          className="w-9 h-9 flex items-center justify-center text-[#171717]"
         >
-          <ArrowLeft size={20} className="text-[#171717]" />
-        </motion.button>
-        <h1 className="text-[#171717] text-[20px] font-black leading-6">
+          <X size={24} />
+        </button>
+      </div>
+
+      {/* Page title */}
+      <div className="px-4 pb-6">
+        <h1 className="text-[#171717] text-[32px] font-black leading-8">
           {t.addToReadingList}
         </h1>
       </div>
 
-      {/* ── Form ────────────────────────────────────────────────────────── */}
-      <ToReadForm
-        onSubmit={handleSubmit}
-        loading={loading}
-        submitLabel={t.addToReadingList}
-      />
+      {/* Form */}
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <ToReadForm
+          onSubmit={handleSubmit}
+          loading={loading}
+          submitLabel={t.addToReadingList}
+        />
+      </motion.div>
     </div>
   )
 }
