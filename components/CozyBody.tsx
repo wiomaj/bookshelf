@@ -22,6 +22,7 @@ export default function CozyBody({ children }: { children: React.ReactNode }) {
       {/* z-index: 2 keeps all page content above the fire overlay (z-index: 1) */}
       {/* Extra bottom padding in cozy mode lets users scroll to see the full fire */}
       <div
+        id="scroll-container"
         className="antialiased h-screen overflow-y-auto relative max-w-[600px] mx-auto w-full"
         style={{ zIndex: 2, paddingBottom: cozyMode ? 120 : 0 }}
       >
