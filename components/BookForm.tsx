@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2, Search } from 'lucide-react'
+import { Camera, Loader2, Search } from 'lucide-react'
 import StarRating from './StarRating'
+import ISBNScanner from './ISBNScanner'
 import { LONG_MONTHS, SEASONS } from '@/lib/month'
 import { useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
@@ -240,6 +241,7 @@ export default function BookForm({
   const suggestionsRef     = useRef<HTMLDivElement>(null)
   const skipNextSearchRef  = useRef(false)
   const [titleFocused, setTitleFocused] = useState(false)
+  const [showScanner, setShowScanner] = useState(false)
 
   // ── Debounced autocomplete ──────────────────────────────────────────────────
   useEffect(() => {
@@ -332,20 +334,34 @@ export default function BookForm({
           {t.titleLabel}<span style={{ color: 'var(--primary)' }}>*</span>
         </label>
 
-        <div className="relative">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onFocus={() => setTitleFocused(true)}
-            placeholder={t.titlePlaceholder}
-            className={inputBase + ' pr-12'}
-          />
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[rgba(23,23,23,0.72)]">
-            {searchLoading
-              ? <Loader2 size={20} className="animate-spin" />
-              : <Search size={20} />
-            }
+        <div className="flex items-center gap-2">
+          {/* Camera / ISBN scan button */}
+          <button
+            type="button"
+            onClick={() => setShowScanner(true)}
+            className="w-[60px] h-[60px] flex-shrink-0 flex items-center justify-center
+                       rounded-[12px] border-2 border-[rgba(23,23,23,0.16)]
+                       text-[rgba(23,23,23,0.72)] transition-colors hover:border-[rgba(23,23,23,0.4)]"
+            aria-label="Scan ISBN barcode"
+          >
+            <Camera size={22} />
+          </button>
+
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onFocus={() => setTitleFocused(true)}
+              placeholder={t.titlePlaceholder}
+              className={inputBase + ' pr-12'}
+            />
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[rgba(23,23,23,0.72)]">
+              {searchLoading
+                ? <Loader2 size={20} className="animate-spin" />
+                : <Search size={20} />
+              }
+            </div>
           </div>
         </div>
 
@@ -480,6 +496,17 @@ export default function BookForm({
         <p className="text-red-500 text-[14px] bg-red-50 px-4 py-3 rounded-[12px]">
           {error}
         </p>
+      )}
+
+      {/* ── ISBN Scanner overlay ───────────────────────────────────────────── */}
+      {showScanner && (
+        <ISBNScanner
+          onScanned={(suggestion) => {
+            setShowScanner(false)
+            selectSuggestion(suggestion)
+          }}
+          onClose={() => setShowScanner(false)}
+        />
       )}
 
       {/* ── Submit — full-width pill ────────────────────────────────────────── */}

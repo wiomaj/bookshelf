@@ -36,6 +36,18 @@ body {
 }
 
 
+/* ── ISBN scanner scan-line animation ────────────────────────────────────── */
+@keyframes scan-line {
+  0%   { top: 0; }
+  50%  { top: calc(100% - 2px); }
+  100% { top: 0; }
+}
+
+.animate-scan-line {
+  animation: scan-line 1.8s ease-in-out infinite;
+  position: absolute;
+}
+
 /* ── Cozy mode primary-color override for focused inputs ─────────────────── */
 /* Overrides the hardcoded Tailwind focus:border-[#160a9d] class              */
 input:focus,
