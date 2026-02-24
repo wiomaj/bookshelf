@@ -249,7 +249,7 @@ export default function HomePage() {
 
       {/* ── Bottom navigation bar ───────────────────────────────────────── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 h-16 bg-white flex items-center"
+        className="fixed bottom-0 left-0 right-0 h-16 bg-white flex items-center z-50"
         style={{ borderTop: '1px solid #b9b9b9' }}
       >
         <button
