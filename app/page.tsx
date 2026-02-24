@@ -5,24 +5,35 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Plus, LayoutGrid, List } from 'lucide-react'
 import Link from 'next/link'
-import { getBooks } from '@/lib/bookApi'
+import { getReadBooks, getToReadBooks } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import YearSection from '@/components/YearSection'
+import ToReadList from '@/components/ToReadList'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
+
+type Tab = 'read' | 'to_read'
 
 export default function HomePage() {
   const router = useRouter()
   const { viewMode, setViewMode, user } = useApp()
   const t = useT()
+  const [activeTab, setActiveTab] = useState<Tab>('read')
   const [books, setBooks] = useState<Book[]>([])
+  const [toReadBooks, setToReadBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
   const [flashMessage, setFlashMessage] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
-    getBooks(supabase, user.id)
-      .then(setBooks)
+    Promise.all([
+      getReadBooks(supabase, user.id),
+      getToReadBooks(supabase, user.id),
+    ])
+      .then(([read, toRead]) => {
+        setBooks(read)
+        setToReadBooks(toRead)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [user])
@@ -57,6 +68,9 @@ export default function HomePage() {
     )
   }
 
+  const fabRoute = activeTab === 'read' ? '/add' : '/to-read/add'
+  const showFab = activeTab === 'read' ? books.length > 0 : toReadBooks.length > 0
+
   return (
     <div className="min-h-screen">
 
@@ -78,7 +92,7 @@ export default function HomePage() {
             <h1 className="text-[#171717] text-[32px] font-black leading-8">
               {t.myBookshelf}
             </h1>
-            {books.length === 0 && (
+            {books.length === 0 && toReadBooks.length === 0 && (
               <Link
                 href="/settings"
                 className="font-bold text-[16px] leading-6"
@@ -89,12 +103,12 @@ export default function HomePage() {
             )}
           </div>
 
-          {/* Blue circular FAB — hidden when shelf is empty */}
-          {books.length > 0 && (
+          {/* FAB — shown when current tab has books */}
+          {showFab && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => router.push('/add')}
+              onClick={() => router.push(fabRoute)}
               className="w-12 h-12 rounded-full flex items-center justify-center"
               style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
             >
@@ -103,9 +117,27 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* ── Toolbar (grid/list toggle + Settings) ──────────────────────── */}
-        {books.length > 0 && (
-          <div className="flex items-center gap-1 px-4 pt-4 pb-1">
+        {/* ── Tabs ────────────────────────────────────────────────────────── */}
+        <div className="flex items-center gap-2 px-4 pt-3 pb-1">
+          {(['read', 'to_read'] as Tab[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-1.5 rounded-full text-[14px] font-bold transition-colors ${
+                activeTab === tab
+                  ? 'text-white'
+                  : 'text-[rgba(23,23,23,0.55)] bg-[rgba(23,23,23,0.06)]'
+              }`}
+              style={activeTab === tab ? { backgroundColor: 'var(--primary)' } : {}}
+            >
+              {tab === 'read' ? t.tabRead : t.tabToRead}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Toolbar (grid/list toggle + Settings) — Read tab only ───────── */}
+        {activeTab === 'read' && books.length > 0 && (
+          <div className="flex items-center gap-1 px-4 pt-3 pb-1">
             <button
               onClick={() => setViewMode('grid')}
               className={`p-[6px] rounded-lg transition-colors ${
@@ -135,55 +167,97 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* ── Book list ──────────────────────────────────────────────────── */}
-        {books.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center"
-          >
-            {/* Illustration */}
-            <div className="mt-[101px] w-[200px] h-[200px] overflow-hidden relative shrink-0">
-              <img
-                alt=""
-                className="absolute inset-[5%_0] w-full h-full object-contain"
-                src="https://www.figma.com/api/mcp/asset/33555f04-f9e5-4652-b095-20ae0c278236"
-              />
-            </div>
-
-            {/* Content */}
-            <div className="mt-6 w-full px-8 flex flex-col gap-6 text-center">
-              <div className="flex flex-col gap-[9px]">
-                <h2 className="text-[24px] font-black text-[#171717] leading-8">
-                  {t.noBooks}
-                </h2>
-                <p className="text-[16px] text-[#171717] leading-6">
-                  {t.addFirstBook}
-                </p>
+        {/* ── Read tab ────────────────────────────────────────────────────── */}
+        {activeTab === 'read' && (
+          books.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center"
+            >
+              <div className="mt-[101px] w-[200px] h-[200px] overflow-hidden relative shrink-0">
+                <img
+                  alt=""
+                  className="absolute inset-[5%_0] w-full h-full object-contain"
+                  src="https://www.figma.com/api/mcp/asset/33555f04-f9e5-4652-b095-20ae0c278236"
+                />
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/add')}
-                className="w-full py-4 rounded-full text-white text-[16px] font-bold text-center"
-                style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
-              >
-                {t.addFirstBookCta}
-              </motion.button>
+              <div className="mt-6 w-full px-8 flex flex-col gap-6 text-center">
+                <div className="flex flex-col gap-[9px]">
+                  <h2 className="text-[24px] font-black text-[#171717] leading-8">
+                    {t.noBooks}
+                  </h2>
+                  <p className="text-[16px] text-[#171717] leading-6">
+                    {t.addFirstBook}
+                  </p>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => router.push('/add')}
+                  className="w-full py-4 rounded-full text-white text-[16px] font-bold text-center"
+                  style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+                >
+                  {t.addFirstBookCta}
+                </motion.button>
+              </div>
+            </motion.div>
+          ) : (
+            <div className="pb-8">
+              {years.map((year) => (
+                <YearSection
+                  key={year}
+                  year={year}
+                  books={booksByYear[year]}
+                  viewMode={viewMode}
+                />
+              ))}
             </div>
-          </motion.div>
-        ) : (
-          <div className="pb-8">
-            {years.map((year) => (
-              <YearSection
-                key={year}
-                year={year}
-                books={booksByYear[year]}
-                viewMode={viewMode}
-              />
-            ))}
-          </div>
+          )
+        )}
+
+        {/* ── To Read tab ─────────────────────────────────────────────────── */}
+        {activeTab === 'to_read' && (
+          toReadBooks.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center"
+            >
+              <div className="mt-[101px] w-[200px] h-[200px] overflow-hidden relative shrink-0">
+                <img
+                  alt=""
+                  className="absolute inset-[5%_0] w-full h-full object-contain"
+                  src="https://www.figma.com/api/mcp/asset/33555f04-f9e5-4652-b095-20ae0c278236"
+                />
+              </div>
+
+              <div className="mt-6 w-full px-8 flex flex-col gap-6 text-center">
+                <div className="flex flex-col gap-[9px]">
+                  <h2 className="text-[24px] font-black text-[#171717] leading-8">
+                    {t.toReadEmptyTitle}
+                  </h2>
+                  <p className="text-[16px] text-[#171717] leading-6">
+                    {t.toReadEmptyCopy}
+                  </p>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => router.push('/to-read/add')}
+                  className="w-full py-4 rounded-full text-white text-[16px] font-bold text-center"
+                  style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+                >
+                  {t.addToReadingList}
+                </motion.button>
+              </div>
+            </motion.div>
+          ) : (
+            <ToReadList books={toReadBooks} />
+          )
         )}
     </div>
   )

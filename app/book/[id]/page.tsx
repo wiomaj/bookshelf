@@ -69,7 +69,7 @@ export default function BookDetailPage() {
     if (!book || !user) return
     setUpdateLoading(true)
     try {
-      await updateBook(supabase, user.id, book.id, data)
+      await updateBook(supabase, user.id, book.id, { ...data, status: 'read' })
       sessionStorage.setItem('bookshelf_flash', 'changesSaved')
       router.replace('/')
     } finally {

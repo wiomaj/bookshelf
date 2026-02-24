@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Book } from '@/types/book'
 import { monthSortKey } from '@/lib/month'
 
-const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at'
+const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at, status'
 
 /** All books for a user, sorted newest year → oldest, then newest month. */
 export async function getBooks(supabase: SupabaseClient, userId: string): Promise<Book[]> {
@@ -23,6 +23,39 @@ export async function getBooks(supabase: SupabaseClient, userId: string): Promis
     if (diff !== 0) return diff
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   })
+}
+
+/** Books the user has finished reading (status = 'read'). */
+export async function getReadBooks(supabase: SupabaseClient, userId: string): Promise<Book[]> {
+  const { data, error } = await supabase
+    .from('books')
+    .select(COLUMNS)
+    .eq('user_id', userId)
+    .eq('status', 'read')
+    .order('year', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+
+  return (data as Book[]).sort((a, b) => {
+    if (b.year !== a.year) return b.year - a.year
+    const diff = monthSortKey(b.month) - monthSortKey(a.month)
+    if (diff !== 0) return diff
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  })
+}
+
+/** Books the user wants to read (status = 'to_read'), newest first. */
+export async function getToReadBooks(supabase: SupabaseClient, userId: string): Promise<Book[]> {
+  const { data, error } = await supabase
+    .from('books')
+    .select(COLUMNS)
+    .eq('user_id', userId)
+    .eq('status', 'to_read')
+    .order('created_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  return data as Book[]
 }
 
 /** Single book by id. Returns null if not found. */
