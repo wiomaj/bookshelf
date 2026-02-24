@@ -28,9 +28,10 @@ export default function HomePage() {
   useEffect(() => {
     const el = document.getElementById('scroll-container')
     if (!el) return
-    function onScroll() { setScrolled(el.scrollTop > 80) }
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => el.removeEventListener('scroll', onScroll)
+    const scrollEl = el
+    function onScroll() { setScrolled(scrollEl.scrollTop > 80) }
+    scrollEl.addEventListener('scroll', onScroll, { passive: true })
+    return () => scrollEl.removeEventListener('scroll', onScroll)
   }, [])
 
   useEffect(() => {
@@ -78,50 +79,57 @@ export default function HomePage() {
   }
 
   const fabRoute = activeTab === 'read' ? '/add' : '/to-read/add'
+  const isEmptyState =
+    (activeTab === 'read' && books.length === 0) ||
+    (activeTab === 'to_read' && toReadBooks.length === 0)
 
   return (
     <div className="relative min-h-screen pb-20">
 
-      {/* ── Lavender header bubble ──────────────────────────────────────── */}
-      <div
-        className="relative w-full overflow-hidden"
-        style={{ backgroundColor: '#d0daf3', height: 100 }}
-      >
-        {/* Decorative circles — inlined from Figma asset */}
-        <svg
-          viewBox="0 0 1249 1586"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden
-          className="absolute pointer-events-none -translate-x-1/2"
-          style={{ width: 1249, height: 1586, left: '50%', top: 28 }}
+      {/* ── Lavender header bubble — hidden on empty states ─────────────── */}
+      {!isEmptyState && (
+        <div
+          className="relative w-full overflow-hidden"
+          style={{ backgroundColor: '#d0daf3', height: 100 }}
         >
-          <ellipse cx="624.5" cy="624" rx="624.5" ry="624" fill="#c4caf0" />
-          <path
-            d="M917.079 1586H338.079V111H335C421.556 65.6543 520.069 40 624.579 40C729.089 40 827.602 65.6543 914.158 111H917.079V1586Z"
-            fill="white"
-          />
-        </svg>
-      </div>
+          {/* Decorative circles — inlined from Figma asset */}
+          <svg
+            viewBox="0 0 1249 1586"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden
+            className="absolute pointer-events-none -translate-x-1/2"
+            style={{ width: 1249, height: 1586, left: '50%', top: 28 }}
+          >
+            <ellipse cx="624.5" cy="624" rx="624.5" ry="624" fill="#c4caf0" />
+            <path
+              d="M917.079 1586H338.079V111H335C421.556 65.6543 520.069 40 624.579 40C729.089 40 827.602 65.6543 914.158 111H917.079V1586Z"
+              fill="white"
+            />
+          </svg>
+        </div>
+      )}
 
-      {/* FAB — outside overflow-hidden header so shadow isn't clipped */}
-      <div
-        className="absolute z-50 left-1/2 -translate-x-1/2"
-        style={{ top: 48 }}
-      >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => router.push(fabRoute)}
-          className="p-3 rounded-full block"
-          style={{
-            backgroundColor: 'var(--primary)',
-            boxShadow: 'var(--btn-shadow)',
-          }}
+      {/* FAB — hidden on empty states (CTA button serves that purpose) */}
+      {!isEmptyState && (
+        <div
+          className="absolute z-50 left-1/2 -translate-x-1/2"
+          style={{ top: 48 }}
         >
-          <Plus size={24} className="text-white" strokeWidth={2.5} />
-        </motion.button>
-      </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => router.push(fabRoute)}
+            className="p-3 rounded-full block"
+            style={{
+              backgroundColor: 'var(--primary)',
+              boxShadow: 'var(--btn-shadow)',
+            }}
+          >
+            <Plus size={24} className="text-white" strokeWidth={2.5} />
+          </motion.button>
+        </div>
+      )}
 
       {/* ── Flash message ───────────────────────────────────────────────── */}
       {flashMessage && (
@@ -135,36 +143,38 @@ export default function HomePage() {
         </motion.div>
       )}
 
-      {/* ── Title row ───────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 pt-5 pb-2">
-        <h1 className="text-[#171717] text-[24px] font-black leading-8">
-          {activeTab === 'read' ? t.readBooksTitle : t.toReadBooksTitle}
-        </h1>
+      {/* ── Title row — hidden on empty states ──────────────────────────── */}
+      {!isEmptyState && (
+        <div className="flex items-center justify-between px-4 pt-5 pb-2">
+          <h1 className="text-[#171717] text-[24px] font-black leading-8">
+            {activeTab === 'read' ? t.readBooksTitle : t.toReadBooksTitle}
+          </h1>
 
-        {/* Grid / list toggle — Read tab only, when books exist */}
-        {activeTab === 'read' && books.length > 0 && (
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-[6px] rounded-lg transition-colors ${
-                viewMode === 'grid' ? 'text-[#171717]' : 'text-[rgba(23,23,23,0.35)]'
-              }`}
-              aria-label="Grid view"
-            >
-              <LayoutGrid size={24} />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-[6px] rounded-lg transition-colors ${
-                viewMode === 'list' ? 'text-[#171717]' : 'text-[rgba(23,23,23,0.35)]'
-              }`}
-              aria-label="List view"
-            >
-              <List size={24} />
-            </button>
-          </div>
-        )}
-      </div>
+          {/* Grid / list toggle — Read tab only, when books exist */}
+          {activeTab === 'read' && books.length > 0 && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-[6px] rounded-lg transition-colors ${
+                  viewMode === 'grid' ? 'text-[#171717]' : 'text-[rgba(23,23,23,0.35)]'
+                }`}
+                aria-label="Grid view"
+              >
+                <LayoutGrid size={24} />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-[6px] rounded-lg transition-colors ${
+                  viewMode === 'list' ? 'text-[#171717]' : 'text-[rgba(23,23,23,0.35)]'
+                }`}
+                aria-label="List view"
+              >
+                <List size={24} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Read tab content ────────────────────────────────────────────── */}
       {activeTab === 'read' && (
@@ -201,7 +211,7 @@ export default function HomePage() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => router.push('/add')}
                 className="w-full py-4 rounded-full text-white text-[16px] font-bold text-center"
-                style={{ backgroundColor: '#171717' }}
+                style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
               >
                 {t.addFirstBookCta}
               </motion.button>
@@ -229,15 +239,17 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center"
           >
-            <div className="mt-[101px] w-[200px] h-[200px] overflow-hidden relative shrink-0">
+            <div className="mt-[30px] w-full h-[320px] overflow-hidden relative shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt=""
-                className="absolute inset-[5%_0] w-full h-full object-contain"
-                src="https://www.figma.com/api/mcp/asset/33555f04-f9e5-4652-b095-20ae0c278236"
+                className="absolute h-full left-1/2 -translate-x-1/2 max-w-none"
+                style={{ width: 441 }}
+                src="https://www.figma.com/api/mcp/asset/31efe637-7ca3-4ec0-9e1e-191cbaab36c6"
               />
             </div>
 
-            <div className="mt-6 w-full px-8 flex flex-col gap-6 text-center">
+            <div className="mt-4 w-full px-8 flex flex-col gap-6 text-center">
               <div className="flex flex-col gap-[9px]">
                 <h2 className="text-[24px] font-black text-[#171717] leading-8">
                   {t.toReadEmptyTitle}
@@ -265,7 +277,7 @@ export default function HomePage() {
 
       {/* ── Scroll-triggered top action bar ────────────────────────────── */}
       <AnimatePresence>
-        {scrolled && (
+        {scrolled && !isEmptyState && (
           <motion.div
             key="topbar"
             initial={{ y: -44, opacity: 0 }}
