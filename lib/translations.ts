@@ -85,6 +85,14 @@ export type Translations = {
   passwordChangedSuccess: string
   deleteAccount: string
   deleteAccountDesc: string
+  // To Read tab
+  tabRead: string
+  tabToRead: string
+  toReadEmptyTitle: string
+  toReadEmptyCopy: string
+  addToReadingList: string
+  markAsRead: string
+  toReadNotesPlaceholder: string
 }
 
 const en: Translations = {
@@ -155,6 +163,13 @@ const en: Translations = {
   passwordChangedSuccess: 'Password changed successfully.',
   deleteAccount: 'Delete account',
   deleteAccountDesc: 'This will permanently delete your account and all your books. This cannot be undone.',
+  tabRead: 'Read',
+  tabToRead: 'To Read',
+  toReadEmptyTitle: 'Nothing here yet',
+  toReadEmptyCopy: 'Add books you want to read next.',
+  addToReadingList: 'Add to reading list',
+  markAsRead: 'Mark as Read',
+  toReadNotesPlaceholder: 'Why do you want to read this?',
 }
 
 const de: Translations = {
@@ -225,6 +240,13 @@ const de: Translations = {
   passwordChangedSuccess: 'Passwort erfolgreich geändert.',
   deleteAccount: 'Konto löschen',
   deleteAccountDesc: 'Dein Konto und alle deine Bücher werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.',
+  tabRead: 'Gelesen',
+  tabToRead: 'Leseliste',
+  toReadEmptyTitle: 'Noch nichts hier',
+  toReadEmptyCopy: 'Füge Bücher hinzu, die du lesen möchtest.',
+  addToReadingList: 'Zur Leseliste hinzufügen',
+  markAsRead: 'Als gelesen markieren',
+  toReadNotesPlaceholder: 'Warum möchtest du das lesen?',
 }
 
 const fr: Translations = {
@@ -295,6 +317,13 @@ const fr: Translations = {
   passwordChangedSuccess: 'Mot de passe modifié avec succès.',
   deleteAccount: 'Supprimer le compte',
   deleteAccountDesc: 'Votre compte et tous vos livres seront supprimés définitivement. Cette action est irréversible.',
+  tabRead: 'Lus',
+  tabToRead: 'À lire',
+  toReadEmptyTitle: 'Rien ici pour l\'instant',
+  toReadEmptyCopy: 'Ajoutez des livres que vous souhaitez lire.',
+  addToReadingList: 'Ajouter à la liste',
+  markAsRead: 'Marquer comme lu',
+  toReadNotesPlaceholder: 'Pourquoi voulez-vous le lire ?',
 }
 
 const es: Translations = {
@@ -365,6 +394,13 @@ const es: Translations = {
   passwordChangedSuccess: 'Contraseña cambiada correctamente.',
   deleteAccount: 'Eliminar cuenta',
   deleteAccountDesc: 'Tu cuenta y todos tus libros se eliminarán permanentemente. Esta acción no se puede deshacer.',
+  tabRead: 'Leídos',
+  tabToRead: 'Por leer',
+  toReadEmptyTitle: 'Nada aquí todavía',
+  toReadEmptyCopy: 'Añade libros que quieras leer.',
+  addToReadingList: 'Añadir a la lista',
+  markAsRead: 'Marcar como leído',
+  toReadNotesPlaceholder: '¿Por qué quieres leerlo?',
 }
 
 const pl: Translations = {
@@ -435,6 +471,13 @@ const pl: Translations = {
   passwordChangedSuccess: 'Hasło zostało pomyślnie zmienione.',
   deleteAccount: 'Usuń konto',
   deleteAccountDesc: 'Twoje konto i wszystkie książki zostaną trwale usunięte. Tej operacji nie można cofnąć.',
+  tabRead: 'Przeczytane',
+  tabToRead: 'Do przeczytania',
+  toReadEmptyTitle: 'Nic tu jeszcze nie ma',
+  toReadEmptyCopy: 'Dodaj książki, które chcesz przeczytać.',
+  addToReadingList: 'Dodaj do listy',
+  markAsRead: 'Oznacz jako przeczytane',
+  toReadNotesPlaceholder: 'Dlaczego chcesz to przeczytać?',
 }
 
 export const translations: Record<Locale, Translations> = { en, de, fr, es, pl }
