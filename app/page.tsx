@@ -340,37 +340,37 @@ export default function HomePage() {
 
       {/* ── Bottom navigation bar ───────────────────────────────────────── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 h-16 bg-white flex items-center z-50"
-        style={{ borderTop: '1px solid #b9b9b9' }}
+        className="fixed bottom-0 left-0 right-0 h-20 bg-white flex items-center z-50"
+        style={{ borderTop: '1px solid #e0e0e0' }}
       >
         <button
           onClick={() => setActiveTab('read')}
-          className={`flex flex-col items-center justify-center gap-[3px] flex-1 h-full transition-colors ${
-            activeTab === 'read' ? 'text-[#171717]' : 'text-[rgba(23,23,23,0.4)]'
+          className={`flex flex-col items-center justify-center gap-[2px] flex-1 h-full transition-colors ${
+            activeTab === 'read' ? 'text-[#171717]' : 'text-[#7c7c7c]'
           }`}
         >
           <BookOpen size={24} strokeWidth={activeTab === 'read' ? 2 : 1.5} />
-          <span className="text-[11px] font-semibold">{t.tabRead}</span>
+          <span className="text-[12px] font-medium">{t.tabRead}</span>
         </button>
 
         <button
           onClick={() => setActiveTab('to_read')}
-          className={`flex flex-col items-center justify-center gap-[3px] flex-1 h-full transition-colors ${
-            activeTab === 'to_read' ? 'text-[#171717]' : 'text-[rgba(23,23,23,0.4)]'
+          className={`flex flex-col items-center justify-center gap-[2px] flex-1 h-full transition-colors ${
+            activeTab === 'to_read' ? 'text-[#171717]' : 'text-[#7c7c7c]'
           }`}
         >
           <BookMarked size={24} strokeWidth={activeTab === 'to_read' ? 2 : 1.5} />
-          <span className="text-[11px] font-semibold">
+          <span className="text-[12px] font-medium">
             {toReadBooks.length > 0 ? `${t.tabToRead} (${toReadBooks.length})` : t.tabToRead}
           </span>
         </button>
 
         <Link
           href="/settings"
-          className="flex flex-col items-center justify-center gap-[3px] flex-1 h-full text-[rgba(23,23,23,0.4)]"
+          className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full text-[#7c7c7c]"
         >
           <Settings size={24} strokeWidth={1.5} />
-          <span className="text-[11px] font-semibold">{t.settings}</span>
+          <span className="text-[12px] font-medium">{t.settings}</span>
         </Link>
       </nav>
     </div>

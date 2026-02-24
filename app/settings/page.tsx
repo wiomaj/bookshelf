@@ -74,28 +74,28 @@ export default function SettingsPage() {
   // ── Bottom navigation bar ────────────────────────────────────────────────────
   const BottomNav = () => (
     <nav
-      className="fixed bottom-0 left-0 right-0 h-16 bg-white flex items-center z-50"
-      style={{ borderTop: '1px solid #b9b9b9' }}
+      className="fixed bottom-0 left-0 right-0 h-20 bg-white flex items-center z-50"
+      style={{ borderTop: '1px solid #e0e0e0' }}
     >
       <Link
         href="/"
-        className="flex flex-col items-center justify-center gap-[3px] flex-1 h-full text-[rgba(23,23,23,0.4)]"
+        className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full text-[#7c7c7c]"
       >
         <BookOpen size={24} strokeWidth={1.5} />
-        <span className="text-[11px] font-semibold">{t.tabRead}</span>
+        <span className="text-[12px] font-medium">{t.tabRead}</span>
       </Link>
 
       <Link
         href="/"
-        className="flex flex-col items-center justify-center gap-[3px] flex-1 h-full text-[rgba(23,23,23,0.4)]"
+        className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full text-[#7c7c7c]"
       >
         <BookMarked size={24} strokeWidth={1.5} />
-        <span className="text-[11px] font-semibold">{t.tabToRead}</span>
+        <span className="text-[12px] font-medium">{t.tabToRead}</span>
       </Link>
 
-      <button className="flex flex-col items-center justify-center gap-[3px] flex-1 h-full text-[#171717]">
+      <button className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full text-[#171717]">
         <Settings size={24} strokeWidth={2} />
-        <span className="text-[11px] font-semibold">{t.settings}</span>
+        <span className="text-[12px] font-medium">{t.settings}</span>
       </button>
     </nav>
   )
