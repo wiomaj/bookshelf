@@ -175,12 +175,12 @@ export default function HomePage() {
             className="flex flex-col items-center"
           >
             {/* Cozy cat illustration */}
-            <div className="mt-[80px] w-[200px] h-[200px] relative shrink-0">
+            <div className="mt-4 w-[320px] h-[320px] relative shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt=""
                 className="w-full h-full object-contain"
-                src="https://www.figma.com/api/mcp/asset/b91dc9ef-f060-45b8-92ae-566d469ad8b1"
+                src="https://www.figma.com/api/mcp/asset/f5d561e7-b783-4dd8-82bc-7ea2ff94c6b2"
               />
             </div>
 
