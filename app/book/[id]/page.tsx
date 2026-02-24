@@ -195,23 +195,21 @@ export default function BookDetailPage() {
             {/* Info block at the bottom of the hero */}
             <div className="absolute bottom-0 left-0 w-full px-4 pb-6 flex flex-col gap-2">
               {/* Stars */}
-              <StarRating rating={book.rating} readonly size={20} />
+              <StarRating rating={book.rating} readonly size={20} darkBg />
 
               {/* Title + month/year tag on the same row */}
               <div className="flex items-end gap-2 flex-wrap">
                 <h1 className="text-white text-[24px] font-black leading-8">
                   {book.title}
                 </h1>
-                <div className="rounded-[8px] px-2 py-1 mb-[2px]
-                               bg-white/[0.18] backdrop-blur-xl
-                               border border-white/[0.32]
-                               shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_6px_rgba(0,0,0,0.10)]">
-                  <span className="text-white text-[12px] font-extrabold uppercase leading-4 tracking-wide">
-                    {formatMonthShort(book.month)
-                      ? `${formatMonthShort(book.month)} ${book.year}`
-                      : book.year}
-                  </span>
-                </div>
+                <span
+                  className="px-2 py-1 mb-[2px] rounded-[8px] text-[12px] font-extrabold text-[#171717] uppercase leading-4"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.72)' }}
+                >
+                  {formatMonthShort(book.month)
+                    ? `${formatMonthShort(book.month)} ${book.year}`
+                    : book.year}
+                </span>
               </div>
 
               {/* Author */}

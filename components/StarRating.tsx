@@ -10,6 +10,7 @@ interface StarRatingProps {
   onRate?: (rating: number) => void // Omit for read-only display
   readonly?: boolean
   size?: number
+  darkBg?: boolean // true when rendered on a dark hero — inactive stars show as faint amber
 }
 
 export default function StarRating({
@@ -17,6 +18,7 @@ export default function StarRating({
   onRate,
   readonly = false,
   size = 20,
+  darkBg = false,
 }: StarRatingProps) {
   const { cozyMode } = useApp()
   // `hovered` tracks which star the cursor is over, for the preview highlight
@@ -46,6 +48,8 @@ export default function StarRating({
               className={
                 isActive
                   ? 'fill-amber-400 text-amber-400 transition-colors'
+                  : darkBg
+                  ? 'fill-amber-400/25 text-amber-400/25 transition-colors'
                   : cozyMode ? 'text-[#171717] transition-colors' : 'text-gray-200 transition-colors'
               }
             />
