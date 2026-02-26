@@ -74,36 +74,38 @@ export default function SettingsPage() {
   // ── Bottom navigation bar ────────────────────────────────────────────────────
   const BottomNav = () => (
     <nav
-      className="fixed bottom-0 left-0 right-0 h-20 bg-white flex items-start pt-[11px] z-50"
+      className="fixed bottom-0 left-0 right-0 bg-white z-50 bottom-nav-safe"
       style={{ borderTop: '1px solid #e0e0e0' }}
     >
-      <Link
-        href="/"
-        className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full text-[#7c7c7c]"
-      >
-        <BookOpen size={24} strokeWidth={1.5} />
-        <span className="text-[12px] font-medium">{t.tabRead}</span>
-      </Link>
+      <div className="h-20 flex">
+        <Link
+          href="/"
+          className="flex flex-col items-center pt-[11px] gap-[2px] flex-1 text-[#7c7c7c]"
+        >
+          <BookOpen size={24} strokeWidth={1.5} />
+          <span className="text-[12px] font-medium leading-[16px]">{t.tabRead}</span>
+        </Link>
 
-      <Link
-        href="/"
-        className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full text-[#7c7c7c]"
-      >
-        <BookMarked size={24} strokeWidth={1.5} />
-        <span className="text-[12px] font-medium">{t.tabToRead}</span>
-      </Link>
+        <Link
+          href="/"
+          className="flex flex-col items-center pt-[11px] gap-[2px] flex-1 text-[#7c7c7c]"
+        >
+          <BookMarked size={24} strokeWidth={1.5} />
+          <span className="text-[12px] font-medium leading-[16px]">{t.tabToRead}</span>
+        </Link>
 
-      <button className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full text-[#171717]">
-        <Settings size={24} strokeWidth={2} />
-        <span className="text-[12px] font-medium">{t.settings}</span>
-      </button>
+        <button className="flex flex-col items-center pt-[11px] gap-[2px] flex-1 text-[#171717]">
+          <Settings size={24} strokeWidth={2} />
+          <span className="text-[12px] font-medium leading-[16px]">{t.settings}</span>
+        </button>
+      </div>
     </nav>
   )
 
   // ── Change Password sub-view ─────────────────────────────────────────────────
   if (view === 'changePassword') {
     return (
-      <div className="min-h-screen flex flex-col pb-20">
+      <div className="min-h-screen flex flex-col page-bottom-safe">
 
         {/* Back header */}
         <div className="flex items-center p-3 h-[60px]">
@@ -166,7 +168,7 @@ export default function SettingsPage() {
 
   // ── Main settings view ───────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex flex-col pb-20">
+    <div className="min-h-screen flex flex-col page-bottom-safe">
 
       {/* Title */}
       <div className="px-4 pt-6 pb-4">
