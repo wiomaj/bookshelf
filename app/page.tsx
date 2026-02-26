@@ -90,7 +90,7 @@ export default function HomePage() {
     (activeTab === 'to_read' && toReadBooks.length === 0)
 
   return (
-    <div className="relative min-h-screen pb-20">
+    <div className="relative min-h-screen page-bottom-safe">
 
       {/* ── Lavender header bubble — hidden on empty states ─────────────── */}
       {!isEmptyState && (
@@ -340,38 +340,40 @@ export default function HomePage() {
 
       {/* ── Bottom navigation bar ───────────────────────────────────────── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 h-20 bg-white flex items-start pt-[11px] z-50"
+        className="fixed bottom-0 left-0 right-0 bg-white z-50 bottom-nav-safe"
         style={{ borderTop: '1px solid #e0e0e0' }}
       >
-        <button
-          onClick={() => setActiveTab('read')}
-          className={`flex flex-col items-center justify-center gap-[2px] flex-1 h-full transition-colors ${
-            activeTab === 'read' ? 'text-[#171717]' : 'text-[#7c7c7c]'
-          }`}
-        >
-          <BookOpen size={24} strokeWidth={activeTab === 'read' ? 2 : 1.5} />
-          <span className="text-[12px] font-medium">{t.tabRead}</span>
-        </button>
+        <div className="h-20 flex">
+          <button
+            onClick={() => setActiveTab('read')}
+            className={`flex flex-col items-center pt-[11px] gap-[2px] flex-1 transition-colors ${
+              activeTab === 'read' ? 'text-[#171717]' : 'text-[#7c7c7c]'
+            }`}
+          >
+            <BookOpen size={24} strokeWidth={activeTab === 'read' ? 2 : 1.5} />
+            <span className="text-[12px] font-medium leading-[16px]">{t.tabRead}</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('to_read')}
-          className={`flex flex-col items-center justify-center gap-[2px] flex-1 h-full transition-colors ${
-            activeTab === 'to_read' ? 'text-[#171717]' : 'text-[#7c7c7c]'
-          }`}
-        >
-          <BookMarked size={24} strokeWidth={activeTab === 'to_read' ? 2 : 1.5} />
-          <span className="text-[12px] font-medium">
-            {toReadBooks.length > 0 ? `${t.tabToRead} (${toReadBooks.length})` : t.tabToRead}
-          </span>
-        </button>
+          <button
+            onClick={() => setActiveTab('to_read')}
+            className={`flex flex-col items-center pt-[11px] gap-[2px] flex-1 transition-colors ${
+              activeTab === 'to_read' ? 'text-[#171717]' : 'text-[#7c7c7c]'
+            }`}
+          >
+            <BookMarked size={24} strokeWidth={activeTab === 'to_read' ? 2 : 1.5} />
+            <span className="text-[12px] font-medium leading-[16px]">
+              {toReadBooks.length > 0 ? `${t.tabToRead} (${toReadBooks.length})` : t.tabToRead}
+            </span>
+          </button>
 
-        <Link
-          href="/settings"
-          className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full text-[#7c7c7c]"
-        >
-          <Settings size={24} strokeWidth={1.5} />
-          <span className="text-[12px] font-medium">{t.settings}</span>
-        </Link>
+          <Link
+            href="/settings"
+            className="flex flex-col items-center pt-[11px] gap-[2px] flex-1 text-[#7c7c7c]"
+          >
+            <Settings size={24} strokeWidth={1.5} />
+            <span className="text-[12px] font-medium leading-[16px]">{t.settings}</span>
+          </Link>
+        </div>
       </nav>
     </div>
   )

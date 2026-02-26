@@ -36,6 +36,17 @@ body {
 }
 
 
+/* ── Bottom navigation safe area (iPhone home indicator) ─────────────────── */
+/* Extends the 80px nav downward to cover the safe area on modern iPhones.    */
+.bottom-nav-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Page containers that sit above the bottom nav need this bottom padding.    */
+.page-bottom-safe {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
 /* ── ISBN scanner scan-line animation ────────────────────────────────────── */
 @keyframes scan-line {
   0%   { top: 0; }

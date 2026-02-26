@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Noto_Sans } from 'next/font/google'
 import './globals.css'
 import { AppProvider } from '@/contexts/AppContext'
@@ -12,6 +12,12 @@ const notoSans = Noto_Sans({
 export const metadata: Metadata = {
   title: 'My Bookshelf',
   description: 'Track every book you read',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
