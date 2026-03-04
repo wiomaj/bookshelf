@@ -79,7 +79,10 @@ export default function HomePage() {
     const flash = sessionStorage.getItem('bookshelf_flash')
     if (flash) {
       sessionStorage.removeItem('bookshelf_flash')
-      const message = flash === 'changesSaved' ? t.changesSaved : null
+      const message =
+        flash === 'changesSaved'   ? t.changesSaved :
+        flash === 'bookAddedToRead' ? t.bookAddedToRead :
+        null
       if (message) {
         setFlashMessage(message)
         setTimeout(() => setFlashMessage(null), 3000)

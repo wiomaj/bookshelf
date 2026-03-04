@@ -40,6 +40,8 @@ export default function ToReadAddPage() {
         }
       }
 
+      sessionStorage.setItem('bookshelf_returnTab', 'to_read')
+      sessionStorage.setItem('bookshelf_flash', 'bookAddedToRead')
       router.push('/')
     } finally {
       setLoading(false)
