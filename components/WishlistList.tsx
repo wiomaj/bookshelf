@@ -15,34 +15,18 @@ interface WishlistListProps {
 const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-const SEASON_LABELS: Record<number, string> = {
-  13: 'Spring', 14: 'Summer', 15: 'Autumn', 16: 'Winter',
-}
-
-const SEASON_MIDPOINT: Record<number, number> = {
-  13: 4, 14: 7, 15: 10, 16: 12,
-}
-
-function formatAddedDate(year: number, month: number | null): string | null {
-  if (!year || year === 0) return null
-
+function formatCreatedAt(createdAt: string): string {
+  const added = new Date(createdAt)
   const now = new Date()
+
+  const month = SHORT_MONTHS[added.getMonth()]
+  const year = added.getFullYear()
+
   const nowYear = now.getFullYear()
   const nowMonth = now.getMonth() + 1
+  const addedMonth = added.getMonth() + 1
 
-  let prefix = ''
-  let midpoint = 6
-  if (month) {
-    if (month >= 1 && month <= 12) {
-      prefix = SHORT_MONTHS[month - 1] + ' '
-      midpoint = month
-    } else if (SEASON_LABELS[month]) {
-      prefix = SEASON_LABELS[month] + ' '
-      midpoint = SEASON_MIDPOINT[month]
-    }
-  }
-
-  const monthsDiff = (nowYear * 12 + nowMonth) - (year * 12 + midpoint)
+  const monthsDiff = (nowYear * 12 + nowMonth) - (year * 12 + addedMonth)
 
   let relative: string
   if (monthsDiff < 1) {
@@ -54,7 +38,7 @@ function formatAddedDate(year: number, month: number | null): string | null {
     relative = `${years} year${years !== 1 ? 's' : ''}`
   }
 
-  return `${prefix}${year} (${relative})`
+  return `${month} ${year} (${relative})`
 }
 
 // ─── Year section (accordion) ─────────────────────────────────────────────────
@@ -74,7 +58,7 @@ function WishlistYearSection({ year, books }: YearSectionProps) {
     setIsOpen(!isOpen)
   }
 
-  const yearLabel = year === 0 ? 'Unknown Year' : String(year)
+  const yearLabel = String(year)
   const count = books.length
 
   return (
@@ -113,7 +97,7 @@ function WishlistYearSection({ year, books }: YearSectionProps) {
           >
             <div className="flex flex-col px-5 pb-2">
               {books.map((book, i) => {
-                const dateLabel = formatAddedDate(book.year, book.month ?? null)
+                const dateLabel = formatCreatedAt(book.created_at)
                 return (
                   <div key={book.id}>
                     <motion.button
@@ -180,18 +164,14 @@ function WishlistYearSection({ year, books }: YearSectionProps) {
 
 export default function WishlistList({ books }: WishlistListProps) {
   const byYear = books.reduce<Record<number, Book[]>>((acc, book) => {
-    const y = book.year ?? 0
+    const y = new Date(book.created_at).getFullYear()
     acc[y] = [...(acc[y] ?? []), book]
     return acc
   }, {})
 
   const years = Object.keys(byYear)
     .map(Number)
-    .sort((a, b) => {
-      if (a === 0) return 1
-      if (b === 0) return -1
-      return b - a
-    })
+    .sort((a, b) => b - a)
 
   return (
     <div className="pb-8">
