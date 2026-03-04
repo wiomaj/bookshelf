@@ -32,18 +32,23 @@ export function normaliseGoogleCover(raw: string): string {
 /**
  * Extract the best available cover URL from a parsed Google Books API response.
  * Prefers higher-resolution variants (extraLarge > large > medium > thumbnail).
- * Returns `undefined` when no image links are present.
+ * Scans ALL returned items (not just the first) because some editions lack
+ * imageLinks while a later result for the same title has one.
+ * Returns `undefined` when no image links are present in any item.
  */
 export function googleCoverFromResponse(data: unknown): string | undefined {
   const items = (data as Record<string, unknown>)?.items
   if (!Array.isArray(items) || items.length === 0) return undefined
-  const links = (items[0] as any)?.volumeInfo?.imageLinks as
-    | Record<string, string>
-    | undefined
-  if (!links) return undefined
-  const raw =
-    links.extraLarge ?? links.large ?? links.medium ?? links.thumbnail
-  return raw ? normaliseGoogleCover(raw) : undefined
+  for (const item of items) {
+    const links = (item as any)?.volumeInfo?.imageLinks as
+      | Record<string, string>
+      | undefined
+    if (!links) continue
+    const raw =
+      links.extraLarge ?? links.large ?? links.medium ?? links.thumbnail
+    if (raw) return normaliseGoogleCover(raw)
+  }
+  return undefined
 }
 
 /**
@@ -197,7 +202,7 @@ export async function fetchCoverByTitleAuthor(
 
   const googleBooks = async (q: string): Promise<string | undefined> => {
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=1`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=5`
     )
     if (!res.ok) return undefined
     return googleCoverFromResponse(await res.json())
