@@ -31,6 +31,7 @@ interface ToReadFormProps {
   onSubmit: (data: ToReadFormData) => Promise<void>
   submitLabel?: string
   loading?: boolean
+  hideDateField?: boolean
 }
 
 // ─── Book Search ──────────────────────────────────────────────────────────────
@@ -80,6 +81,7 @@ export default function ToReadForm({
   onSubmit,
   submitLabel,
   loading = false,
+  hideDateField = false,
 }: ToReadFormProps) {
   const t = useT()
   const { user } = useApp()
@@ -259,7 +261,7 @@ export default function ToReadForm({
       </div>
 
       {/* ── When did you get it? (Month 2/3 + Year 1/3) ────────────────────── */}
-      <div>
+      {!hideDateField && <div>
         <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>{t.whenDidYouGetIt}</label>
         <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
           <div className="grid grid-cols-3">
@@ -298,7 +300,7 @@ export default function ToReadForm({
             </div>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* ── Cover ──────────────────────────────────────────────────────────── */}
       <div>

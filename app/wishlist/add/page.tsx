@@ -79,6 +79,7 @@ export default function WishlistAddPage() {
           onSubmit={handleSubmit}
           loading={loading}
           submitLabel={t.addToWishlist}
+          hideDateField
         />
       </motion.div>
     </div>
