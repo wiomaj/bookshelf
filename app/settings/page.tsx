@@ -238,23 +238,19 @@ export default function SettingsPage() {
                 />
               </button>
             </div>
-          </div>
-        </div>
 
-        {/* ── Language section ─────────────────────────────────────────── */}
-        <div className="flex flex-col gap-2">
-          <p className="text-[13px] font-medium uppercase tracking-wide px-1"
-             style={{ color: 'var(--label-secondary)' }}>
-            {t.language}
-          </p>
+            {/* Separator */}
+            <div className="h-px ml-4" style={{ backgroundColor: 'var(--separator)' }} />
 
-          <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
-            {/* Language selector row */}
+            {/* Language row */}
             <button
               onClick={() => setLangOpen(o => !o)}
               className="w-full flex items-center px-4 min-h-[52px] gap-3 transition-colors active:opacity-60"
             >
               <span className="flex-1 text-[17px] py-3" style={{ color: 'var(--label)' }}>
+                {t.language}
+              </span>
+              <span className="text-[17px]" style={{ color: 'var(--label-secondary)' }}>
                 {currentLang?.flag}&nbsp;{currentLang?.label}
               </span>
               <ChevronRight
