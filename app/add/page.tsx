@@ -27,7 +27,7 @@ export default function AddBookPage() {
       if (!data.cover_url && data.title) {
         try {
           const cover = await fetchCoverByTitleAuthor(data.title, data.author ?? '')
-          if (cover) await updateBook(supabase, saved.id, { cover_url: cover })
+          if (cover) await updateBook(supabase, user.id, saved.id, { cover_url: cover })
         } catch {
           // Cover search failed — proceed without cover
         }

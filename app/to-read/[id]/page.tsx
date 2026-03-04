@@ -58,7 +58,7 @@ export default function ToReadDetailPage() {
           if (!b.cover_url && b.title) {
             fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
               if (!cover) return
-              updateBook(supabase, b.id, { cover_url: cover }).catch(() => {})
+              updateBook(supabase, user.id, b.id, { cover_url: cover }).catch(() => {})
               setBook((prev) => prev ? { ...prev, cover_url: cover } : prev)
             }).catch(() => {})
           }
