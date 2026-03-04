@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpen, BookMarked, Settings } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpen, BookMarked, Settings, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { getReadBooks, getToReadBooks } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
@@ -14,6 +14,11 @@ import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 type Tab = 'read' | 'to_read'
+
+/** Raw touch travel (px) needed to trigger a refresh */
+const PULL_THRESHOLD = 72
+/** Max visual height (px) of the pull indicator */
+const PULL_MAX = 64
 
 export default function HomePage() {
   const router = useRouter()
@@ -26,6 +31,29 @@ export default function HomePage() {
   const [flashMessage, setFlashMessage] = useState<string | null>(null)
   const [scrolled, setScrolled] = useState(false)
 
+  // Pull-to-refresh visual state
+  const [pullY, setPullY] = useState(0)          // 0 → PULL_MAX visual height
+  const [refreshing, setRefreshing] = useState(false)
+  const [isTracking, setIsTracking] = useState(false) // true while finger is down
+
+  // Mutable refs so touch handlers don't form stale closures
+  const pullStartYRef  = useRef(0)
+  const rawDyRef       = useRef(0)
+  const isPullingRef   = useRef(false)
+  const refreshingRef  = useRef(false)
+
+  // ── loadBooks (stable reference for PTR handler) ────────────────────────
+  const loadBooks = useCallback(async () => {
+    if (!user) return
+    const [read, toRead] = await Promise.all([
+      getReadBooks(supabase, user.id),
+      getToReadBooks(supabase, user.id),
+    ])
+    setBooks(read)
+    setToReadBooks(toRead)
+  }, [user])
+
+  // ── Scroll shadow trigger ───────────────────────────────────────────────
   useEffect(() => {
     const el = document.getElementById('scroll-container')
     if (!el) return
@@ -35,20 +63,13 @@ export default function HomePage() {
     return () => el.removeEventListener('scroll', onScroll)
   }, [])
 
+  // ── Initial data load ───────────────────────────────────────────────────
   useEffect(() => {
     if (!user) return
-    Promise.all([
-      getReadBooks(supabase, user.id),
-      getToReadBooks(supabase, user.id),
-    ])
-      .then(([read, toRead]) => {
-        setBooks(read)
-        setToReadBooks(toRead)
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [user])
+    loadBooks().catch(console.error).finally(() => setLoading(false))
+  }, [user, loadBooks])
 
+  // ── Session-storage flash / tab restore ─────────────────────────────────
   useEffect(() => {
     const returnTab = sessionStorage.getItem('bookshelf_returnTab')
     if (returnTab === 'to_read') {
@@ -65,6 +86,73 @@ export default function HomePage() {
       }
     }
   }, [])
+
+  // ── Pull-to-refresh touch handlers ──────────────────────────────────────
+  useEffect(() => {
+    const el = document.getElementById('scroll-container')
+    if (!el) return
+
+    function onTouchStart(e: TouchEvent) {
+      if (el!.scrollTop > 0 || refreshingRef.current) return
+      pullStartYRef.current = e.touches[0].clientY
+      rawDyRef.current = 0
+      isPullingRef.current = true
+      setIsTracking(true)
+    }
+
+    function onTouchMove(e: TouchEvent) {
+      if (!isPullingRef.current || refreshingRef.current) return
+      const dy = e.touches[0].clientY - pullStartYRef.current
+      if (dy <= 0) {
+        rawDyRef.current = 0
+        setPullY(0)
+        return
+      }
+      // Prevent the browser's native overscroll/bounce while we're pulling
+      e.preventDefault()
+      rawDyRef.current = dy
+      // Rubber-band: fast near 0, asymptotically approaches PULL_MAX
+      const visual = PULL_MAX * (1 - Math.exp(-dy / 110))
+      setPullY(visual)
+    }
+
+    function onTouchEnd() {
+      if (!isPullingRef.current) return
+      isPullingRef.current = false
+      setIsTracking(false)
+      const dy = rawDyRef.current
+      rawDyRef.current = 0
+
+      if (dy >= PULL_THRESHOLD && !refreshingRef.current) {
+        // Threshold met → trigger refresh and lock indicator in place
+        refreshingRef.current = true
+        setRefreshing(true)
+        setPullY(PULL_MAX * 0.75)          // settle to a stable spinner height
+        loadBooks()
+          .catch(console.error)
+          .finally(() => {
+            refreshingRef.current = false
+            setRefreshing(false)
+            setPullY(0)
+          })
+      } else {
+        // Below threshold → snap back
+        setPullY(0)
+      }
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true })
+    el.addEventListener('touchmove',  onTouchMove,  { passive: false })
+    el.addEventListener('touchend',   onTouchEnd,   { passive: true })
+    el.addEventListener('touchcancel',onTouchEnd,   { passive: true })
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchmove',  onTouchMove)
+      el.removeEventListener('touchend',   onTouchEnd)
+      el.removeEventListener('touchcancel',onTouchEnd)
+    }
+  }, [loadBooks])
 
   const booksByYear = books.reduce<Record<number, Book[]>>((acc, book) => {
     acc[book.year] = [...(acc[book.year] ?? []), book]
@@ -91,8 +179,40 @@ export default function HomePage() {
 
   const title = activeTab === 'read' ? t.readBooksTitle : t.toReadBooksTitle
 
+  // Progress ratio 0→1 for opacity / rotation of the pull icon
+  const pullProgress = Math.min(pullY / PULL_MAX, 1)
+
   return (
     <div className="relative min-h-screen pb-[100px]" style={{ backgroundColor: 'var(--bg)' }}>
+
+      {/* ── Pull-to-refresh indicator ──────────────────────────────── */}
+      <div
+        style={{
+          height: pullY,
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+          paddingBottom: pullY > 6 ? 10 : 0,
+          // Instant tracking while finger is down; spring back on release
+          transition: isTracking ? 'none' : 'height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          willChange: 'height',
+        }}
+      >
+        {pullY > 4 && (
+          <Loader2
+            size={22}
+            className={refreshing ? 'animate-spin' : ''}
+            style={{
+              color: 'var(--primary)',
+              opacity: pullProgress,
+              // Rotate toward 270° as the user pulls; stop rotating when refreshing
+              transform: refreshing ? 'none' : `rotate(${pullProgress * 270}deg)`,
+              transition: isTracking ? 'opacity 0.05s' : 'opacity 0.3s, transform 0.3s',
+            }}
+          />
+        )}
+      </div>
 
       {/* ── Glass top navigation bar (scroll-triggered) ──────────────── */}
       <AnimatePresence>
