@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { X, BookOpen } from 'lucide-react'
-import { getBook, deleteBook } from '@/lib/bookApi'
+import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
+import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { useApp, useT } from '@/contexts/AppContext'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import type { Book } from '@/types/book'
@@ -53,6 +54,14 @@ export default function ToReadDetailPage() {
             setPublishedYear(data.publishedYear)
             setBookDataLoading(false)
           })
+          // If no cover, search for one in the background and update silently
+          if (!b.cover_url && b.title) {
+            fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
+              if (!cover) return
+              updateBook(supabase, b.id, { cover_url: cover }).catch(() => {})
+              setBook((prev) => prev ? { ...prev, cover_url: cover } : prev)
+            }).catch(() => {})
+          }
         }
       })
       .catch(console.error)

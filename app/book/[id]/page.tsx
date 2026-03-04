@@ -7,6 +7,7 @@ import { BookOpen, Pencil, X } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
+import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import StarRating from '@/components/StarRating'
 import BookForm from '@/components/BookForm'
 import ConfirmDialog from '@/components/ConfirmDialog'
@@ -58,6 +59,14 @@ export default function BookDetailPage() {
           setApiGenre(data.genre)
           setBookDataLoading(false)
         })
+        // If no cover, search for one in the background and update silently
+        if (!b.cover_url && b.title) {
+          fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
+            if (!cover) return
+            updateBook(supabase, b.id, { cover_url: cover }).catch(() => {})
+            setBook((prev) => prev ? { ...prev, cover_url: cover } : prev)
+          }).catch(() => {})
+        }
       }
       setLoading(false)
     })
