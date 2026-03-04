@@ -170,7 +170,7 @@ export default function HomePage() {
 
       {/* ── Large title + controls ────────────────────────────────────── */}
       {!isEmptyState && (
-        <div className="flex items-end justify-between px-5 pt-14 pb-4">
+        <div className="flex items-end justify-between px-5 pt-4 pb-4">
           <h1 className="text-[34px] font-bold tracking-[-0.5px]"
               style={{ color: 'var(--label)' }}>
             {title}

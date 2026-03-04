@@ -109,6 +109,12 @@ export type Translations = {
   markAsRead: string
   toReadNotesPlaceholder: string
   whenDidYouGetIt: string
+  // Add to Home Screen
+  athsTitle: string
+  athsAndroid: string
+  athsIosTap: string
+  athsIosThen: string
+  athsInstall: string
 }
 
 const en: Translations = {
@@ -201,6 +207,11 @@ const en: Translations = {
   markAsRead: 'Mark as Read',
   toReadNotesPlaceholder: 'Why do you want to read this?',
   whenDidYouGetIt: 'When did you get it?',
+  athsTitle: 'Add to Home Screen',
+  athsAndroid: 'Install for the full app experience',
+  athsIosTap: 'Tap',
+  athsIosThen: 'then',
+  athsInstall: 'Install',
 }
 
 const de: Translations = {
@@ -293,6 +304,11 @@ const de: Translations = {
   markAsRead: 'Als gelesen markieren',
   whenDidYouGetIt: 'Wann hast du es bekommen?',
   toReadNotesPlaceholder: 'Warum möchtest du das lesen?',
+  athsTitle: 'Zum Startbildschirm',
+  athsAndroid: 'Installieren für das volle App-Erlebnis',
+  athsIosTap: 'Tippe auf',
+  athsIosThen: 'dann auf',
+  athsInstall: 'Installieren',
 }
 
 const fr: Translations = {
@@ -385,6 +401,11 @@ const fr: Translations = {
   markAsRead: 'Marquer comme lu',
   whenDidYouGetIt: 'Quand l\'avez-vous reçu ?',
   toReadNotesPlaceholder: 'Pourquoi voulez-vous le lire ?',
+  athsTitle: 'Ajouter à l\'écran d\'accueil',
+  athsAndroid: 'Installez pour une expérience complète',
+  athsIosTap: 'Appuyez sur',
+  athsIosThen: 'puis sur',
+  athsInstall: 'Installer',
 }
 
 const es: Translations = {
@@ -477,6 +498,11 @@ const es: Translations = {
   markAsRead: 'Marcar como leído',
   whenDidYouGetIt: '¿Cuándo lo conseguiste?',
   toReadNotesPlaceholder: '¿Por qué quieres leerlo?',
+  athsTitle: 'Añadir a la pantalla de inicio',
+  athsAndroid: 'Instala para una experiencia completa',
+  athsIosTap: 'Pulsa',
+  athsIosThen: 'luego',
+  athsInstall: 'Instalar',
 }
 
 const pl: Translations = {
@@ -569,6 +595,11 @@ const pl: Translations = {
   markAsRead: 'Oznacz jako przeczytane',
   whenDidYouGetIt: 'Kiedy ją dostałeś?',
   toReadNotesPlaceholder: 'Dlaczego chcesz to przeczytać?',
+  athsTitle: 'Dodaj do ekranu głównego',
+  athsAndroid: 'Zainstaluj dla pełnego doświadczenia',
+  athsIosTap: 'Dotknij',
+  athsIosThen: 'a następnie',
+  athsInstall: 'Zainstaluj',
 }
 
 export const translations: Record<Locale, Translations> = { en, de, fr, es, pl }

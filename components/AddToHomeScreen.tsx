@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
+import { useT } from '@/contexts/AppContext'
 
 const STORAGE_KEY = 'bookshelf_aths_dismissed'
 
@@ -22,8 +23,11 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function AddToHomeScreen() {
+  const t = useT()
   const [show, setShow] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
+  // Track prompt availability in state (not just a ref) so the Install button re-renders
+  const [canInstall, setCanInstall] = useState(false)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
@@ -45,6 +49,7 @@ export default function AddToHomeScreen() {
     const handler = (e: Event) => {
       e.preventDefault()
       deferredPrompt.current = e as BeforeInstallPromptEvent
+      setCanInstall(true)  // triggers re-render so Install button appears
     }
     window.addEventListener('beforeinstallprompt', handler)
 
@@ -66,6 +71,8 @@ export default function AddToHomeScreen() {
     if (deferredPrompt.current) {
       await deferredPrompt.current.prompt()
       const { outcome } = await deferredPrompt.current.userChoice
+      deferredPrompt.current = null
+      setCanInstall(false)
       if (outcome === 'accepted') {
         localStorage.setItem(STORAGE_KEY, '1')
         setShow(false)
@@ -104,28 +111,28 @@ export default function AddToHomeScreen() {
             {/* Text */}
             <div className="flex-1 min-w-0">
               <p className="text-[14px] font-semibold" style={{ color: 'var(--label)' }}>
-                Add to Home Screen
+                {t.athsTitle}
               </p>
               {isIOS ? (
                 <p className="text-[12px] mt-0.5 leading-[1.4]" style={{ color: 'var(--label-secondary)' }}>
-                  Tap <IOSShareIcon /> then{' '}
-                  <span style={{ color: 'var(--label)' }}>&ldquo;Add to Home Screen&rdquo;</span>
+                  {t.athsIosTap} <IOSShareIcon /> {t.athsIosThen}{' '}
+                  <span style={{ color: 'var(--label)' }}>&ldquo;{t.athsTitle}&rdquo;</span>
                 </p>
               ) : (
                 <p className="text-[12px] mt-0.5 leading-[1.4]" style={{ color: 'var(--label-secondary)' }}>
-                  Install for the full app experience
+                  {t.athsAndroid}
                 </p>
               )}
             </div>
 
             {/* Action: Install button (Android) or just dismiss (iOS — instructions are inline) */}
-            {!isIOS && deferredPrompt.current && (
+            {!isIOS && canInstall && (
               <button
                 onClick={handleInstall}
                 className="shrink-0 px-3 py-1.5 rounded-[10px] text-[13px] font-semibold text-white"
                 style={{ backgroundColor: 'var(--primary)' }}
               >
-                Install
+                {t.athsInstall}
               </button>
             )}
 
