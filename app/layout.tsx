@@ -12,6 +12,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'My Bookshelf',
   description: 'Track every book you read',
+  themeColor: '#d3f0fb',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'My Bookshelf',
+  },
 }
 
 export default function RootLayout({
