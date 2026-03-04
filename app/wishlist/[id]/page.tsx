@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { X, BookOpen, Pencil } from 'lucide-react'
+import { X, Heart, Pencil } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
@@ -26,7 +26,7 @@ function getAddedTags(createdAt: string): { dateTag: string; durationTag: string
   return { dateTag, durationTag }
 }
 
-export default function ToReadDetailPage() {
+export default function WishlistDetailPage() {
   const router = useRouter()
   const { id } = useParams<{ id: string }>()
   const { user } = useApp()
@@ -36,6 +36,7 @@ export default function ToReadDetailPage() {
   const [loading, setLoading] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [moveLoading, setMoveLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [updateLoading, setUpdateLoading] = useState(false)
 
@@ -57,7 +58,7 @@ export default function ToReadDetailPage() {
             setPublishedYear(data.publishedYear)
             setBookDataLoading(false)
           })
-          // If no cover, search for one in the background and update silently
+          // Retroactive cover search
           if (!b.cover_url && b.title) {
             fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
               if (!cover) return
@@ -78,10 +79,8 @@ export default function ToReadDetailPage() {
       const updated = await updateBook(supabase, user.id, book.id, {
         title: data.title,
         author: data.author,
-        month: data.month,
-        year: data.year,
         cover_url: data.cover_url,
-        status: 'to_read',
+        status: 'wishlist',
       })
       setBook(updated)
       setIsEditing(false)
@@ -95,10 +94,23 @@ export default function ToReadDetailPage() {
     setDeleteLoading(true)
     try {
       await deleteBook(supabase, user.id, book.id)
+      sessionStorage.setItem('bookshelf_returnTab', 'wishlist')
       router.replace('/')
     } finally {
       setDeleteLoading(false)
       setShowDeleteConfirm(false)
+    }
+  }
+
+  async function handleMoveToReadingList() {
+    if (!user || !book) return
+    setMoveLoading(true)
+    try {
+      await updateBook(supabase, user.id, book.id, { status: 'to_read' })
+      sessionStorage.setItem('bookshelf_returnTab', 'to_read')
+      router.replace('/')
+    } finally {
+      setMoveLoading(false)
     }
   }
 
@@ -144,6 +156,7 @@ export default function ToReadDetailPage() {
             onSubmit={handleUpdate}
             submitLabel={t.saveChanges}
             loading={updateLoading}
+            hideDateField
           />
         </motion.div>
       </div>
@@ -154,7 +167,7 @@ export default function ToReadDetailPage() {
     <>
       <div className="min-h-screen pb-8" style={{ backgroundColor: 'var(--bg)' }}>
 
-        {/* ── Hero: full-width cover + gradient overlay ────────────────────── */}
+        {/* ── Hero: full-width cover + gradient overlay ─────────────────── */}
         <div className="relative w-full min-h-[260px]" style={{ backgroundColor: 'var(--fill)' }}>
           {book.cover_url ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -166,7 +179,7 @@ export default function ToReadDetailPage() {
           ) : (
             <div className="absolute inset-0 flex items-center justify-center"
                  style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}>
-              <BookOpen size={48} style={{ color: 'var(--label-tertiary)' }} />
+              <Heart size={48} style={{ color: 'var(--label-tertiary)' }} />
             </div>
           )}
 
@@ -186,7 +199,7 @@ export default function ToReadDetailPage() {
               <Pencil size={20} strokeWidth={2} />
             </button>
             <button
-              onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'to_read'); router.push('/') }}
+              onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'wishlist'); router.push('/') }}
               className="w-9 h-9 flex items-center justify-center"
               aria-label="Close"
             >
@@ -233,15 +246,16 @@ export default function ToReadDetailPage() {
           </motion.button>
           <motion.button
             whileTap={{ scale: 0.97 }}
-            onClick={() => router.push(`/book/${book.id}`)}
-            className="flex-1 py-[13px] rounded-[14px] text-[16px] font-semibold text-white text-center"
+            disabled={moveLoading}
+            onClick={handleMoveToReadingList}
+            className="flex-1 py-[13px] rounded-[14px] text-[16px] font-semibold text-white text-center disabled:opacity-50"
             style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
           >
-            {t.markAsRead}
+            {moveLoading ? t.loading : t.moveToReadingList}
           </motion.button>
         </div>
 
-        {/* ── Details section ──────────────────────────────────────────────── */}
+        {/* ── Details section ───────────────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
