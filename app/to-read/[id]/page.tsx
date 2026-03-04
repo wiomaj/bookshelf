@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { X, BookOpen } from 'lucide-react'
+import { X, BookOpen, Pencil } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { useApp, useT } from '@/contexts/AppContext'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
 import type { Book } from '@/types/book'
 
 const MONTH_NAMES = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
@@ -33,6 +34,8 @@ export default function ToReadDetailPage() {
 
   const [book, setBook] = useState<Book | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
+  const [updateLoading, setUpdateLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
@@ -68,6 +71,18 @@ export default function ToReadDetailPage() {
       .finally(() => setLoading(false))
   }, [user, id])
 
+  async function handleUpdate(data: ToReadFormData) {
+    if (!book || !user) return
+    setUpdateLoading(true)
+    try {
+      await updateBook(supabase, user.id, book.id, { ...data, status: 'to_read' })
+      setBook(prev => prev ? { ...prev, ...data } : prev)
+      setIsEditing(false)
+    } finally {
+      setUpdateLoading(false)
+    }
+  }
+
   async function handleDelete() {
     if (!user || !book) return
     setDeleteLoading(true)
@@ -100,6 +115,33 @@ export default function ToReadDetailPage() {
   const { dateTag, durationTag } = getAddedTags(book.created_at)
   const displayGenre = book.genre || apiGenre
 
+  if (isEditing) {
+    return (
+      <div className="min-h-screen relative" style={{ backgroundColor: 'var(--bg)' }}>
+        <button
+          onClick={() => setIsEditing(false)}
+          className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center z-10"
+          style={{ color: 'var(--label)' }}
+        >
+          <X size={24} />
+        </button>
+        <div className="px-4 pt-14 pb-4">
+          <h1 className="text-[28px] font-bold tracking-[-0.4px]" style={{ color: 'var(--label)' }}>
+            {t.editBook}
+          </h1>
+        </div>
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
+          <ToReadForm
+            initialData={book}
+            onSubmit={handleUpdate}
+            submitLabel={t.saveChanges}
+            loading={updateLoading}
+          />
+        </motion.div>
+      </div>
+    )
+  }
+
   return (
     <>
       <div className="min-h-screen pb-8" style={{ backgroundColor: 'var(--bg)' }}>
@@ -126,14 +168,23 @@ export default function ToReadDetailPage() {
             style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.72) 100%)' }}
           />
 
-          {/* X close button */}
-          <button
-            onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'to_read'); router.push('/') }}
-            className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center z-10"
-            aria-label="Close"
-          >
-            <X size={24} className="text-white" strokeWidth={2} />
-          </button>
+          {/* Edit + Close buttons */}
+          <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
+            <button
+              onClick={() => setIsEditing(true)}
+              className="w-9 h-9 flex items-center justify-center text-white"
+              aria-label="Edit"
+            >
+              <Pencil size={20} strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'to_read'); router.push('/') }}
+              className="w-9 h-9 flex items-center justify-center text-white"
+              aria-label="Close"
+            >
+              <X size={24} strokeWidth={2} />
+            </button>
+          </div>
 
           {/* Title + tags + author */}
           <div className="relative z-[1] pt-12 px-4 pb-5 flex flex-col gap-2">

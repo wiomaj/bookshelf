@@ -2,15 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { X, Heart } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X, Heart, Pencil } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { useApp, useT } from '@/contexts/AppContext'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
+import { LONG_MONTHS } from '@/lib/month'
 import type { Book } from '@/types/book'
+
+const currentDate = new Date()
 
 const MONTH_NAMES = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
 
@@ -33,9 +37,14 @@ export default function WishlistDetailPage() {
 
   const [book, setBook] = useState<Book | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
+  const [updateLoading, setUpdateLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [moveLoading, setMoveLoading] = useState(false)
+  const [showMoveModal, setShowMoveModal] = useState(false)
+  const [moveMonth, setMoveMonth] = useState<number>(currentDate.getMonth() + 1)
+  const [moveYear, setMoveYear] = useState<number>(currentDate.getFullYear())
 
   const [description, setDescription] = useState<string | undefined>(undefined)
   const [apiGenre, setApiGenre] = useState<string | undefined>(undefined)
@@ -69,6 +78,18 @@ export default function WishlistDetailPage() {
       .finally(() => setLoading(false))
   }, [user, id])
 
+  async function handleUpdate(data: ToReadFormData) {
+    if (!book || !user) return
+    setUpdateLoading(true)
+    try {
+      await updateBook(supabase, user.id, book.id, { ...data, status: 'wishlist' })
+      setBook(prev => prev ? { ...prev, ...data } : prev)
+      setIsEditing(false)
+    } finally {
+      setUpdateLoading(false)
+    }
+  }
+
   async function handleDelete() {
     if (!user || !book) return
     setDeleteLoading(true)
@@ -82,12 +103,13 @@ export default function WishlistDetailPage() {
     }
   }
 
-  async function handleMoveToReadingList() {
+  async function handleConfirmMove(status: 'to_read' | 'read') {
     if (!user || !book) return
     setMoveLoading(true)
+    setShowMoveModal(false)
     try {
-      await updateBook(supabase, user.id, book.id, { status: 'to_read' })
-      sessionStorage.setItem('bookshelf_returnTab', 'to_read')
+      await updateBook(supabase, user.id, book.id, { status, month: moveMonth, year: moveYear })
+      sessionStorage.setItem('bookshelf_returnTab', status === 'read' ? 'read' : 'to_read')
       router.replace('/')
     } finally {
       setMoveLoading(false)
@@ -113,6 +135,34 @@ export default function WishlistDetailPage() {
 
   const { dateTag, durationTag } = getAddedTags(book.created_at)
   const displayGenre = book.genre || apiGenre
+
+  if (isEditing) {
+    return (
+      <div className="min-h-screen relative" style={{ backgroundColor: 'var(--bg)' }}>
+        <button
+          onClick={() => setIsEditing(false)}
+          className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center z-10"
+          style={{ color: 'var(--label)' }}
+        >
+          <X size={24} />
+        </button>
+        <div className="px-4 pt-14 pb-4">
+          <h1 className="text-[28px] font-bold tracking-[-0.4px]" style={{ color: 'var(--label)' }}>
+            {t.editBook}
+          </h1>
+        </div>
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
+          <ToReadForm
+            initialData={book}
+            onSubmit={handleUpdate}
+            submitLabel={t.saveChanges}
+            loading={updateLoading}
+            hideDateField
+          />
+        </motion.div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -140,14 +190,23 @@ export default function WishlistDetailPage() {
             style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.72) 100%)' }}
           />
 
-          {/* X close button */}
-          <button
-            onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'wishlist'); router.push('/') }}
-            className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center z-10"
-            aria-label="Close"
-          >
-            <X size={24} className="text-white" strokeWidth={2} />
-          </button>
+          {/* Edit + Close buttons */}
+          <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
+            <button
+              onClick={() => setIsEditing(true)}
+              className="w-9 h-9 flex items-center justify-center text-white"
+              aria-label="Edit"
+            >
+              <Pencil size={20} strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'wishlist'); router.push('/') }}
+              className="w-9 h-9 flex items-center justify-center text-white"
+              aria-label="Close"
+            >
+              <X size={24} strokeWidth={2} />
+            </button>
+          </div>
 
           {/* Title + tags + author */}
           <div className="relative z-[1] pt-12 px-4 pb-5 flex flex-col gap-2">
@@ -189,7 +248,7 @@ export default function WishlistDetailPage() {
           <motion.button
             whileTap={{ scale: 0.97 }}
             disabled={moveLoading}
-            onClick={handleMoveToReadingList}
+            onClick={() => setShowMoveModal(true)}
             className="flex-1 py-[13px] rounded-[14px] text-[16px] font-semibold text-white text-center disabled:opacity-50"
             style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
           >
@@ -268,6 +327,96 @@ export default function WishlistDetailPage() {
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteConfirm(false)}
       />
+
+      {/* ── Move modal ──────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showMoveModal && (
+          <>
+            <motion.div
+              key="move-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMoveModal(false)}
+              className="fixed inset-0 z-40"
+              style={{ backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+            />
+            <motion.div
+              key="move-sheet"
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+              className="fixed bottom-0 left-0 right-0 z-50 max-w-[600px] mx-auto rounded-t-[28px] p-6 pb-10"
+              style={{ backgroundColor: 'var(--bg-elevated)' }}
+            >
+              <div className="w-10 h-1 rounded-full mx-auto mb-5"
+                   style={{ backgroundColor: 'var(--separator-opaque)' }} />
+
+              <h3 className="text-[22px] font-bold tracking-[-0.3px] mb-5" style={{ color: 'var(--label)' }}>
+                {t.whenDidYouGetIt}
+              </h3>
+
+              {/* Month + Year pickers */}
+              <div className="rounded-[14px] overflow-hidden mb-6" style={{ backgroundColor: 'var(--fill)' }}>
+                <div className="grid grid-cols-3">
+                  <div className="col-span-2" style={{ borderRight: '1px solid var(--separator)' }}>
+                    <select
+                      value={moveMonth}
+                      onChange={e => setMoveMonth(Number(e.target.value))}
+                      className="w-full px-4 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
+                      style={{ color: 'var(--label)' }}
+                    >
+                      {LONG_MONTHS.map((m, i) => (
+                        <option key={i + 1} value={i + 1}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <select
+                      value={moveYear}
+                      onChange={e => setMoveYear(Number(e.target.value))}
+                      className="w-full px-4 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
+                      style={{ color: 'var(--label)' }}
+                    >
+                      {Array.from({ length: 30 }, (_, i) => currentDate.getFullYear() - i).map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleConfirmMove('to_read')}
+                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white"
+                  style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+                >
+                  {t.moveToReadingList}
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleConfirmMove('read')}
+                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white"
+                  style={{ backgroundColor: '#34C759' }}
+                >
+                  {t.markAsRead}
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setShowMoveModal(false)}
+                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold"
+                  style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+                >
+                  {t.cancel}
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   )
 }
