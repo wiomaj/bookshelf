@@ -437,25 +437,26 @@ export default function HomePage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center pt-10 px-6"
+            className="flex flex-col items-center pt-6"
           >
-            <div className="w-20 h-20 rounded-[26px] flex items-center justify-center mb-6"
-                 style={{ backgroundColor: 'var(--fill)' }}>
-              <Heart size={36} style={{ color: 'var(--label-secondary)' }} />
+            <div className="w-[320px] h-[320px] relative shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img alt="" className="w-full h-full object-contain"
+                   src="https://www.figma.com/api/mcp/asset/03707860-f3ad-43d2-8e13-02239d2e4497" />
             </div>
-            <div className="flex flex-col gap-5 text-center w-full">
+            <div className="mt-4 w-full px-6 flex flex-col gap-5 text-center">
               <div className="flex flex-col gap-2">
-                <h2 className="text-[24px] font-bold tracking-[-0.3px]" style={{ color: 'var(--label)' }}>
+                <h2 className="text-[22px] font-bold tracking-[-0.3px]" style={{ color: 'var(--label)' }}>
                   {t.wishlistEmptyTitle}
                 </h2>
-                <p className="text-[16px] leading-6" style={{ color: 'var(--label-secondary)' }}>
+                <p className="text-[17px] leading-[22px] tracking-[-0.4px]" style={{ color: 'var(--label-secondary)' }}>
                   {t.wishlistEmptyCopy}
                 </p>
               </div>
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={() => router.push('/wishlist/add')}
-                className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold"
+                className="w-full py-[14px] rounded-full text-white text-[17px] font-semibold"
                 style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
               >
                 {t.addToWishlist}
