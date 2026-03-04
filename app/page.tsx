@@ -3,17 +3,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpen, BookMarked, Settings, Loader2 } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpen, BookMarked, Settings, Loader2, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
-import { getReadBooks, getToReadBooks } from '@/lib/bookApi'
+import { getReadBooks, getToReadBooks, getWishlistBooks } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import YearSection from '@/components/YearSection'
 import ToReadList from '@/components/ToReadList'
+import WishlistList from '@/components/WishlistList'
 import AddToHomeScreen from '@/components/AddToHomeScreen'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
-type Tab = 'read' | 'to_read'
+type Tab = 'read' | 'to_read' | 'wishlist'
 
 /** Raw touch travel (px) needed to trigger a refresh */
 const PULL_THRESHOLD = 72
@@ -27,14 +28,15 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<Tab>('read')
   const [books, setBooks] = useState<Book[]>([])
   const [toReadBooks, setToReadBooks] = useState<Book[]>([])
+  const [wishlistBooks, setWishlistBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
   const [flashMessage, setFlashMessage] = useState<string | null>(null)
   const [scrolled, setScrolled] = useState(false)
 
   // Pull-to-refresh visual state
-  const [pullY, setPullY] = useState(0)          // 0 → PULL_MAX visual height
+  const [pullY, setPullY] = useState(0)
   const [refreshing, setRefreshing] = useState(false)
-  const [isTracking, setIsTracking] = useState(false) // true while finger is down
+  const [isTracking, setIsTracking] = useState(false)
 
   // Mutable refs so touch handlers don't form stale closures
   const pullStartYRef  = useRef(0)
@@ -42,18 +44,20 @@ export default function HomePage() {
   const isPullingRef   = useRef(false)
   const refreshingRef  = useRef(false)
 
-  // ── loadBooks (stable reference for PTR handler) ────────────────────────
+  // ── loadBooks (stable reference for PTR handler) ─────────────────────────
   const loadBooks = useCallback(async () => {
     if (!user) return
-    const [read, toRead] = await Promise.all([
+    const [read, toRead, wishlist] = await Promise.all([
       getReadBooks(supabase, user.id),
       getToReadBooks(supabase, user.id),
+      getWishlistBooks(supabase, user.id),
     ])
     setBooks(read)
     setToReadBooks(toRead)
+    setWishlistBooks(wishlist)
   }, [user])
 
-  // ── Scroll shadow trigger ───────────────────────────────────────────────
+  // ── Scroll shadow trigger ─────────────────────────────────────────────────
   useEffect(() => {
     const el = document.getElementById('scroll-container')
     if (!el) return
@@ -63,25 +67,29 @@ export default function HomePage() {
     return () => el.removeEventListener('scroll', onScroll)
   }, [])
 
-  // ── Initial data load ───────────────────────────────────────────────────
+  // ── Initial data load ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!user) return
     loadBooks().catch(console.error).finally(() => setLoading(false))
   }, [user, loadBooks])
 
-  // ── Session-storage flash / tab restore ─────────────────────────────────
+  // ── Session-storage flash / tab restore ───────────────────────────────────
   useEffect(() => {
     const returnTab = sessionStorage.getItem('bookshelf_returnTab')
     if (returnTab === 'to_read') {
       sessionStorage.removeItem('bookshelf_returnTab')
       setActiveTab('to_read')
+    } else if (returnTab === 'wishlist') {
+      sessionStorage.removeItem('bookshelf_returnTab')
+      setActiveTab('wishlist')
     }
     const flash = sessionStorage.getItem('bookshelf_flash')
     if (flash) {
       sessionStorage.removeItem('bookshelf_flash')
       const message =
-        flash === 'changesSaved'   ? t.changesSaved :
-        flash === 'bookAddedToRead' ? t.bookAddedToRead :
+        flash === 'changesSaved'      ? t.changesSaved :
+        flash === 'bookAddedToRead'   ? t.bookAddedToRead :
+        flash === 'bookAddedToWishlist' ? t.bookAddedToWishlist :
         null
       if (message) {
         setFlashMessage(message)
@@ -90,7 +98,7 @@ export default function HomePage() {
     }
   }, [])
 
-  // ── Pull-to-refresh touch handlers ──────────────────────────────────────
+  // ── Pull-to-refresh touch handlers ───────────────────────────────────────
   useEffect(() => {
     const el = document.getElementById('scroll-container')
     if (!el) return
@@ -111,10 +119,8 @@ export default function HomePage() {
         setPullY(0)
         return
       }
-      // Prevent the browser's native overscroll/bounce while we're pulling
       e.preventDefault()
       rawDyRef.current = dy
-      // Rubber-band: fast near 0, asymptotically approaches PULL_MAX
       const visual = PULL_MAX * (1 - Math.exp(-dy / 110))
       setPullY(visual)
     }
@@ -127,10 +133,9 @@ export default function HomePage() {
       rawDyRef.current = 0
 
       if (dy >= PULL_THRESHOLD && !refreshingRef.current) {
-        // Threshold met → trigger refresh and lock indicator in place
         refreshingRef.current = true
         setRefreshing(true)
-        setPullY(PULL_MAX * 0.75)          // settle to a stable spinner height
+        setPullY(PULL_MAX * 0.75)
         loadBooks()
           .catch(console.error)
           .finally(() => {
@@ -139,7 +144,6 @@ export default function HomePage() {
             setPullY(0)
           })
       } else {
-        // Below threshold → snap back
         setPullY(0)
       }
     }
@@ -175,20 +179,27 @@ export default function HomePage() {
     )
   }
 
-  const fabRoute = activeTab === 'read' ? '/add' : '/to-read/add'
+  const fabRoute =
+    activeTab === 'read'     ? '/add' :
+    activeTab === 'to_read'  ? '/to-read/add' :
+    '/wishlist/add'
+
   const isEmptyState =
-    (activeTab === 'read' && books.length === 0) ||
-    (activeTab === 'to_read' && toReadBooks.length === 0)
+    (activeTab === 'read'     && books.length === 0) ||
+    (activeTab === 'to_read'  && toReadBooks.length === 0) ||
+    (activeTab === 'wishlist' && wishlistBooks.length === 0)
 
-  const title = activeTab === 'read' ? t.readBooksTitle : t.toReadBooksTitle
+  const title =
+    activeTab === 'read'    ? t.readBooksTitle :
+    activeTab === 'to_read' ? t.toReadBooksTitle :
+    t.wishlistTitle
 
-  // Progress ratio 0→1 for opacity / rotation of the pull icon
   const pullProgress = Math.min(pullY / PULL_MAX, 1)
 
   return (
     <div className="relative min-h-screen pb-[100px]" style={{ backgroundColor: 'var(--bg)' }}>
 
-      {/* ── Pull-to-refresh indicator ──────────────────────────────── */}
+      {/* ── Pull-to-refresh indicator ─────────────────────────────────── */}
       <div
         style={{
           height: pullY,
@@ -197,7 +208,6 @@ export default function HomePage() {
           alignItems: 'flex-end',
           justifyContent: 'center',
           paddingBottom: pullY > 6 ? 10 : 0,
-          // Instant tracking while finger is down; spring back on release
           transition: isTracking ? 'none' : 'height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
           willChange: 'height',
         }}
@@ -209,7 +219,6 @@ export default function HomePage() {
             style={{
               color: 'var(--primary)',
               opacity: pullProgress,
-              // Rotate toward 270° as the user pulls; stop rotating when refreshing
               transform: refreshing ? 'none' : `rotate(${pullProgress * 270}deg)`,
               transition: isTracking ? 'opacity 0.05s' : 'opacity 0.3s, transform 0.3s',
             }}
@@ -422,10 +431,46 @@ export default function HomePage() {
         )
       )}
 
+      {/* ── Wishlist tab content ──────────────────────────────────────── */}
+      {activeTab === 'wishlist' && (
+        wishlistBooks.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center pt-10 px-6"
+          >
+            <div className="w-20 h-20 rounded-[26px] flex items-center justify-center mb-6"
+                 style={{ backgroundColor: 'var(--fill)' }}>
+              <ShoppingCart size={36} style={{ color: 'var(--label-secondary)' }} />
+            </div>
+            <div className="flex flex-col gap-5 text-center w-full">
+              <div className="flex flex-col gap-2">
+                <h2 className="text-[24px] font-bold tracking-[-0.3px]" style={{ color: 'var(--label)' }}>
+                  {t.wishlistEmptyTitle}
+                </h2>
+                <p className="text-[16px] leading-6" style={{ color: 'var(--label-secondary)' }}>
+                  {t.wishlistEmptyCopy}
+                </p>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                onClick={() => router.push('/wishlist/add')}
+                className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold"
+                style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+              >
+                {t.addToWishlist}
+              </motion.button>
+            </div>
+          </motion.div>
+        ) : (
+          <WishlistList books={wishlistBooks} />
+        )
+      )}
+
       {/* ── Add to Home Screen prompt ────────────────────────────────── */}
       <AddToHomeScreen />
 
-      {/* ── Floating glass tab bar (iOS 26 Liquid Glass) ─────────────── */}
+      {/* ── Floating glass tab bar ────────────────────────────────────── */}
       <nav className="fixed bottom-5 left-4 right-4 z-50 max-w-[568px] mx-auto">
         <div className="glass flex items-center rounded-[28px] px-2 py-2"
              style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)' }}>
@@ -444,12 +489,12 @@ export default function HomePage() {
               />
             )}
             <BookOpen
-              size={24}
+              size={22}
               strokeWidth={activeTab === 'read' ? 2 : 1.5}
               className="relative"
               style={{ color: activeTab === 'read' ? 'var(--primary)' : 'var(--label-secondary)' }}
             />
-            <span className="text-[11px] font-medium relative tracking-[-0.1px]"
+            <span className="text-[10px] font-medium relative tracking-[-0.1px]"
                   style={{ color: activeTab === 'read' ? 'var(--primary)' : 'var(--label-secondary)' }}>
               {t.tabRead}
             </span>
@@ -469,14 +514,39 @@ export default function HomePage() {
               />
             )}
             <BookMarked
-              size={24}
+              size={22}
               strokeWidth={activeTab === 'to_read' ? 2 : 1.5}
               className="relative"
               style={{ color: activeTab === 'to_read' ? 'var(--primary)' : 'var(--label-secondary)' }}
             />
-            <span className="text-[11px] font-medium relative tracking-[-0.1px]"
+            <span className="text-[10px] font-medium relative tracking-[-0.1px]"
                   style={{ color: activeTab === 'to_read' ? 'var(--primary)' : 'var(--label-secondary)' }}>
               {toReadBooks.length > 0 ? `${t.tabToRead} (${toReadBooks.length})` : t.tabToRead}
+            </span>
+          </button>
+
+          {/* Wishlist tab */}
+          <button
+            onClick={() => setActiveTab('wishlist')}
+            className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px] transition-colors relative"
+          >
+            {activeTab === 'wishlist' && (
+              <motion.div
+                layoutId="tab-pill"
+                className="absolute inset-0 rounded-[22px]"
+                style={{ backgroundColor: 'var(--primary-muted)' }}
+                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+              />
+            )}
+            <ShoppingCart
+              size={22}
+              strokeWidth={activeTab === 'wishlist' ? 2 : 1.5}
+              className="relative"
+              style={{ color: activeTab === 'wishlist' ? 'var(--primary)' : 'var(--label-secondary)' }}
+            />
+            <span className="text-[10px] font-medium relative tracking-[-0.1px]"
+                  style={{ color: activeTab === 'wishlist' ? 'var(--primary)' : 'var(--label-secondary)' }}>
+              {wishlistBooks.length > 0 ? `${t.tabWishlist} (${wishlistBooks.length})` : t.tabWishlist}
             </span>
           </button>
 
@@ -486,8 +556,8 @@ export default function HomePage() {
             className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px] transition-colors"
             style={{ color: 'var(--label-secondary)' }}
           >
-            <Settings size={24} strokeWidth={1.5} />
-            <span className="text-[11px] font-medium tracking-[-0.1px]">{t.settings}</span>
+            <Settings size={22} strokeWidth={1.5} />
+            <span className="text-[10px] font-medium tracking-[-0.1px]">{t.settings}</span>
           </Link>
 
         </div>

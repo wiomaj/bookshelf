@@ -106,12 +106,19 @@ export type Translations = {
   toReadBooksTitle: string
   tabRead: string
   tabToRead: string
+  tabWishlist: string
   toReadEmptyTitle: string
   toReadEmptyCopy: string
   addToReadingList: string
   markAsRead: string
   toReadNotesPlaceholder: string
   whenDidYouGetIt: string
+  wishlistTitle: string
+  wishlistEmptyTitle: string
+  wishlistEmptyCopy: string
+  addToWishlist: string
+  bookAddedToWishlist: string
+  moveToReadingList: string
   // Add to Home Screen
   athsTitle: string
   athsAndroid: string
@@ -207,10 +214,17 @@ const en: Translations = {
   toReadBooksTitle: 'Books to read',
   tabRead: 'Read',
   tabToRead: 'To Read',
+  tabWishlist: 'Wishlist',
   toReadEmptyTitle: 'Unread books',
   toReadEmptyCopy: 'Add the books you already own, but haven\'t read so far... So many books, so little time.',
   addToReadingList: 'Add a book to be read',
   markAsRead: 'Mark as Read',
+  wishlistTitle: 'Wishlist',
+  wishlistEmptyTitle: 'Your wishlist is empty',
+  wishlistEmptyCopy: 'Save books you want to buy — so you always know what to grab at the bookshop.',
+  addToWishlist: 'Add to Wishlist',
+  bookAddedToWishlist: 'Added to wishlist!',
+  moveToReadingList: 'Move to Reading List',
   toReadNotesPlaceholder: 'Why do you want to read this?',
   whenDidYouGetIt: 'When did you get it?',
   athsTitle: 'Add to Home Screen',
@@ -307,10 +321,17 @@ const de: Translations = {
   toReadBooksTitle: 'Bücher zum Lesen',
   tabRead: 'Gelesen',
   tabToRead: 'Leseliste',
+  tabWishlist: 'Wunschliste',
   toReadEmptyTitle: 'Ungelesene Bücher',
   toReadEmptyCopy: 'Füge Bücher hinzu, die du schon besitzt, aber noch nicht gelesen hast… So viele Bücher, so wenig Zeit.',
   addToReadingList: 'Buch hinzufügen',
   markAsRead: 'Als gelesen markieren',
+  wishlistTitle: 'Wunschliste',
+  wishlistEmptyTitle: 'Deine Wunschliste ist leer',
+  wishlistEmptyCopy: 'Speichere Bücher, die du kaufen möchtest — damit du beim nächsten Buchladen-Besuch weißt, was du willst.',
+  addToWishlist: 'Zur Wunschliste',
+  bookAddedToWishlist: 'Zur Wunschliste hinzugefügt!',
+  moveToReadingList: 'In Leseliste verschieben',
   whenDidYouGetIt: 'Wann hast du es bekommen?',
   toReadNotesPlaceholder: 'Warum möchtest du das lesen?',
   athsTitle: 'Zum Startbildschirm',
@@ -407,10 +428,17 @@ const fr: Translations = {
   toReadBooksTitle: 'Livres à lire',
   tabRead: 'Lus',
   tabToRead: 'À lire',
+  tabWishlist: 'Souhaits',
   toReadEmptyTitle: 'Livres non lus',
   toReadEmptyCopy: 'Ajoute les livres que tu possèdes déjà mais que tu n\'as pas encore lus… Tant de livres, si peu de temps.',
   addToReadingList: 'Ajouter un livre à lire',
   markAsRead: 'Marquer comme lu',
+  wishlistTitle: 'Liste de souhaits',
+  wishlistEmptyTitle: 'Ta liste de souhaits est vide',
+  wishlistEmptyCopy: 'Sauvegarde les livres que tu veux acheter — pour ne pas oublier lors de ta prochaine visite en librairie.',
+  addToWishlist: 'Ajouter à la liste',
+  bookAddedToWishlist: 'Ajouté à la liste de souhaits !',
+  moveToReadingList: 'Déplacer vers À lire',
   whenDidYouGetIt: 'Quand l\'avez-vous reçu ?',
   toReadNotesPlaceholder: 'Pourquoi voulez-vous le lire ?',
   athsTitle: 'Ajouter à l\'écran d\'accueil',
@@ -507,10 +535,17 @@ const es: Translations = {
   toReadBooksTitle: 'Libros por leer',
   tabRead: 'Leídos',
   tabToRead: 'Por leer',
+  tabWishlist: 'Deseos',
   toReadEmptyTitle: 'Libros sin leer',
   toReadEmptyCopy: 'Añade los libros que ya tienes pero aún no has leído… Tantos libros, tan poco tiempo.',
   addToReadingList: 'Añadir un libro por leer',
   markAsRead: 'Marcar como leído',
+  wishlistTitle: 'Lista de deseos',
+  wishlistEmptyTitle: 'Tu lista de deseos está vacía',
+  wishlistEmptyCopy: 'Guarda los libros que quieres comprar — para no olvidarlos en tu próxima visita a la librería.',
+  addToWishlist: 'Añadir a la lista',
+  bookAddedToWishlist: '¡Añadido a la lista de deseos!',
+  moveToReadingList: 'Mover a Por leer',
   whenDidYouGetIt: '¿Cuándo lo conseguiste?',
   toReadNotesPlaceholder: '¿Por qué quieres leerlo?',
   athsTitle: 'Añadir a la pantalla de inicio',
@@ -607,10 +642,17 @@ const pl: Translations = {
   toReadBooksTitle: 'Książki do przeczytania',
   tabRead: 'Przeczytane',
   tabToRead: 'Do przeczytania',
+  tabWishlist: 'Lista życzeń',
   toReadEmptyTitle: 'Nieprzeczytane książki',
   toReadEmptyCopy: 'Dodaj książki, które już masz, ale jeszcze nie przeczytałeś… Tyle książek, tak mało czasu.',
   addToReadingList: 'Dodaj książkę do przeczytania',
   markAsRead: 'Oznacz jako przeczytane',
+  wishlistTitle: 'Lista życzeń',
+  wishlistEmptyTitle: 'Twoja lista życzeń jest pusta',
+  wishlistEmptyCopy: 'Zapisuj książki, które chcesz kupić — żeby nie zapomnieć przy kolejnej wizycie w księgarni.',
+  addToWishlist: 'Dodaj do listy życzeń',
+  bookAddedToWishlist: 'Dodano do listy życzeń!',
+  moveToReadingList: 'Przenieś do listy lektur',
   whenDidYouGetIt: 'Kiedy ją dostałeś?',
   toReadNotesPlaceholder: 'Dlaczego chcesz to przeczytać?',
   athsTitle: 'Dodaj do ekranu głównego',

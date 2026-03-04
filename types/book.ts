@@ -12,5 +12,5 @@ export type Book = {
   notes?: string
   cover_url?: string
   created_at: string // ISO timestamp, set by Supabase automatically
-  status?: 'read' | 'to_read'  // defaults to 'read' in DB
+  status?: 'read' | 'to_read' | 'wishlist'  // defaults to 'read' in DB
 }
