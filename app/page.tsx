@@ -9,6 +9,7 @@ import { getReadBooks, getToReadBooks } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import YearSection from '@/components/YearSection'
 import ToReadList from '@/components/ToReadList'
+import AddToHomeScreen from '@/components/AddToHomeScreen'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
@@ -297,6 +298,9 @@ export default function HomePage() {
           <ToReadList books={toReadBooks} />
         )
       )}
+
+      {/* ── Add to Home Screen prompt ────────────────────────────────── */}
+      <AddToHomeScreen />
 
       {/* ── Floating glass tab bar (iOS 26 Liquid Glass) ─────────────── */}
       <nav className="fixed bottom-5 left-4 right-4 z-50 max-w-[568px] mx-auto">
