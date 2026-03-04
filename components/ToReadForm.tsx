@@ -4,9 +4,11 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Camera, Loader2, Search } from 'lucide-react'
 import ISBNScanner from './ISBNScanner'
-import { useT } from '@/contexts/AppContext'
+import { useApp, useT } from '@/contexts/AppContext'
 import { LONG_MONTHS, SEASONS } from '@/lib/month'
 import { normaliseGoogleCover } from '@/lib/bookMetadata'
+import { uploadCoverPhoto } from '@/lib/coverUpload'
+import { supabase } from '@/lib/supabase'
 
 const currentYear = new Date().getFullYear()
 
@@ -80,11 +82,14 @@ export default function ToReadForm({
   loading = false,
 }: ToReadFormProps) {
   const t = useT()
+  const { user } = useApp()
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [author, setAuthor] = useState(initialData?.author ?? '')
   const [month, setMonth] = useState<number | null>(initialData?.month ?? null)
   const [year, setYear] = useState<number>(initialData?.year ?? 0)
   const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
+  const [photoLoading, setPhotoLoading] = useState(false)
+  const photoInputRef = useRef<HTMLInputElement>(null)
 
   const [suggestions, setSuggestions] = useState<BookSuggestion[]>([])
   const [searchLoading, setSearchLoading] = useState(false)
@@ -136,6 +141,22 @@ export default function ToReadForm({
         title: s.title,
         cover_url: s.cover_url ?? '(none)',
       })
+    }
+  }
+
+  async function handlePhotoCapture(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+    setPhotoLoading(true)
+    setError('')
+    try {
+      const url = await uploadCoverPhoto(supabase, user.id, file)
+      setCoverUrl(url)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Photo upload failed')
+    } finally {
+      setPhotoLoading(false)
+      e.target.value = ''
     }
   }
 
@@ -279,19 +300,45 @@ export default function ToReadForm({
         </div>
       </div>
 
-      {/* ── Cover preview ──────────────────────────────────────────────────── */}
-      {coverUrl && (
+      {/* ── Cover ──────────────────────────────────────────────────────────── */}
+      {coverUrl ? (
         <div className="flex items-center gap-4 px-1">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={coverUrl} alt="Cover preview" className="w-14 h-20 object-cover rounded-[10px] shadow-sm flex-shrink-0" />
-          <div>
-            <p className="text-[15px] font-semibold mb-1" style={{ color: 'var(--label)' }}>{t.coverPreview}</p>
-            <button type="button" onClick={() => setCoverUrl('')} className="text-[14px]" style={{ color: '#FF3B30' }}>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-semibold" style={{ color: 'var(--label)' }}>{t.coverPreview}</p>
+            <button type="button" onClick={() => photoInputRef.current?.click()}
+              className="text-[14px] text-left" style={{ color: 'var(--primary)' }}>
+              {t.takePhoto}
+            </button>
+            <button type="button" onClick={() => setCoverUrl('')}
+              className="text-[14px] text-left" style={{ color: '#FF3B30' }}>
               {t.removeCover}
             </button>
           </div>
         </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => photoInputRef.current?.click()}
+          disabled={photoLoading}
+          className="flex items-center justify-center gap-2 w-full h-[52px] rounded-[14px] text-[16px] disabled:opacity-50"
+          style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--label-secondary)' }}
+        >
+          {photoLoading
+            ? <><Loader2 size={18} className="animate-spin" /><span>{t.uploadingPhoto}</span></>
+            : <><Camera size={18} /><span>{t.takePhoto}</span></>
+          }
+        </button>
       )}
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handlePhotoCapture}
+      />
 
       {/* ── Error ──────────────────────────────────────────────────────────── */}
       {error && (

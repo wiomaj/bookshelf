@@ -37,6 +37,8 @@ export type Translations = {
   notesPlaceholder: string
   coverPreview: string
   removeCover: string
+  takePhoto: string
+  uploadingPhoto: string
   // View page
   noNotesAdded: string
   released: string
@@ -143,6 +145,8 @@ const en: Translations = {
   notesPlaceholder: 'What did you think about this book?',
   coverPreview: 'Cover preview',
   removeCover: 'Remove cover',
+  takePhoto: 'Take photo',
+  uploadingPhoto: 'Uploading…',
   noNotesAdded: 'No notes added.',
   released: 'Released',
   genre: 'Genre',
@@ -240,6 +244,8 @@ const de: Translations = {
   notesPlaceholder: 'Was hast du über dieses Buch gedacht?',
   coverPreview: 'Cover-Vorschau',
   removeCover: 'Cover entfernen',
+  takePhoto: 'Foto aufnehmen',
+  uploadingPhoto: 'Wird hochgeladen…',
   noNotesAdded: 'Keine Notizen hinzugefügt.',
   released: 'Erschienen',
   genre: 'Genre',
@@ -337,6 +343,8 @@ const fr: Translations = {
   notesPlaceholder: "Qu'avez-vous pensé de ce livre ?",
   coverPreview: 'Aperçu de la couverture',
   removeCover: 'Supprimer la couverture',
+  takePhoto: 'Prendre une photo',
+  uploadingPhoto: 'Envoi en cours…',
   noNotesAdded: 'Aucune note ajoutée.',
   released: 'Parution',
   genre: 'Genre',
@@ -434,6 +442,8 @@ const es: Translations = {
   notesPlaceholder: '¿Qué te pareció este libro?',
   coverPreview: 'Vista previa de portada',
   removeCover: 'Eliminar portada',
+  takePhoto: 'Tomar foto',
+  uploadingPhoto: 'Subiendo…',
   noNotesAdded: 'No hay notas añadidas.',
   released: 'Publicado',
   genre: 'Género',
@@ -531,6 +541,8 @@ const pl: Translations = {
   notesPlaceholder: 'Co myślisz o tej książce?',
   coverPreview: 'Podgląd okładki',
   removeCover: 'Usuń okładkę',
+  takePhoto: 'Zrób zdjęcie',
+  uploadingPhoto: 'Przesyłanie…',
   noNotesAdded: 'Brak notatek.',
   released: 'Wydano',
   genre: 'Gatunek',
