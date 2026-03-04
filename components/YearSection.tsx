@@ -33,54 +33,46 @@ export default function YearSection({
     return defaultOpen
   })
 
-  // Once fully open we switch to overflow-visible so hover shadows/lift aren't clipped.
-  // We revert to overflow-hidden just before the close animation so it clips correctly.
   const [expanded, setExpanded] = useState(isOpen)
 
   function toggle() {
     const next = !isOpen
-    if (!next) setExpanded(false) // clip before close animation starts
+    if (!next) setExpanded(false)
     setIsOpen(next)
     try {
       const raw = localStorage.getItem('bookshelf_closed_years')
       const closed: number[] = raw ? JSON.parse(raw) : []
-      if (!next) {
-        if (!closed.includes(year)) closed.push(year)
-      } else {
-        const i = closed.indexOf(year)
-        if (i > -1) closed.splice(i, 1)
-      }
+      if (!next) { if (!closed.includes(year)) closed.push(year) }
+      else { const i = closed.indexOf(year); if (i > -1) closed.splice(i, 1) }
       localStorage.setItem('bookshelf_closed_years', JSON.stringify(closed))
     } catch { /* ignore */ }
   }
 
   return (
     <div>
-      {/* Accordion header */}
+      {/* Section header — iOS 26 style: secondary label, small caps */}
       <button
         onClick={toggle}
-        className="flex items-center justify-between w-full p-4 text-left"
+        className="flex items-center justify-between w-full px-5 pt-5 pb-2 text-left"
       >
-        <span className="text-[#171717] text-[16px] font-bold leading-6">
+        <span className="text-[13px] font-semibold uppercase tracking-wide"
+              style={{ color: 'var(--label-secondary)' }}>
           {year}
-          <span className="font-medium text-[12px] text-[#7c7c7c]">
-            {'  '}{books.length} {books.length === 1 ? 'book' : 'books'}
+          <span className="font-medium ml-2" style={{ color: 'var(--label-tertiary)' }}>
+            · {books.length} {books.length === 1 ? 'book' : 'books'}
           </span>
         </span>
 
-        <div className="flex items-center">
-          {/* Chevron rotates when closed */}
-          <motion.div
-            animate={{ rotate: isOpen ? 0 : -90 }}
-            transition={{ duration: 0.2 }}
-            className="text-[#171717]"
-          >
-            <ChevronDown size={24} />
-          </motion.div>
-        </div>
+        <motion.div
+          animate={{ rotate: isOpen ? 0 : -90 }}
+          transition={{ duration: 0.18 }}
+          style={{ color: 'var(--label-tertiary)' }}
+        >
+          <ChevronDown size={16} />
+        </motion.div>
       </button>
 
-      {/* Book grid — slides open/closed */}
+      {/* Book grid */}
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
@@ -88,18 +80,23 @@ export default function YearSection({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.26, ease: [0.4, 0, 0.2, 1] }}
             className={expanded ? 'overflow-visible' : 'overflow-hidden'}
             onAnimationComplete={() => { if (isOpen) setExpanded(true) }}
           >
             {viewMode === 'list' ? (
-              <div className="flex flex-col gap-[13px] px-4 pb-4">
-                {books.map((book) => (
-                  <BookListItem key={book.id} book={book} />
+              <div className="flex flex-col px-5 pb-2">
+                {books.map((book, i) => (
+                  <div key={book.id}>
+                    <BookListItem book={book} />
+                    {i < books.length - 1 && (
+                      <div className="h-px ml-[68px]" style={{ backgroundColor: 'var(--separator)' }} />
+                    )}
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 min-[500px]:grid-cols-3 gap-x-[13px] gap-y-3 px-4 pb-4">
+              <div className="grid grid-cols-2 min-[500px]:grid-cols-3 gap-x-[12px] gap-y-3 px-4 pb-4">
                 {books.map((book) => (
                   <BookCard key={book.id} book={book} />
                 ))}

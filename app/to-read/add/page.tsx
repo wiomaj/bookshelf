@@ -35,21 +35,23 @@ export default function ToReadAddPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
 
-      {/* Header — X close button on the right */}
-      <div className="flex items-center justify-end h-[60px] px-3">
+      {/* Header */}
+      <div className="flex items-center justify-between h-[60px] px-4">
+        <div /> {/* spacer */}
         <button
           onClick={() => router.back()}
-          className="w-9 h-9 flex items-center justify-center text-[#171717]"
+          className="w-9 h-9 flex items-center justify-center"
+          style={{ color: 'var(--label)' }}
         >
           <X size={24} />
         </button>
       </div>
 
       {/* Page title */}
-      <div className="px-4 pb-6">
-        <h1 className="text-[#171717] text-[32px] font-black leading-8">
+      <div className="px-4 pb-5">
+        <h1 className="text-[28px] font-bold tracking-[-0.4px]" style={{ color: 'var(--label)' }}>
           {t.addToReadingList}
         </h1>
       </div>

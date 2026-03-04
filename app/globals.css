@@ -2,57 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Smooth scrolling and consistent box model */
-* {
-  box-sizing: border-box;
+/* ── Box model + scroll ────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { -webkit-text-size-adjust: 100%; }
+
+/* ── iOS 26 Design Tokens ──────────────────────────────────────────────────── */
+:root {
+  /* Labels */
+  --label:            #000000;
+  --label-secondary:  rgba(60, 60, 67, 0.6);
+  --label-tertiary:   rgba(60, 60, 67, 0.3);
+  --label-quaternary: rgba(60, 60, 67, 0.18);
+
+  /* Fills */
+  --fill:             rgba(120, 120, 128, 0.12);
+  --fill-secondary:   rgba(120, 120, 128, 0.08);
+  --fill-tertiary:    rgba(118, 118, 128, 0.06);
+
+  /* Separator */
+  --separator:        rgba(60, 60, 67, 0.13);
+  --separator-opaque: #C6C6C8;
+
+  /* Backgrounds */
+  --bg:               #F2F2F7;
+  --bg-elevated:      #FFFFFF;
+  --bg-grouped:       #F2F2F7;
+  --bg-grouped-elevated: #FFFFFF;
+
+  /* Liquid Glass */
+  --glass-bg:         rgba(255, 255, 255, 0.72);
+  --glass-border:     rgba(255, 255, 255, 0.55);
+  --glass-shadow:     0 8px 40px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+
+  /* Tint (overridden by CozyBody) */
+  --primary:          #007AFF;
+  --primary-muted:    rgba(0, 122, 255, 0.12);
+  --btn-shadow:       0 4px 16px rgba(0,122,255,0.30), 0 1px 4px rgba(0,122,255,0.15);
 }
 
-html {
-  scroll-behavior: smooth;
+/* ── Liquid Glass utility ──────────────────────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-border);
 }
 
-/* Prevent text size adjustment on mobile after orientation change */
-body {
-  -webkit-text-size-adjust: 100%;
+/* ── Focus ring: use --primary ─────────────────────────────────────────────── */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 
-/* ── Cozy mode animations ─────────────────────────────────────────────────── */
+/* ── Cozy mode animations ──────────────────────────────────────────────────── */
 @keyframes cozy-flicker {
-  0%,  100% { transform: rotate(-2deg)  scaleX(1)    scaleY(1);    opacity: 0.90; }
-  20%        { transform: rotate(1deg)   scaleX(0.95) scaleY(1.05); opacity: 1;    }
-  40%        { transform: rotate(-1deg)  scaleX(1.04) scaleY(0.96); opacity: 0.85; }
-  60%        { transform: rotate(2deg)   scaleX(0.97) scaleY(1.03); opacity: 0.95; }
+  0%,  100% { transform: rotate(-2deg)   scaleX(1)    scaleY(1);    opacity: 0.90; }
+  20%        { transform: rotate(1deg)    scaleX(0.95) scaleY(1.05); opacity: 1;    }
+  40%        { transform: rotate(-1deg)   scaleX(1.04) scaleY(0.96); opacity: 0.85; }
+  60%        { transform: rotate(2deg)    scaleX(0.97) scaleY(1.03); opacity: 0.95; }
   80%        { transform: rotate(-0.5deg) scaleX(1.02) scaleY(0.99); opacity: 0.90; }
 }
-
 @keyframes cozy-ember {
   0%   { transform: translateY(0)     translateX(0);   opacity: 0.9; }
   100% { transform: translateY(-90px) translateX(8px); opacity: 0;   }
 }
-
 @keyframes cozy-glow {
-  0%,  100% { opacity: 0.65; transform: translateX(-50%) scale(1);   }
+  0%,  100% { opacity: 0.65; transform: translateX(-50%) scale(1);    }
   50%        { opacity: 1;    transform: translateX(-50%) scale(1.12); }
 }
 
-
-/* ── ISBN scanner scan-line animation ────────────────────────────────────── */
+/* ── ISBN scanner ──────────────────────────────────────────────────────────── */
 @keyframes scan-line {
   0%   { top: 0; }
   50%  { top: calc(100% - 2px); }
   100% { top: 0; }
 }
-
 .animate-scan-line {
   animation: scan-line 1.8s ease-in-out infinite;
   position: absolute;
 }
-
-/* ── Cozy mode primary-color override for focused inputs ─────────────────── */
-/* Overrides the hardcoded Tailwind focus:border-[#160a9d] class              */
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: var(--primary, #160a9d);
-}
-

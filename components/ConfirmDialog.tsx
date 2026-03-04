@@ -1,7 +1,6 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertTriangle } from 'lucide-react'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -37,51 +36,50 @@ export default function ConfirmDialog({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onCancel}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            className="fixed inset-0 z-40"
+            style={{ backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
           />
 
-          {/* Dialog */}
+          {/* Bottom sheet */}
           <motion.div
-            key="dialog"
-            initial={{ opacity: 0, scale: 0.9, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 16 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-            className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 mx-auto max-w-sm
-                       bg-white rounded-[16px] shadow-[0_8px_32px_rgba(23,23,23,0.16)] p-6"
+            key="sheet"
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+            className="fixed bottom-0 left-0 right-0 z-50 max-w-[600px] mx-auto
+                       rounded-t-[28px] p-6 pb-10"
+            style={{ backgroundColor: 'var(--bg-elevated)' }}
           >
-            {/* Icon + title */}
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle className="text-red-500" size={18} />
-              </div>
-              <h3 className="font-bold text-[#171717] text-[18px]">{title}</h3>
+            {/* Drag handle */}
+            <div className="w-10 h-1 rounded-full mx-auto mb-5"
+                 style={{ backgroundColor: 'var(--separator-opaque)' }} />
+
+            <div className="flex flex-col gap-1.5 mb-6">
+              <h3 className="text-[22px] font-bold tracking-[-0.3px]" style={{ color: 'var(--label)' }}>
+                {title}
+              </h3>
+              <p className="text-[15px] leading-5" style={{ color: 'var(--label-secondary)' }}>
+                {description}
+              </p>
             </div>
 
-            <p className="text-[rgba(23,23,23,0.72)] text-[16px] ml-[52px] mb-6 leading-6">
-              {description}
-            </p>
-
-            {/* Buttons */}
             <div className="flex flex-col gap-3">
               <motion.button
+                whileTap={{ scale: 0.97 }}
                 onClick={onConfirm}
                 disabled={loading}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full py-4 rounded-full text-white text-[16px]
-                           font-bold text-center disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+                className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold disabled:opacity-50"
+                style={{ backgroundColor: '#FF3B30' }}
               >
                 {loading ? loadingLabel : confirmLabel}
               </motion.button>
               <motion.button
+                whileTap={{ scale: 0.97 }}
                 onClick={onCancel}
                 disabled={loading}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full py-4 bg-[#171717]/[0.08] rounded-full text-[#171717]
-                           text-[16px] font-bold text-center disabled:opacity-50"
+                className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold disabled:opacity-50"
+                style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
               >
                 {cancelLabel}
               </motion.button>

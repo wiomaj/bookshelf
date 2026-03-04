@@ -10,6 +10,17 @@ export type ViewMode = 'grid' | 'list'
 
 const VALID_LOCALES: Locale[] = ['en', 'de', 'fr', 'es', 'pl']
 
+/** Map navigator.language (e.g. "de-DE", "fr-FR") to a supported locale, defaulting to 'en'. */
+function detectBrowserLocale(): Locale {
+  if (typeof navigator === 'undefined') return 'en'
+  const lang = (navigator.language ?? '').toLowerCase()
+  if (lang.startsWith('de')) return 'de'
+  if (lang.startsWith('fr')) return 'fr'
+  if (lang.startsWith('es')) return 'es'
+  if (lang.startsWith('pl')) return 'pl'
+  return 'en'
+}
+
 interface AppContextValue {
   viewMode: ViewMode
   setViewMode: (mode: ViewMode) => void
@@ -22,6 +33,7 @@ interface AppContextValue {
   signIn: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>
   signUp: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>
   signOut: () => Promise<void>
+  resetPassword: (email: string) => Promise<{ error: string | null }>
   changePassword: (newPassword: string) => Promise<{ error: string | null }>
   deleteAccount: () => Promise<{ error: string | null }>
 }
@@ -47,6 +59,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (c === 'true') setCozyModeState(true)
       const l = localStorage.getItem('bookshelf_language') as Locale | null
       if (l && VALID_LOCALES.includes(l)) setLanguageState(l)
+      else setLanguageState(detectBrowserLocale())
     } catch { /* ignore */ }
   }, [])
 
@@ -67,7 +80,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // ── Redirect guard ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (isAuthLoading) return
-    if (!user && pathname !== '/login') router.replace('/login')
+    if (!user && pathname !== '/login' && pathname !== '/reset') router.replace('/login')
     if (user && pathname === '/login') router.replace('/')
   }, [user, isAuthLoading, pathname, router])
 
@@ -102,6 +115,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
   }
 
+  async function resetPassword(email: string): Promise<{ error: string | null }> {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset`,
+    })
+    return { error: error?.message ?? null }
+  }
+
   async function changePassword(newPassword: string): Promise<{ error: string | null }> {
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     return { error: error?.message ?? null }
@@ -128,7 +148,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       cozyMode, setCozyMode,
       language, setLanguage,
       user, isAuthLoading,
-      signIn, signUp, signOut, changePassword, deleteAccount,
+      signIn, signUp, signOut, resetPassword, changePassword, deleteAccount,
     }}>
       {children}
     </AppContext.Provider>

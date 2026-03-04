@@ -16,14 +16,12 @@ import type { Book } from '@/types/book'
 
 /** Upgrade a cover URL to the highest resolution available for the full-width hero. */
 function heroImageUrl(url: string): string {
-  // Google Books: maximise zoom + request 1200 px wide for crisp retina display
   if (url.includes('books.google.com')) {
     return url
       .replace('http:', 'https:')
       .replace(/zoom=\d+/, 'zoom=0')
       .replace(/&fife=[^&]*/g, '') + '&fife=w1200'
   }
-  // Open Library: ensure we're on the largest documented size
   if (url.includes('covers.openlibrary.org')) {
     return url.replace(/-[SM]\.jpg$/, '-L.jpg')
   }
@@ -92,8 +90,9 @@ export default function BookDetailPage() {
   // ── Loading ──────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-7 h-7 border-2 border-gray-200 border-t-[#171717] rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
+        <div className="w-7 h-7 border-2 border-black/10 rounded-full animate-spin"
+             style={{ borderTopColor: 'var(--primary)' }} />
       </div>
     )
   }
@@ -101,14 +100,17 @@ export default function BookDetailPage() {
   // ── Not found ────────────────────────────────────────────────────────────────
   if (notFound || !book) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4">
-        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center">
-          <BookOpen size={26} className="text-gray-300" />
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4"
+           style={{ backgroundColor: 'var(--bg)' }}>
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
+             style={{ backgroundColor: 'var(--fill)' }}>
+          <BookOpen size={26} style={{ color: 'var(--label-tertiary)' }} />
         </div>
-        <h2 className="text-[18px] font-bold text-[#171717]">{t.bookNotFound}</h2>
+        <h2 className="text-[18px] font-bold" style={{ color: 'var(--label)' }}>{t.bookNotFound}</h2>
         <button
           onClick={() => router.replace('/')}
-          className="flex items-center gap-1.5 text-[rgba(23,23,23,0.72)] text-[16px]"
+          className="text-[16px] font-medium"
+          style={{ color: 'var(--primary)' }}
         >
           {t.backToBookshelf}
         </button>
@@ -119,27 +121,30 @@ export default function BookDetailPage() {
   // ── Edit mode ────────────────────────────────────────────────────────────────
   if (isEditing) {
     return (
-      <div className="min-h-screen relative">
-          {/* Close button — top right */}
-          <button
-            onClick={() => setIsEditing(false)}
-            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center text-[#171717] z-10"
-          >
-            <X size={24} />
-          </button>
+      <div className="min-h-screen relative" style={{ backgroundColor: 'var(--bg)' }}>
+        {/* Close button — top right */}
+        <button
+          onClick={() => setIsEditing(false)}
+          className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center z-10"
+          style={{ color: 'var(--label)' }}
+        >
+          <X size={24} />
+        </button>
 
-          <div className="px-4 pt-12 pb-6">
-            <h1 className="text-[#171717] text-[32px] font-black leading-8">{t.editBook}</h1>
-          </div>
+        <div className="px-4 pt-14 pb-4">
+          <h1 className="text-[28px] font-bold tracking-[-0.4px]" style={{ color: 'var(--label)' }}>
+            {t.editBook}
+          </h1>
+        </div>
 
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
-            <BookForm
-              initialData={book}
-              onSubmit={handleUpdate}
-              submitLabel={t.saveChanges}
-              loading={updateLoading}
-            />
-          </motion.div>
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
+          <BookForm
+            initialData={book}
+            onSubmit={handleUpdate}
+            submitLabel={t.saveChanges}
+            loading={updateLoading}
+          />
+        </motion.div>
       </div>
     )
   }
@@ -147,160 +152,158 @@ export default function BookDetailPage() {
   // ── View mode ────────────────────────────────────────────────────────────────
   return (
     <>
-      <div className="min-h-screen">
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
 
-          {/* ── Hero cover (230px) ──────────────────────────────────────── */}
-          <motion.div
-            initial={{ scale: 0.92, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 26, mass: 0.85 }}
-            className="relative h-[230px] w-full overflow-hidden bg-gray-200"
-          >
-            <div className="absolute inset-0">
-              {book.cover_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={heroImageUrl(book.cover_url)}
-                  alt={book.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                  <BookOpen size={60} className="text-gray-400" />
-                </div>
-              )}
-            </div>
-
-            {/* Gradient overlay: covers full image top → bottom */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0)] to-[rgba(0,0,0,0.7)]" />
-
-            {/* Edit + Close buttons — top right */}
-            <div className="absolute top-3 right-3 flex items-center gap-1">
-              <button
-                onClick={() => setIsEditing(true)}
-                className="w-9 h-9 flex items-center justify-center text-white"
-                aria-label="Edit"
-              >
-                <Pencil size={20} strokeWidth={2} />
-              </button>
-              <button
-                onClick={() => router.back()}
-                className="w-9 h-9 flex items-center justify-center text-white"
-                aria-label="Close"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* Info block at the bottom of the hero */}
-            <div className="absolute bottom-0 left-0 w-full px-4 pb-6 flex flex-col gap-2">
-              {/* Stars */}
-              <StarRating rating={book.rating} readonly size={20} darkBg />
-
-              {/* Title + month/year tag on the same row */}
-              <div className="flex items-end gap-2 flex-wrap">
-                <h1 className="text-white text-[24px] font-black leading-8">
-                  {book.title}
-                </h1>
-                <span
-                  className="px-2 py-1 mb-[2px] rounded-[8px] text-[12px] font-extrabold text-[#171717] uppercase leading-4"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.72)' }}
-                >
-                  {formatMonthShort(book.month)
-                    ? `${formatMonthShort(book.month)} ${book.year}`
-                    : book.year}
-                </span>
-              </div>
-
-              {/* Author */}
-              {book.author && (
-                <p className="text-white text-[12px] font-medium leading-4">
-                  {book.author}
-                </p>
-              )}
-            </div>
-          </motion.div>
-
-          {/* ── Details: notes · about · released/genre ─────────────────── */}
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-            className="px-4 pt-6 flex flex-col gap-6 text-[#171717]"
-          >
-            {/* My notes — body text, no heading */}
-            {book.notes ? (
-              <p className="text-[16px] font-normal leading-6 whitespace-pre-wrap">
-                {book.notes}
-              </p>
+        {/* ── Hero cover (230px) ──────────────────────────────────────── */}
+        <motion.div
+          initial={{ scale: 0.92, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 26, mass: 0.85 }}
+          className="relative h-[260px] w-full overflow-hidden"
+          style={{ backgroundColor: 'var(--fill)' }}
+        >
+          <div className="absolute inset-0">
+            {book.cover_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={heroImageUrl(book.cover_url)}
+                alt={book.title}
+                className="w-full h-full object-cover"
+              />
             ) : (
-              <p className="text-[rgba(23,23,23,0.72)] text-[16px] leading-6 italic">
-                {t.noNotesAdded}
+              <div className="w-full h-full flex items-center justify-center"
+                   style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}>
+                <BookOpen size={60} style={{ color: 'var(--label-tertiary)' }} />
+              </div>
+            )}
+          </div>
+
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0)] to-[rgba(0,0,0,0.72)]" />
+
+          {/* Edit + Close buttons — top right */}
+          <div className="absolute top-4 right-4 flex items-center gap-1">
+            <button
+              onClick={() => setIsEditing(true)}
+              className="w-9 h-9 flex items-center justify-center text-white"
+              aria-label="Edit"
+            >
+              <Pencil size={20} strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => router.back()}
+              className="w-9 h-9 flex items-center justify-center text-white"
+              aria-label="Close"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Info block at the bottom of the hero */}
+          <div className="absolute bottom-0 left-0 w-full px-4 pb-5 flex flex-col gap-2">
+            <StarRating rating={book.rating} readonly size={20} darkBg />
+            <div className="flex items-end gap-2 flex-wrap">
+              <h1 className="text-white text-[24px] font-bold leading-8">
+                {book.title}
+              </h1>
+              <span
+                className="px-2 py-1 mb-[2px] rounded-[8px] text-[12px] font-bold uppercase leading-4"
+                style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)' }}
+              >
+                {formatMonthShort(book.month)
+                  ? `${formatMonthShort(book.month)} ${book.year}`
+                  : book.year}
+              </span>
+            </div>
+            {book.author && (
+              <p className="text-[13px] font-medium leading-4" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                {book.author}
               </p>
             )}
+          </div>
+        </motion.div>
 
-            {/* Released + Genre */}
-            <div className="flex gap-2">
-              <div className="flex flex-col gap-2 w-[150px] shrink-0">
-                <span className="text-[12px] font-extrabold uppercase leading-4">
-                  {t.released}
+        {/* ── Details ─────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          className="px-4 pt-6 flex flex-col gap-6"
+        >
+          {/* My notes */}
+          {book.notes ? (
+            <p className="text-[16px] font-normal leading-6 whitespace-pre-wrap" style={{ color: 'var(--label)' }}>
+              {book.notes}
+            </p>
+          ) : (
+            <p className="text-[16px] leading-6 italic" style={{ color: 'var(--label-tertiary)' }}>
+              {t.noNotesAdded}
+            </p>
+          )}
+
+          {/* Released + Genre */}
+          <div className="flex gap-4">
+            <div className="flex flex-col gap-1.5 w-[140px] shrink-0">
+              <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
+                {t.released}
+              </span>
+              <span className="text-[16px] leading-6" style={{ color: 'var(--label)' }}>
+                {formatMonthShort(book.month)
+                  ? `${formatMonthShort(book.month)} ${book.year}`
+                  : book.year}
+              </span>
+            </div>
+            {(book.genre || apiGenre) && (
+              <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
+                  {t.genre}
                 </span>
-                <span className="text-[16px] font-normal leading-6">
-                  {formatMonthShort(book.month)
-                    ? `${formatMonthShort(book.month)} ${book.year}`
-                    : book.year}
+                <span className="text-[16px] leading-6" style={{ color: 'var(--label)' }}>
+                  {book.genre || apiGenre}
                 </span>
               </div>
-              {(book.genre || apiGenre) && (
-                <div className="flex flex-col gap-2 flex-1 min-w-0">
-                  <span className="text-[12px] font-extrabold uppercase leading-4">
-                    {t.genre}
-                  </span>
-                  <span className="text-[16px] font-normal leading-6">
-                    {book.genre || apiGenre}
-                  </span>
-                </div>
-              )}
-            </div>
+            )}
+          </div>
 
-            {/* About the book */}
-            <div className="flex flex-col gap-2">
-              <span className="text-[12px] font-extrabold uppercase leading-4">
-                {t.aboutTheBook}
-              </span>
-              {bookDataLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-gray-200 border-t-[#171717] rounded-full animate-spin" />
-                  <span className="text-[rgba(23,23,23,0.48)] text-[14px]">{t.loading}</span>
-                </div>
-              ) : description ? (
-                <p className="text-[16px] font-normal leading-6">
-                  {description}
-                </p>
-              ) : (
-                <p className="text-[rgba(23,23,23,0.48)] text-[16px] leading-6 italic">
-                  {t.noDescriptionAvailable}
-                </p>
-              )}
-            </div>
-          </motion.div>
+          {/* About the book */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
+              {t.aboutTheBook}
+            </span>
+            {bookDataLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-black/10 rounded-full animate-spin"
+                     style={{ borderTopColor: 'var(--primary)' }} />
+                <span className="text-[14px]" style={{ color: 'var(--label-tertiary)' }}>{t.loading}</span>
+              </div>
+            ) : description ? (
+              <p className="text-[16px] font-normal leading-6" style={{ color: 'var(--label)' }}>
+                {description}
+              </p>
+            ) : (
+              <p className="text-[16px] leading-6 italic" style={{ color: 'var(--label-tertiary)' }}>
+                {t.noDescriptionAvailable}
+              </p>
+            )}
+          </div>
+        </motion.div>
 
-          {/* ── Bottom CTA ──────────────────────────────────────────────────── */}
-          <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-            className="px-4 pt-3 pb-6"
+        {/* ── Delete CTA ──────────────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+          className="px-4 pt-4 pb-10"
+        >
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setShowDeleteConfirm(true)}
+            className="px-6 py-[11px] rounded-[14px] text-[16px] font-semibold"
+            style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
           >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowDeleteConfirm(true)}
-              className="px-6 py-2 bg-[#171717]/[0.08] rounded-full text-[#171717] text-[16px] font-bold"
-            >
-              {t.deleteBook}
-            </motion.button>
-          </motion.div>
+            {t.deleteBook}
+          </motion.button>
+        </motion.div>
       </div>
 
       <ConfirmDialog

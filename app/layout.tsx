@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
-import { Noto_Sans } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import './globals.css'
 import { AppProvider } from '@/contexts/AppContext'
 import CozyBody from '@/components/CozyBody'
 
-const notoSans = Noto_Sans({
+const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '700', '800', '900'],
+  weight: ['400', '500', '600', '700', '800'],
 })
 
 export const metadata: Metadata = {
@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={notoSans.className}>
+      <body className={inter.className}>
         <AppProvider>
           <CozyBody>{children}</CozyBody>
         </AppProvider>

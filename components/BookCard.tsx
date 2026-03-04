@@ -67,10 +67,12 @@ export default function BookCard({ book }: { book: Book }) {
             </div>
           )}
 
-          {/* Title */}
-          <p className="text-white text-[16px] font-bold leading-6 line-clamp-2">
-            {book.title}
-          </p>
+          {/* Title — only shown when there is no cover */}
+          {!book.cover_url && (
+            <p className="text-white text-[16px] font-bold leading-6 line-clamp-2">
+              {book.title}
+            </p>
+          )}
 
           {/* Stars */}
           <StarRating rating={book.rating} readonly size={16} />

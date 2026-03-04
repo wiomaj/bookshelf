@@ -2,12 +2,87 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, ChevronLeft, ChevronDown, BookOpen, BookMarked, Settings, Check } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Check, BookOpen, BookMarked, Settings } from 'lucide-react'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useApp, useT } from '@/contexts/AppContext'
 import { LANGUAGES } from '@/lib/translations'
 
 type View = 'settings' | 'changePassword'
+
+// ── Shared: floating glass bottom nav ────────────────────────────────────────
+function BottomNav({ t }: { t: ReturnType<typeof useT> }) {
+  const router = useRouter()
+  return (
+    <nav className="fixed bottom-5 left-4 right-4 z-50 max-w-[568px] mx-auto">
+      <div className="glass flex items-center rounded-[28px] px-2 py-2"
+           style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)' }}>
+        <Link href="/"
+              className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
+              style={{ color: 'var(--label-secondary)' }}>
+          <BookOpen size={24} strokeWidth={1.5} />
+          <span className="text-[11px] font-medium tracking-[-0.1px]">{t.tabRead}</span>
+        </Link>
+        <button
+              onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'to_read'); router.push('/') }}
+              className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
+              style={{ color: 'var(--label-secondary)' }}>
+          <BookMarked size={24} strokeWidth={1.5} />
+          <span className="text-[11px] font-medium tracking-[-0.1px]">{t.tabToRead}</span>
+        </button>
+        <button className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px] relative">
+          <div className="absolute inset-0 rounded-[22px]" style={{ backgroundColor: 'var(--primary-muted)' }} />
+          <Settings size={24} strokeWidth={2} className="relative" style={{ color: 'var(--primary)' }} />
+          <span className="text-[11px] font-medium tracking-[-0.1px] relative" style={{ color: 'var(--primary)' }}>
+            {t.settings}
+          </span>
+        </button>
+      </div>
+    </nav>
+  )
+}
+
+// ── Grouped list row ──────────────────────────────────────────────────────────
+function ListRow({
+  label,
+  labelColor,
+  sublabel,
+  onClick,
+  accessory,
+  first,
+  last,
+}: {
+  label: string
+  labelColor?: string
+  sublabel?: string
+  onClick?: () => void
+  accessory?: React.ReactNode
+  first?: boolean
+  last?: boolean
+}) {
+  return (
+    <>
+      <button
+        onClick={onClick}
+        className="w-full flex items-center px-4 min-h-[52px] gap-3 text-left transition-colors active:opacity-60"
+        style={{ backgroundColor: 'var(--bg-elevated)' }}
+      >
+        <div className="flex-1 py-3">
+          <span className="text-[17px]" style={{ color: labelColor ?? 'var(--label)' }}>
+            {label}
+          </span>
+          {sublabel && (
+            <p className="text-[13px] mt-0.5" style={{ color: 'var(--label-secondary)' }}>{sublabel}</p>
+          )}
+        </div>
+        {accessory ?? <ChevronRight size={18} style={{ color: 'var(--label-tertiary)' }} />}
+      </button>
+      {!last && (
+        <div className="h-px ml-4" style={{ backgroundColor: 'var(--separator)' }} />
+      )}
+    </>
+  )
+}
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -17,14 +92,12 @@ export default function SettingsPage() {
   const [view, setView] = useState<View>('settings')
   const [langOpen, setLangOpen] = useState(false)
 
-  // Change password state
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [cpLoading, setCpLoading] = useState(false)
   const [cpError, setCpError] = useState<string | null>(null)
   const [cpSuccess, setCpSuccess] = useState(false)
 
-  // Delete account state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -32,284 +105,277 @@ export default function SettingsPage() {
   const currentLang = LANGUAGES.find(l => l.code === language)
 
   const inputClass = `
-    w-full px-4 py-3 rounded-2xl border border-[rgba(23,23,23,0.12)]
-    bg-white text-[#171717] text-[16px] leading-6
-    placeholder:text-[rgba(23,23,23,0.35)]
-    focus:outline-none focus:border-[rgba(23,23,23,0.4)]
-    transition-colors
+    w-full px-4 py-[14px] rounded-[12px] text-[17px] transition-colors
+    focus:outline-none
   `
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault()
-    setCpError(null)
-    setCpSuccess(false)
-    if (newPassword !== confirmNewPassword) {
-      setCpError(t.passwordMismatch)
-      return
-    }
+    setCpError(null); setCpSuccess(false)
+    if (newPassword !== confirmNewPassword) { setCpError(t.passwordMismatch); return }
     setCpLoading(true)
     const { error } = await changePassword(newPassword)
     setCpLoading(false)
-    if (error) {
-      setCpError(error)
-    } else {
+    if (error) { setCpError(error) } else {
       setCpSuccess(true)
-      setNewPassword('')
-      setConfirmNewPassword('')
+      setNewPassword(''); setConfirmNewPassword('')
     }
   }
 
   async function handleDeleteAccount() {
-    setDeleteLoading(true)
-    setDeleteError(null)
+    setDeleteLoading(true); setDeleteError(null)
     const { error } = await deleteAccount()
     setDeleteLoading(false)
-    if (error) {
-      setDeleteError(error)
-    } else {
-      router.replace('/login')
-    }
+    if (error) { setDeleteError(error) } else { router.replace('/login') }
   }
 
-  // ── Bottom navigation bar ────────────────────────────────────────────────────
-  const BottomNav = () => (
-    <nav
-      className="fixed bottom-0 left-0 right-0 h-20 bg-white flex items-start pt-[11px] z-50"
-      style={{ borderTop: '1px solid #e0e0e0' }}
-    >
-      <Link
-        href="/"
-        className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full text-[#7c7c7c]"
-      >
-        <BookOpen size={24} strokeWidth={1.5} />
-        <span className="text-[12px] font-medium">{t.tabRead}</span>
-      </Link>
-
-      <Link
-        href="/"
-        className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full text-[#7c7c7c]"
-      >
-        <BookMarked size={24} strokeWidth={1.5} />
-        <span className="text-[12px] font-medium">{t.tabToRead}</span>
-      </Link>
-
-      <button className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full text-[#171717]">
-        <Settings size={24} strokeWidth={2} />
-        <span className="text-[12px] font-medium">{t.settings}</span>
-      </button>
-    </nav>
-  )
-
-  // ── Change Password sub-view ─────────────────────────────────────────────────
+  // ── Change Password sub-view ──────────────────────────────────────────────
   if (view === 'changePassword') {
     return (
-      <div className="min-h-screen flex flex-col pb-20">
-
-        {/* Back header */}
-        <div className="flex items-center p-3 h-[60px]">
+      <div className="min-h-screen pb-[100px]" style={{ backgroundColor: 'var(--bg)' }}>
+        {/* Back nav */}
+        <div className="flex items-center px-2 pt-3 h-[50px]">
           <button
             onClick={() => { setView('settings'); setCpError(null); setCpSuccess(false); setNewPassword(''); setConfirmNewPassword('') }}
-            className="p-[6px] w-[36px] flex items-center justify-center text-[#171717]"
-            aria-label="Back"
+            className="flex items-center gap-1 px-3 py-2 rounded-xl transition-colors"
+            style={{ color: 'var(--primary)' }}
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={20} strokeWidth={2.5} />
+            <span className="text-[17px]">{t.settings}</span>
           </button>
         </div>
 
-        {/* Title */}
-        <div className="px-4 pb-6">
-          <h1 className="text-[24px] font-black text-[#171717] leading-8">{t.changePassword}</h1>
+        <div className="px-5 pt-2 pb-6">
+          <h1 className="text-[34px] font-bold tracking-[-0.5px]" style={{ color: 'var(--label)' }}>
+            {t.changePassword}
+          </h1>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleChangePassword} className="px-4 flex flex-col gap-3">
-          <input
-            type="password"
-            required
-            autoComplete="new-password"
-            placeholder={t.newPassword}
-            value={newPassword}
-            onChange={e => setNewPassword(e.target.value)}
-            className={inputClass}
-          />
-          <input
-            type="password"
-            required
-            autoComplete="new-password"
-            placeholder={t.confirmNewPassword}
-            value={confirmNewPassword}
-            onChange={e => setConfirmNewPassword(e.target.value)}
-            className={inputClass}
-          />
+          <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            <input
+              type="password"
+              required
+              autoComplete="new-password"
+              placeholder={t.newPassword}
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+              className={inputClass}
+              style={{ color: 'var(--label)', borderBottom: '1px solid var(--separator)' }}
+            />
+            <input
+              type="password"
+              required
+              autoComplete="new-password"
+              placeholder={t.confirmNewPassword}
+              value={confirmNewPassword}
+              onChange={e => setConfirmNewPassword(e.target.value)}
+              className={inputClass}
+              style={{ color: 'var(--label)' }}
+            />
+          </div>
 
-          {cpError && (
-            <p className="text-red-500 text-[14px] leading-5 px-1">{cpError}</p>
-          )}
-          {cpSuccess && (
-            <p className="text-green-600 text-[14px] leading-5 px-1">{t.passwordChangedSuccess}</p>
-          )}
+          {cpError && <p className="text-[14px] px-1" style={{ color: '#FF3B30' }}>{cpError}</p>}
+          {cpSuccess && <p className="text-[14px] px-1" style={{ color: '#34C759' }}>{t.passwordChangedSuccess}</p>}
 
-          <button
+          <motion.button
             type="submit"
             disabled={cpLoading}
-            className="w-full py-4 mt-1 rounded-full text-white text-[16px] font-bold disabled:opacity-60 transition-opacity"
+            whileTap={{ scale: 0.97 }}
+            className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold mt-2 disabled:opacity-50 transition-opacity"
             style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
           >
             {cpLoading ? t.savingPassword : t.savePassword}
-          </button>
+          </motion.button>
         </form>
 
-        <BottomNav />
+        <BottomNav t={t} />
       </div>
     )
   }
 
-  // ── Main settings view ───────────────────────────────────────────────────────
+  // ── Main Settings view ────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex flex-col pb-20">
+    <div className="min-h-screen pb-[100px]" style={{ backgroundColor: 'var(--bg)' }}>
 
-      {/* Title */}
-      <div className="px-4 pt-6 pb-4">
-        <h1 className="text-[24px] font-black text-[#171717] leading-8">{t.settings}</h1>
+      {/* Large title */}
+      <div className="px-5 pt-14 pb-6">
+        <h1 className="text-[34px] font-bold tracking-[-0.5px]" style={{ color: 'var(--label)' }}>
+          {t.settings}
+        </h1>
       </div>
 
-      <div className="px-4 pb-10 flex flex-col gap-6">
+      <div className="px-4 flex flex-col gap-8">
 
-        {/* ── Cozy mode ──────────────────────────────────────────────────── */}
-        <div className="flex items-start gap-2">
-          <div className="flex-1 flex flex-col gap-2">
-            <p className="text-[18px] font-bold text-[#171717] leading-6 tracking-[-0.3px]">{t.cozyMode}</p>
-            <p className="text-[16px] text-[#171717] leading-6">{t.cozyModeDescription}</p>
-          </div>
-          <button
-            onClick={() => setCozyMode(!cozyMode)}
-            className="relative w-[51px] h-[31px] rounded-[100px] shrink-0 transition-colors duration-300"
-            style={{ backgroundColor: cozyMode ? '#34C759' : 'rgba(120,120,128,0.16)' }}
-            aria-pressed={cozyMode}
-            aria-label="Toggle cozy mode"
-          >
-            <div
-              className="absolute top-[2px] w-[27px] h-[27px] bg-white rounded-[100px] transition-transform duration-300"
-              style={{
-                transform: cozyMode ? 'translateX(22px)' : 'translateX(2px)',
-                boxShadow: '0px 0px 0px 0px rgba(0,0,0,0.04), 0px 3px 8px 0px rgba(0,0,0,0.15), 0px 3px 1px 0px rgba(0,0,0,0.06)',
-              }}
-            />
-          </button>
-        </div>
-
-        {/* ── Language dropdown ───────────────────────────────────────────── */}
+        {/* ── Preferences section ─────────────────────────────────────── */}
         <div className="flex flex-col gap-2">
-          <p className="text-[18px] font-bold text-[#171717] leading-6 tracking-[-0.3px]">{t.language}</p>
-          <div className="relative">
-            <button
-              onClick={() => setLangOpen(o => !o)}
-              className="w-full h-[60px] flex items-center justify-between px-4 py-3 rounded-[12px] bg-white"
-              style={{ border: '2px solid rgba(23,23,23,0.16)' }}
-            >
-              <span className="text-[16px] text-[#171717] leading-6">
-                {currentLang?.flag}&nbsp;&nbsp;{currentLang?.label}
-              </span>
-              <ChevronDown
-                size={24}
-                className="text-[#171717] transition-transform duration-200"
-                style={{ transform: langOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-              />
-            </button>
+          <p className="text-[13px] font-medium uppercase tracking-wide px-1"
+             style={{ color: 'var(--label-secondary)' }}>
+            Preferences
+          </p>
 
-            {langOpen && (
-              <div
-                className="absolute top-full left-0 right-0 mt-1 bg-white rounded-[12px] z-10 overflow-hidden"
-                style={{ border: '2px solid rgba(23,23,23,0.16)' }}
-              >
-                {LANGUAGES.map((lang, i) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => { setLanguage(lang.code); setLangOpen(false) }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors active:bg-[rgba(23,23,23,0.04)] ${
-                      i < LANGUAGES.length - 1 ? 'border-b border-[rgba(23,23,23,0.08)]' : ''
-                    }`}
-                  >
-                    <span className="text-[18px] leading-none">{lang.flag}</span>
-                    <span className="flex-1 text-[16px] text-[#171717] leading-6">{lang.label}</span>
-                    {language === lang.code && (
-                      <Check size={18} strokeWidth={2.5} style={{ color: 'var(--primary)' }} />
-                    )}
-                  </button>
-                ))}
+          <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            {/* Cozy mode row */}
+            <div className="flex items-center px-4 min-h-[52px] gap-3">
+              <div className="flex-1 py-3">
+                <p className="text-[17px]" style={{ color: 'var(--label)' }}>{t.cozyMode}</p>
+                <p className="text-[13px] mt-0.5" style={{ color: 'var(--label-secondary)' }}>
+                  {t.cozyModeDescription}
+                </p>
               </div>
-            )}
+              <button
+                onClick={() => setCozyMode(!cozyMode)}
+                className="relative w-[51px] h-[31px] rounded-full shrink-0 transition-colors duration-300"
+                style={{ backgroundColor: cozyMode ? '#34C759' : 'rgba(120,120,128,0.22)' }}
+                aria-pressed={cozyMode}
+              >
+                <div
+                  className="absolute top-[2px] w-[27px] h-[27px] bg-white rounded-full transition-transform duration-300"
+                  style={{
+                    transform: cozyMode ? 'translateX(22px)' : 'translateX(2px)',
+                    boxShadow: '0 3px 8px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.06)',
+                  }}
+                />
+              </button>
+            </div>
+
+            {/* Separator */}
+            <div className="h-px ml-4" style={{ backgroundColor: 'var(--separator)' }} />
+
+            {/* Language row */}
+            <div className="relative">
+              <button
+                onClick={() => setLangOpen(o => !o)}
+                className="w-full flex items-center px-4 min-h-[52px] gap-3 transition-colors active:opacity-60"
+              >
+                <span className="flex-1 text-[17px] py-3" style={{ color: 'var(--label)' }}>
+                  {t.language}
+                </span>
+                <span className="text-[17px]" style={{ color: 'var(--label-secondary)' }}>
+                  {currentLang?.flag}&nbsp;{currentLang?.label}
+                </span>
+                <ChevronRight
+                  size={18}
+                  className="transition-transform duration-200"
+                  style={{
+                    color: 'var(--label-tertiary)',
+                    transform: langOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                  }}
+                />
+              </button>
+
+              {langOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mx-4 mb-3 rounded-[14px] overflow-hidden"
+                  style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--separator)' }}
+                >
+                  {LANGUAGES.map((lang, i) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => { setLanguage(lang.code); setLangOpen(false) }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors active:opacity-60"
+                    >
+                      <span className="text-[18px] leading-none">{lang.flag}</span>
+                      <span className="flex-1 text-[16px]" style={{ color: 'var(--label)' }}>{lang.label}</span>
+                      {language === lang.code && (
+                        <Check size={17} strokeWidth={2.5} style={{ color: 'var(--primary)' }} />
+                      )}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* ── Divider ─────────────────────────────────────────────────────── */}
-        <div className="h-px bg-[#e0e0e0]" />
+        {/* ── My Account section ──────────────────────────────────────── */}
+        <div className="flex flex-col gap-2">
+          <p className="text-[13px] font-medium uppercase tracking-wide px-1"
+             style={{ color: 'var(--label-secondary)' }}>
+            {t.myAccount}
+          </p>
 
-        {/* ── My Account ──────────────────────────────────────────────────── */}
-        <p className="text-[24px] font-black text-[#171717] leading-8">{t.myAccount}</p>
-
-        <div className="flex flex-col -mt-2">
-          <button
-            onClick={() => setView('changePassword')}
-            className="flex items-center p-4 w-full text-left"
-          >
-            <span className="flex-1 text-[16px] font-bold text-[#171717] leading-6">{t.changePassword}</span>
-            <ChevronRight size={24} className="text-[#171717] shrink-0" />
-          </button>
-
-          <button
-            onClick={async () => { await signOut(); router.replace('/login') }}
-            className="flex items-center p-4 w-full text-left"
-          >
-            <span className="flex-1 text-[16px] font-bold text-[#171717] leading-6">{t.signOut}</span>
-            <ChevronRight size={24} className="text-[#171717] shrink-0" />
-          </button>
-
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center p-4 w-full text-left"
-          >
-            <span className="flex-1 text-[16px] font-bold text-red-500 leading-6">{t.deleteAccount}</span>
-            <ChevronRight size={24} className="text-red-500 shrink-0" />
-          </button>
+          <div className="rounded-[16px] overflow-visible" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            <ListRow
+              label={t.changePassword}
+              onClick={() => setView('changePassword')}
+              first
+            />
+            <ListRow
+              label={t.signOut}
+              onClick={async () => { await signOut(); router.replace('/login') }}
+            />
+            <ListRow
+              label={t.deleteAccount}
+              labelColor="#FF3B30"
+              onClick={() => setShowDeleteConfirm(true)}
+              last
+              accessory={<ChevronRight size={18} style={{ color: '#FF3B30', opacity: 0.5 }} />}
+            />
+          </div>
         </div>
 
       </div>
 
-      {/* ── Delete account confirmation dialog ──────────────────────────────── */}
+      {/* ── Delete account sheet ─────────────────────────────────────────── */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-8">
-          <div className="w-full max-w-[400px] bg-white rounded-3xl p-6 flex flex-col gap-5">
-            <div className="flex flex-col gap-2">
-              <h2 className="text-[24px] font-black text-[#171717] leading-8">{t.deleteAccount}?</h2>
-              <p className="text-[16px] text-[rgba(23,23,23,0.56)] leading-6">{t.deleteAccountDesc}</p>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          style={{ backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)' }}
+        >
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+            className="w-full max-w-[600px] rounded-t-[28px] p-6 pb-10"
+            style={{ backgroundColor: 'var(--bg-elevated)' }}
+          >
+            {/* Drag handle */}
+            <div className="w-10 h-1 rounded-full mx-auto mb-5"
+                 style={{ backgroundColor: 'var(--separator-opaque)' }} />
+
+            <div className="flex flex-col gap-2 mb-6">
+              <h2 className="text-[22px] font-bold tracking-[-0.3px]" style={{ color: 'var(--label)' }}>
+                {t.deleteAccount}?
+              </h2>
+              <p className="text-[15px] leading-5" style={{ color: 'var(--label-secondary)' }}>
+                {t.deleteAccountDesc}
+              </p>
             </div>
 
             {deleteError && (
-              <p className="text-red-500 text-[14px] leading-5">{deleteError}</p>
+              <p className="text-[14px] mb-4" style={{ color: '#FF3B30' }}>{deleteError}</p>
             )}
 
             <div className="flex flex-col gap-3">
-              <button
+              <motion.button
+                whileTap={{ scale: 0.97 }}
                 onClick={handleDeleteAccount}
                 disabled={deleteLoading}
-                className="w-full py-4 rounded-full text-white text-[16px] font-bold bg-red-500 disabled:opacity-60 transition-opacity"
+                className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold disabled:opacity-50"
+                style={{ backgroundColor: '#FF3B30' }}
               >
                 {deleteLoading ? t.deleting : t.deleteAccount}
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.97 }}
                 onClick={() => { setShowDeleteConfirm(false); setDeleteError(null) }}
                 disabled={deleteLoading}
-                className="w-full py-4 rounded-full text-[#171717] text-[16px] font-bold bg-[rgba(23,23,23,0.06)] disabled:opacity-60"
+                className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold disabled:opacity-50"
+                style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
               >
                 {t.cancel}
-              </button>
+              </motion.button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
-      <BottomNav />
+      <BottomNav t={t} />
     </div>
   )
 }

@@ -87,6 +87,17 @@ export type Translations = {
   passwordChangedSuccess: string
   deleteAccount: string
   deleteAccountDesc: string
+  // Forgot / reset password
+  forgotPassword: string
+  resetYourPassword: string
+  resetPasswordDesc: string
+  sendResetLink: string
+  sendingResetLink: string
+  resetLinkSent: string
+  resetLinkSentDesc: string
+  setNewPassword: string
+  setNewPasswordDesc: string
+  passwordResetSuccess: string
   // To Read tab
   readBooksTitle: string
   toReadBooksTitle: string
@@ -170,6 +181,16 @@ const en: Translations = {
   passwordChangedSuccess: 'Password changed successfully.',
   deleteAccount: 'Delete account',
   deleteAccountDesc: 'This will permanently delete your account and all your books. This cannot be undone.',
+  forgotPassword: 'Forgot password?',
+  resetYourPassword: 'Reset your password',
+  resetPasswordDesc: 'Enter your email and we\'ll send you a reset link.',
+  sendResetLink: 'Send reset link',
+  sendingResetLink: 'Sending…',
+  resetLinkSent: 'Check your email',
+  resetLinkSentDesc: 'We sent you a password reset link. Click it to set a new password.',
+  setNewPassword: 'Set new password',
+  setNewPasswordDesc: 'Enter a new password for your account.',
+  passwordResetSuccess: 'Password updated! You can now sign in.',
   readBooksTitle: 'Read books',
   toReadBooksTitle: 'Books to read',
   tabRead: 'Read',
@@ -252,6 +273,16 @@ const de: Translations = {
   passwordChangedSuccess: 'Passwort erfolgreich geändert.',
   deleteAccount: 'Konto löschen',
   deleteAccountDesc: 'Dein Konto und alle deine Bücher werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.',
+  forgotPassword: 'Passwort vergessen?',
+  resetYourPassword: 'Passwort zurücksetzen',
+  resetPasswordDesc: 'Gib deine E-Mail ein und wir senden dir einen Reset-Link.',
+  sendResetLink: 'Reset-Link senden',
+  sendingResetLink: 'Senden…',
+  resetLinkSent: 'Prüfe deine E-Mail',
+  resetLinkSentDesc: 'Wir haben dir einen Passwort-Reset-Link geschickt. Klick ihn an, um ein neues Passwort zu setzen.',
+  setNewPassword: 'Neues Passwort setzen',
+  setNewPasswordDesc: 'Gib ein neues Passwort für dein Konto ein.',
+  passwordResetSuccess: 'Passwort aktualisiert! Du kannst dich jetzt anmelden.',
   readBooksTitle: 'Gelesene Bücher',
   toReadBooksTitle: 'Bücher zum Lesen',
   tabRead: 'Gelesen',
@@ -334,6 +365,16 @@ const fr: Translations = {
   passwordChangedSuccess: 'Mot de passe modifié avec succès.',
   deleteAccount: 'Supprimer le compte',
   deleteAccountDesc: 'Votre compte et tous vos livres seront supprimés définitivement. Cette action est irréversible.',
+  forgotPassword: 'Mot de passe oublié ?',
+  resetYourPassword: 'Réinitialiser votre mot de passe',
+  resetPasswordDesc: 'Entrez votre e-mail et nous vous enverrons un lien de réinitialisation.',
+  sendResetLink: 'Envoyer le lien',
+  sendingResetLink: 'Envoi…',
+  resetLinkSent: 'Vérifiez vos e-mails',
+  resetLinkSentDesc: 'Nous vous avons envoyé un lien de réinitialisation. Cliquez dessus pour définir un nouveau mot de passe.',
+  setNewPassword: 'Définir un nouveau mot de passe',
+  setNewPasswordDesc: 'Entrez un nouveau mot de passe pour votre compte.',
+  passwordResetSuccess: 'Mot de passe mis à jour ! Vous pouvez maintenant vous connecter.',
   readBooksTitle: 'Livres lus',
   toReadBooksTitle: 'Livres à lire',
   tabRead: 'Lus',
@@ -416,6 +457,16 @@ const es: Translations = {
   passwordChangedSuccess: 'Contraseña cambiada correctamente.',
   deleteAccount: 'Eliminar cuenta',
   deleteAccountDesc: 'Tu cuenta y todos tus libros se eliminarán permanentemente. Esta acción no se puede deshacer.',
+  forgotPassword: '¿Olvidaste tu contraseña?',
+  resetYourPassword: 'Restablecer contraseña',
+  resetPasswordDesc: 'Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.',
+  sendResetLink: 'Enviar enlace',
+  sendingResetLink: 'Enviando…',
+  resetLinkSent: 'Revisa tu correo',
+  resetLinkSentDesc: 'Te enviamos un enlace para restablecer tu contraseña. Haz clic en él para establecer una nueva.',
+  setNewPassword: 'Establecer nueva contraseña',
+  setNewPasswordDesc: 'Ingresa una nueva contraseña para tu cuenta.',
+  passwordResetSuccess: '¡Contraseña actualizada! Ya puedes iniciar sesión.',
   readBooksTitle: 'Libros leídos',
   toReadBooksTitle: 'Libros por leer',
   tabRead: 'Leídos',
@@ -498,6 +549,16 @@ const pl: Translations = {
   passwordChangedSuccess: 'Hasło zostało pomyślnie zmienione.',
   deleteAccount: 'Usuń konto',
   deleteAccountDesc: 'Twoje konto i wszystkie książki zostaną trwale usunięte. Tej operacji nie można cofnąć.',
+  forgotPassword: 'Zapomniałeś hasła?',
+  resetYourPassword: 'Zresetuj hasło',
+  resetPasswordDesc: 'Podaj swój adres e-mail, a wyślemy Ci link do resetowania hasła.',
+  sendResetLink: 'Wyślij link',
+  sendingResetLink: 'Wysyłanie…',
+  resetLinkSent: 'Sprawdź swoją pocztę',
+  resetLinkSentDesc: 'Wysłaliśmy Ci link do resetowania hasła. Kliknij go, aby ustawić nowe hasło.',
+  setNewPassword: 'Ustaw nowe hasło',
+  setNewPasswordDesc: 'Wprowadź nowe hasło dla swojego konta.',
+  passwordResetSuccess: 'Hasło zaktualizowane! Możesz się teraz zalogować.',
   readBooksTitle: 'Przeczytane książki',
   toReadBooksTitle: 'Książki do przeczytania',
   tabRead: 'Przeczytane',

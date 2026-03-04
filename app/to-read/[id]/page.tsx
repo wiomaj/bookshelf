@@ -35,7 +35,6 @@ export default function ToReadDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
-  // API-fetched metadata
   const [description, setDescription] = useState<string | undefined>(undefined)
   const [apiGenre, setApiGenre] = useState<string | undefined>(undefined)
   const [publishedYear, setPublishedYear] = useState<string | undefined>(undefined)
@@ -74,16 +73,17 @@ export default function ToReadDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-7 h-7 border-2 border-gray-200 border-t-[#171717] rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
+        <div className="w-7 h-7 border-2 border-black/10 rounded-full animate-spin"
+             style={{ borderTopColor: 'var(--primary)' }} />
       </div>
     )
   }
 
   if (!book) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-[rgba(23,23,23,0.55)]">Book not found.</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
+        <p className="text-[16px]" style={{ color: 'var(--label-secondary)' }}>Book not found.</p>
       </div>
     )
   }
@@ -93,10 +93,10 @@ export default function ToReadDetailPage() {
 
   return (
     <>
-      <div className="min-h-screen pb-8">
+      <div className="min-h-screen pb-8" style={{ backgroundColor: 'var(--bg)' }}>
 
         {/* ── Hero: full-width cover + gradient overlay ────────────────────── */}
-        <div className="relative w-full min-h-[230px] bg-gray-200">
+        <div className="relative w-full min-h-[260px]" style={{ backgroundColor: 'var(--fill)' }}>
           {book.cover_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -105,67 +105,68 @@ export default function ToReadDetailPage() {
               className="absolute inset-0 w-full h-full object-cover"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-              <BookOpen size={48} className="text-gray-400" />
+            <div className="absolute inset-0 flex items-center justify-center"
+                 style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}>
+              <BookOpen size={48} style={{ color: 'var(--label-tertiary)' }} />
             </div>
           )}
 
-          {/* Gradient overlay: transparent top → dark bottom */}
+          {/* Gradient overlay */}
           <div
             className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.75) 100%)' }}
+            style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.72) 100%)' }}
           />
 
-          {/* X close button — top right, always above content */}
+          {/* X close button */}
           <button
             onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'to_read'); router.push('/') }}
-            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center z-10"
+            className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center z-10"
             aria-label="Close"
           >
             <X size={24} className="text-white" strokeWidth={2} />
           </button>
 
-          {/* Title + tags + author — flows naturally, padded below X button */}
-          <div className="relative z-[1] pt-12 px-4 pb-6 flex flex-col gap-2">
+          {/* Title + tags + author */}
+          <div className="relative z-[1] pt-12 px-4 pb-5 flex flex-col gap-2">
             <div className="flex items-end gap-2 flex-wrap">
-              <h1 className="text-[24px] font-black text-white leading-8">{book.title}</h1>
+              <h1 className="text-[24px] font-bold text-white leading-8">{book.title}</h1>
               <div className="flex items-center gap-1 mb-[2px]">
                 <span
-                  className="px-2 py-1 rounded-[8px] text-[12px] font-extrabold text-[#171717] uppercase leading-4"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.72)' }}
+                  className="px-2 py-1 rounded-[8px] text-[12px] font-bold uppercase leading-4"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)' }}
                 >
                   {dateTag}
                 </span>
                 <span
-                  className="px-2 py-1 rounded-[8px] text-[12px] font-extrabold text-[#171717] uppercase leading-4"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.72)' }}
+                  className="px-2 py-1 rounded-[8px] text-[12px] font-bold uppercase leading-4"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)' }}
                 >
                   {durationTag}
                 </span>
               </div>
             </div>
             {book.author && (
-              <p className="text-[12px] font-medium text-white leading-4">{book.author}</p>
+              <p className="text-[13px] font-medium leading-4" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                {book.author}
+              </p>
             )}
           </div>
         </div>
 
-        {/* ── CTA buttons — side by side ───────────────────────────────────── */}
+        {/* ── CTA buttons ───────────────────────────────────────────────── */}
         <div className="flex gap-3 px-4 pt-4">
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex-1 py-3 rounded-full text-[16px] font-bold text-[#171717] text-center"
-            style={{ backgroundColor: 'rgba(23,23,23,0.08)' }}
+            className="flex-1 py-[13px] rounded-[14px] text-[16px] font-semibold text-center"
+            style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
           >
             {t.deleteBook}
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => router.push(`/book/${book.id}`)}
-            className="flex-1 py-3 rounded-full text-[16px] font-bold text-white text-center"
+            className="flex-1 py-[13px] rounded-[14px] text-[16px] font-semibold text-white text-center"
             style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
           >
             {t.markAsRead}
@@ -177,43 +178,52 @@ export default function ToReadDetailPage() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-          className="px-4 pt-6 flex flex-col gap-6 text-[#171717]"
+          className="px-4 pt-6 flex flex-col gap-6"
         >
           {/* My notes */}
           {book.notes && (
-            <p className="text-[16px] font-normal leading-6 whitespace-pre-wrap">{book.notes}</p>
+            <p className="text-[16px] font-normal leading-6 whitespace-pre-wrap" style={{ color: 'var(--label)' }}>
+              {book.notes}
+            </p>
           )}
 
-          {/* About the book — API description */}
-          <div className="flex flex-col gap-2">
-            <span className="text-[12px] font-extrabold uppercase leading-4">{t.aboutTheBook}</span>
+          {/* About the book */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
+              {t.aboutTheBook}
+            </span>
             {bookDataLoading ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-gray-200 border-t-[#171717] rounded-full animate-spin" />
-                <span className="text-[rgba(23,23,23,0.48)] text-[14px]">{t.loading}</span>
+                <div className="w-4 h-4 border-2 border-black/10 rounded-full animate-spin"
+                     style={{ borderTopColor: 'var(--primary)' }} />
+                <span className="text-[14px]" style={{ color: 'var(--label-tertiary)' }}>{t.loading}</span>
               </div>
             ) : description ? (
-              <p className="text-[16px] font-normal leading-6">{description}</p>
+              <p className="text-[16px] font-normal leading-6" style={{ color: 'var(--label)' }}>{description}</p>
             ) : (
-              <p className="text-[rgba(23,23,23,0.48)] text-[16px] leading-6 italic">
+              <p className="text-[16px] leading-6 italic" style={{ color: 'var(--label-tertiary)' }}>
                 {t.noDescriptionAvailable}
               </p>
             )}
           </div>
 
-          {/* Released + Genre — below About the book, matching Figma order */}
+          {/* Released + Genre */}
           {(publishedYear || displayGenre) && (
-            <div className="flex gap-2">
+            <div className="flex gap-4">
               {publishedYear && (
-                <div className="flex flex-col gap-2 w-[150px] shrink-0">
-                  <span className="text-[12px] font-extrabold uppercase leading-4">{t.released}</span>
-                  <span className="text-[16px] font-normal leading-6">{publishedYear}</span>
+                <div className="flex flex-col gap-1.5 w-[140px] shrink-0">
+                  <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
+                    {t.released}
+                  </span>
+                  <span className="text-[16px] leading-6" style={{ color: 'var(--label)' }}>{publishedYear}</span>
                 </div>
               )}
               {displayGenre && (
-                <div className="flex flex-col gap-2 flex-1 min-w-0">
-                  <span className="text-[12px] font-extrabold uppercase leading-4">{t.genre}</span>
-                  <span className="text-[16px] font-normal leading-6">{displayGenre}</span>
+                <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                  <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
+                    {t.genre}
+                  </span>
+                  <span className="text-[16px] leading-6" style={{ color: 'var(--label)' }}>{displayGenre}</span>
                 </div>
               )}
             </div>
