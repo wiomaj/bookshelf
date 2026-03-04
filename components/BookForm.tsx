@@ -480,48 +480,52 @@ export default function BookForm({
       </div>
 
       {/* ── Cover ──────────────────────────────────────────────────────────── */}
-      {coverUrl ? (
-        <div className="flex items-center gap-4 px-1">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={coverUrl}
-            alt="Cover preview"
-            className="w-14 h-20 object-cover rounded-[10px] shadow-sm flex-shrink-0"
-          />
-          <div className="flex flex-col gap-1">
-            <p className="text-[15px] font-semibold" style={{ color: 'var(--label)' }}>{t.coverPreview}</p>
-            <button type="button" onClick={() => photoInputRef.current?.click()}
-              className="text-[14px] text-left" style={{ color: 'var(--primary)' }}>
-              {t.takePhoto}
-            </button>
-            <button type="button" onClick={() => setCoverUrl('')}
-              className="text-[14px] text-left" style={{ color: '#FF3B30' }}>
-              {t.removeCover}
-            </button>
+      <div>
+        <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>
+          {t.coverPreview}
+        </label>
+        {coverUrl ? (
+          <div className="flex items-center gap-4 px-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={coverUrl}
+              alt="Cover preview"
+              className="w-14 h-20 object-cover rounded-[10px] shadow-sm flex-shrink-0"
+            />
+            <div className="flex flex-col gap-1">
+              <button type="button" onClick={() => photoInputRef.current?.click()}
+                className="text-[14px] text-left" style={{ color: 'var(--primary)' }}>
+                {t.takePhoto}
+              </button>
+              <button type="button" onClick={() => setCoverUrl('')}
+                className="text-[14px] text-left" style={{ color: '#FF3B30' }}>
+                {t.removeCover}
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => photoInputRef.current?.click()}
-          disabled={photoLoading}
-          className="flex items-center justify-center gap-2 w-full h-[52px] rounded-[14px] text-[16px] disabled:opacity-50"
-          style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--label-secondary)' }}
-        >
-          {photoLoading
-            ? <><Loader2 size={18} className="animate-spin" /><span>{t.uploadingPhoto}</span></>
-            : <><Camera size={18} /><span>{t.takePhoto}</span></>
-          }
-        </button>
-      )}
-      <input
-        ref={photoInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handlePhotoCapture}
-      />
+        ) : (
+          <button
+            type="button"
+            onClick={() => photoInputRef.current?.click()}
+            disabled={photoLoading}
+            className="flex items-center justify-center gap-2 w-full h-[52px] rounded-[14px] text-[16px] disabled:opacity-50"
+            style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--label-secondary)' }}
+          >
+            {photoLoading
+              ? <><Loader2 size={18} className="animate-spin" /><span>{t.uploadingPhoto}</span></>
+              : <><Camera size={18} /><span>{t.takePhoto}</span></>
+            }
+          </button>
+        )}
+        <input
+          ref={photoInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={handlePhotoCapture}
+        />
+      </div>
 
       {/* ── Error ──────────────────────────────────────────────────────────── */}
       {error && (
