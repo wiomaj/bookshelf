@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase'
 import { useApp, useT } from '@/contexts/AppContext'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 
-export default function ToReadAddPage() {
+export default function WishlistAddPage() {
   const router = useRouter()
   const { user } = useApp()
   const t = useT()
@@ -24,13 +24,13 @@ export default function ToReadAddPage() {
         title: data.title,
         author: data.author,
         cover_url: data.cover_url,
-        status: 'to_read',
+        status: 'wishlist',
         year: data.year,
         month: data.month,
         rating: 0,
       })
 
-      // If the book was saved without a cover, search for one automatically
+      // If no cover, search for one automatically
       if (!data.cover_url && data.title) {
         try {
           const cover = await fetchCoverByTitleAuthor(data.title, data.author ?? '')
@@ -40,8 +40,8 @@ export default function ToReadAddPage() {
         }
       }
 
-      sessionStorage.setItem('bookshelf_returnTab', 'to_read')
-      sessionStorage.setItem('bookshelf_flash', 'bookAddedToRead')
+      sessionStorage.setItem('bookshelf_returnTab', 'wishlist')
+      sessionStorage.setItem('bookshelf_flash', 'bookAddedToWishlist')
       router.push('/')
     } finally {
       setLoading(false)
@@ -66,7 +66,7 @@ export default function ToReadAddPage() {
       {/* Page title */}
       <div className="px-4 pb-5">
         <h1 className="text-[28px] font-bold tracking-[-0.4px]" style={{ color: 'var(--label)' }}>
-          {t.addToReadingList}
+          {t.addToWishlist}
         </h1>
       </div>
 
@@ -78,7 +78,8 @@ export default function ToReadAddPage() {
         <ToReadForm
           onSubmit={handleSubmit}
           loading={loading}
-          submitLabel={t.addToReadingList}
+          submitLabel={t.addToWishlist}
+          hideDateField
         />
       </motion.div>
     </div>

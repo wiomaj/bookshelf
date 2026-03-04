@@ -24,6 +24,7 @@ export type Translations = {
   saveChanges: string
   editBook: string
   changesSaved: string
+  bookAddedToRead: string
   // Book form
   titleLabel: string
   titlePlaceholder: string
@@ -37,6 +38,8 @@ export type Translations = {
   notesPlaceholder: string
   coverPreview: string
   removeCover: string
+  takePhoto: string
+  uploadingPhoto: string
   // View page
   noNotesAdded: string
   released: string
@@ -103,12 +106,25 @@ export type Translations = {
   toReadBooksTitle: string
   tabRead: string
   tabToRead: string
+  tabWishlist: string
   toReadEmptyTitle: string
   toReadEmptyCopy: string
   addToReadingList: string
   markAsRead: string
   toReadNotesPlaceholder: string
   whenDidYouGetIt: string
+  wishlistTitle: string
+  wishlistEmptyTitle: string
+  wishlistEmptyCopy: string
+  addToWishlist: string
+  bookAddedToWishlist: string
+  moveToReadingList: string
+  // Add to Home Screen
+  athsTitle: string
+  athsAndroid: string
+  athsIosTap: string
+  athsIosThen: string
+  athsInstall: string
 }
 
 const en: Translations = {
@@ -125,6 +141,7 @@ const en: Translations = {
   saveChanges: 'Save Changes',
   editBook: 'Edit book',
   changesSaved: 'Changes saved!',
+  bookAddedToRead: 'Added to reading list!',
   titleLabel: 'Title',
   titlePlaceholder: 'Start typing to search…',
   authorLabel: 'Author',
@@ -137,6 +154,8 @@ const en: Translations = {
   notesPlaceholder: 'What did you think about this book?',
   coverPreview: 'Cover preview',
   removeCover: 'Remove cover',
+  takePhoto: 'Take photo',
+  uploadingPhoto: 'Uploading…',
   noNotesAdded: 'No notes added.',
   released: 'Released',
   genre: 'Genre',
@@ -195,12 +214,24 @@ const en: Translations = {
   toReadBooksTitle: 'Books to read',
   tabRead: 'Read',
   tabToRead: 'To Read',
+  tabWishlist: 'Wishlist',
   toReadEmptyTitle: 'Unread books',
   toReadEmptyCopy: 'Add the books you already own, but haven\'t read so far... So many books, so little time.',
   addToReadingList: 'Add a book to be read',
   markAsRead: 'Mark as Read',
+  wishlistTitle: 'Wishlist',
+  wishlistEmptyTitle: 'Your wishlist is empty',
+  wishlistEmptyCopy: 'Save books you want to buy — so you always know what to grab at the bookshop.',
+  addToWishlist: 'Add to Wishlist',
+  bookAddedToWishlist: 'Added to wishlist!',
+  moveToReadingList: 'Move to Reading List',
   toReadNotesPlaceholder: 'Why do you want to read this?',
   whenDidYouGetIt: 'When did you get it?',
+  athsTitle: 'Add to Home Screen',
+  athsAndroid: 'Install for the full app experience',
+  athsIosTap: 'Tap',
+  athsIosThen: 'then',
+  athsInstall: 'Install',
 }
 
 const de: Translations = {
@@ -217,6 +248,7 @@ const de: Translations = {
   saveChanges: 'Änderungen speichern',
   editBook: 'Buch bearbeiten',
   changesSaved: 'Änderungen gespeichert!',
+  bookAddedToRead: 'Zur Leseliste hinzugefügt!',
   titleLabel: 'Titel',
   titlePlaceholder: 'Tippe, um zu suchen…',
   authorLabel: 'Autor',
@@ -229,6 +261,8 @@ const de: Translations = {
   notesPlaceholder: 'Was hast du über dieses Buch gedacht?',
   coverPreview: 'Cover-Vorschau',
   removeCover: 'Cover entfernen',
+  takePhoto: 'Foto aufnehmen',
+  uploadingPhoto: 'Wird hochgeladen…',
   noNotesAdded: 'Keine Notizen hinzugefügt.',
   released: 'Erschienen',
   genre: 'Genre',
@@ -287,12 +321,24 @@ const de: Translations = {
   toReadBooksTitle: 'Bücher zum Lesen',
   tabRead: 'Gelesen',
   tabToRead: 'Leseliste',
+  tabWishlist: 'Wunschliste',
   toReadEmptyTitle: 'Ungelesene Bücher',
   toReadEmptyCopy: 'Füge Bücher hinzu, die du schon besitzt, aber noch nicht gelesen hast… So viele Bücher, so wenig Zeit.',
   addToReadingList: 'Buch hinzufügen',
   markAsRead: 'Als gelesen markieren',
+  wishlistTitle: 'Wunschliste',
+  wishlistEmptyTitle: 'Deine Wunschliste ist leer',
+  wishlistEmptyCopy: 'Speichere Bücher, die du kaufen möchtest — damit du beim nächsten Buchladen-Besuch weißt, was du willst.',
+  addToWishlist: 'Zur Wunschliste',
+  bookAddedToWishlist: 'Zur Wunschliste hinzugefügt!',
+  moveToReadingList: 'In Leseliste verschieben',
   whenDidYouGetIt: 'Wann hast du es bekommen?',
   toReadNotesPlaceholder: 'Warum möchtest du das lesen?',
+  athsTitle: 'Zum Startbildschirm',
+  athsAndroid: 'Installieren für das volle App-Erlebnis',
+  athsIosTap: 'Tippe auf',
+  athsIosThen: 'dann auf',
+  athsInstall: 'Installieren',
 }
 
 const fr: Translations = {
@@ -309,6 +355,7 @@ const fr: Translations = {
   saveChanges: 'Enregistrer',
   editBook: 'Modifier le livre',
   changesSaved: 'Modifications enregistrées !',
+  bookAddedToRead: 'Ajouté à la liste de lecture !',
   titleLabel: 'Titre',
   titlePlaceholder: 'Commencez à taper pour rechercher…',
   authorLabel: 'Auteur',
@@ -321,6 +368,8 @@ const fr: Translations = {
   notesPlaceholder: "Qu'avez-vous pensé de ce livre ?",
   coverPreview: 'Aperçu de la couverture',
   removeCover: 'Supprimer la couverture',
+  takePhoto: 'Prendre une photo',
+  uploadingPhoto: 'Envoi en cours…',
   noNotesAdded: 'Aucune note ajoutée.',
   released: 'Parution',
   genre: 'Genre',
@@ -379,12 +428,24 @@ const fr: Translations = {
   toReadBooksTitle: 'Livres à lire',
   tabRead: 'Lus',
   tabToRead: 'À lire',
+  tabWishlist: 'Souhaits',
   toReadEmptyTitle: 'Livres non lus',
   toReadEmptyCopy: 'Ajoute les livres que tu possèdes déjà mais que tu n\'as pas encore lus… Tant de livres, si peu de temps.',
   addToReadingList: 'Ajouter un livre à lire',
   markAsRead: 'Marquer comme lu',
+  wishlistTitle: 'Liste de souhaits',
+  wishlistEmptyTitle: 'Ta liste de souhaits est vide',
+  wishlistEmptyCopy: 'Sauvegarde les livres que tu veux acheter — pour ne pas oublier lors de ta prochaine visite en librairie.',
+  addToWishlist: 'Ajouter à la liste',
+  bookAddedToWishlist: 'Ajouté à la liste de souhaits !',
+  moveToReadingList: 'Déplacer vers À lire',
   whenDidYouGetIt: 'Quand l\'avez-vous reçu ?',
   toReadNotesPlaceholder: 'Pourquoi voulez-vous le lire ?',
+  athsTitle: 'Ajouter à l\'écran d\'accueil',
+  athsAndroid: 'Installez pour une expérience complète',
+  athsIosTap: 'Appuyez sur',
+  athsIosThen: 'puis sur',
+  athsInstall: 'Installer',
 }
 
 const es: Translations = {
@@ -401,6 +462,7 @@ const es: Translations = {
   saveChanges: 'Guardar cambios',
   editBook: 'Editar libro',
   changesSaved: '¡Cambios guardados!',
+  bookAddedToRead: '¡Añadido a la lista de lectura!',
   titleLabel: 'Título',
   titlePlaceholder: 'Empieza a escribir para buscar…',
   authorLabel: 'Autor',
@@ -413,6 +475,8 @@ const es: Translations = {
   notesPlaceholder: '¿Qué te pareció este libro?',
   coverPreview: 'Vista previa de portada',
   removeCover: 'Eliminar portada',
+  takePhoto: 'Tomar foto',
+  uploadingPhoto: 'Subiendo…',
   noNotesAdded: 'No hay notas añadidas.',
   released: 'Publicado',
   genre: 'Género',
@@ -471,12 +535,24 @@ const es: Translations = {
   toReadBooksTitle: 'Libros por leer',
   tabRead: 'Leídos',
   tabToRead: 'Por leer',
+  tabWishlist: 'Deseos',
   toReadEmptyTitle: 'Libros sin leer',
   toReadEmptyCopy: 'Añade los libros que ya tienes pero aún no has leído… Tantos libros, tan poco tiempo.',
   addToReadingList: 'Añadir un libro por leer',
   markAsRead: 'Marcar como leído',
+  wishlistTitle: 'Lista de deseos',
+  wishlistEmptyTitle: 'Tu lista de deseos está vacía',
+  wishlistEmptyCopy: 'Guarda los libros que quieres comprar — para no olvidarlos en tu próxima visita a la librería.',
+  addToWishlist: 'Añadir a la lista',
+  bookAddedToWishlist: '¡Añadido a la lista de deseos!',
+  moveToReadingList: 'Mover a Por leer',
   whenDidYouGetIt: '¿Cuándo lo conseguiste?',
   toReadNotesPlaceholder: '¿Por qué quieres leerlo?',
+  athsTitle: 'Añadir a la pantalla de inicio',
+  athsAndroid: 'Instala para una experiencia completa',
+  athsIosTap: 'Pulsa',
+  athsIosThen: 'luego',
+  athsInstall: 'Instalar',
 }
 
 const pl: Translations = {
@@ -493,6 +569,7 @@ const pl: Translations = {
   saveChanges: 'Zapisz zmiany',
   editBook: 'Edytuj książkę',
   changesSaved: 'Zmiany zapisane!',
+  bookAddedToRead: 'Dodano do listy lektur!',
   titleLabel: 'Tytuł',
   titlePlaceholder: 'Zacznij pisać, aby wyszukać…',
   authorLabel: 'Autor',
@@ -505,6 +582,8 @@ const pl: Translations = {
   notesPlaceholder: 'Co myślisz o tej książce?',
   coverPreview: 'Podgląd okładki',
   removeCover: 'Usuń okładkę',
+  takePhoto: 'Zrób zdjęcie',
+  uploadingPhoto: 'Przesyłanie…',
   noNotesAdded: 'Brak notatek.',
   released: 'Wydano',
   genre: 'Gatunek',
@@ -563,12 +642,24 @@ const pl: Translations = {
   toReadBooksTitle: 'Książki do przeczytania',
   tabRead: 'Przeczytane',
   tabToRead: 'Do przeczytania',
+  tabWishlist: 'Lista życzeń',
   toReadEmptyTitle: 'Nieprzeczytane książki',
   toReadEmptyCopy: 'Dodaj książki, które już masz, ale jeszcze nie przeczytałeś… Tyle książek, tak mało czasu.',
   addToReadingList: 'Dodaj książkę do przeczytania',
   markAsRead: 'Oznacz jako przeczytane',
+  wishlistTitle: 'Lista życzeń',
+  wishlistEmptyTitle: 'Twoja lista życzeń jest pusta',
+  wishlistEmptyCopy: 'Zapisuj książki, które chcesz kupić — żeby nie zapomnieć przy kolejnej wizycie w księgarni.',
+  addToWishlist: 'Dodaj do listy życzeń',
+  bookAddedToWishlist: 'Dodano do listy życzeń!',
+  moveToReadingList: 'Przenieś do listy lektur',
   whenDidYouGetIt: 'Kiedy ją dostałeś?',
   toReadNotesPlaceholder: 'Dlaczego chcesz to przeczytać?',
+  athsTitle: 'Dodaj do ekranu głównego',
+  athsAndroid: 'Zainstaluj dla pełnego doświadczenia',
+  athsIosTap: 'Dotknij',
+  athsIosThen: 'a następnie',
+  athsInstall: 'Zainstaluj',
 }
 
 export const translations: Record<Locale, Translations> = { en, de, fr, es, pl }

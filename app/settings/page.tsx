@@ -199,7 +199,7 @@ export default function SettingsPage() {
     <div className="min-h-screen pb-[100px]" style={{ backgroundColor: 'var(--bg)' }}>
 
       {/* Large title */}
-      <div className="px-5 pt-14 pb-6">
+      <div className="px-5 pt-4 pb-6">
         <h1 className="text-[34px] font-bold tracking-[-0.5px]" style={{ color: 'var(--label)' }}>
           {t.settings}
         </h1>
@@ -243,50 +243,53 @@ export default function SettingsPage() {
             <div className="h-px ml-4" style={{ backgroundColor: 'var(--separator)' }} />
 
             {/* Language row */}
-            <div className="relative">
-              <button
-                onClick={() => setLangOpen(o => !o)}
-                className="w-full flex items-center px-4 min-h-[52px] gap-3 transition-colors active:opacity-60"
-              >
-                <span className="flex-1 text-[17px] py-3" style={{ color: 'var(--label)' }}>
-                  {t.language}
-                </span>
-                <span className="text-[17px]" style={{ color: 'var(--label-secondary)' }}>
-                  {currentLang?.flag}&nbsp;{currentLang?.label}
-                </span>
-                <ChevronRight
-                  size={18}
-                  className="transition-transform duration-200"
-                  style={{
-                    color: 'var(--label-tertiary)',
-                    transform: langOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-                  }}
-                />
-              </button>
+            <button
+              onClick={() => setLangOpen(o => !o)}
+              className="w-full flex items-center px-4 min-h-[52px] gap-3 transition-colors active:opacity-60"
+            >
+              <span className="flex-1 text-[17px] py-3" style={{ color: 'var(--label)' }}>
+                {t.language}
+              </span>
+              <span className="text-[17px]" style={{ color: 'var(--label-secondary)' }}>
+                {currentLang?.flag}&nbsp;{currentLang?.label}
+              </span>
+              <ChevronRight
+                size={18}
+                className="transition-transform duration-200"
+                style={{
+                  color: 'var(--label-tertiary)',
+                  transform: langOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                }}
+              />
+            </button>
 
-              {langOpen && (
+            {langOpen && (
+              <>
+                <div className="h-px ml-4" style={{ backgroundColor: 'var(--separator)' }} />
                 <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mx-4 mb-3 rounded-[14px] overflow-hidden"
-                  style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--separator)' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                 >
                   {LANGUAGES.map((lang, i) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => { setLanguage(lang.code); setLangOpen(false) }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors active:opacity-60"
-                    >
-                      <span className="text-[18px] leading-none">{lang.flag}</span>
-                      <span className="flex-1 text-[16px]" style={{ color: 'var(--label)' }}>{lang.label}</span>
-                      {language === lang.code && (
-                        <Check size={17} strokeWidth={2.5} style={{ color: 'var(--primary)' }} />
+                    <div key={lang.code}>
+                      <button
+                        onClick={() => { setLanguage(lang.code); setLangOpen(false) }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors active:opacity-60"
+                      >
+                        <span className="text-[18px] leading-none">{lang.flag}</span>
+                        <span className="flex-1 text-[16px]" style={{ color: 'var(--label)' }}>{lang.label}</span>
+                        {language === lang.code && (
+                          <Check size={17} strokeWidth={2.5} style={{ color: 'var(--primary)' }} />
+                        )}
+                      </button>
+                      {i < LANGUAGES.length - 1 && (
+                        <div className="h-px ml-[52px]" style={{ backgroundColor: 'var(--separator)' }} />
                       )}
-                    </button>
+                    </div>
                   ))}
                 </motion.div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -297,7 +300,7 @@ export default function SettingsPage() {
             {t.myAccount}
           </p>
 
-          <div className="rounded-[16px] overflow-visible" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+          <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
             <ListRow
               label={t.changePassword}
               onClick={() => setView('changePassword')}

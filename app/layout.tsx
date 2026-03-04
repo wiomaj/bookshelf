@@ -27,6 +27,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Capture beforeinstallprompt as early as possible — before React hydrates */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            window.__installPrompt = e;
+          });
+        `}} />
+      </head>
       <body className={inter.className}>
         <AppProvider>
           <CozyBody>{children}</CozyBody>

@@ -32,18 +32,23 @@ export function normaliseGoogleCover(raw: string): string {
 /**
  * Extract the best available cover URL from a parsed Google Books API response.
  * Prefers higher-resolution variants (extraLarge > large > medium > thumbnail).
- * Returns `undefined` when no image links are present.
+ * Scans ALL returned items (not just the first) because some editions lack
+ * imageLinks while a later result for the same title has one.
+ * Returns `undefined` when no image links are present in any item.
  */
 export function googleCoverFromResponse(data: unknown): string | undefined {
   const items = (data as Record<string, unknown>)?.items
   if (!Array.isArray(items) || items.length === 0) return undefined
-  const links = (items[0] as any)?.volumeInfo?.imageLinks as
-    | Record<string, string>
-    | undefined
-  if (!links) return undefined
-  const raw =
-    links.extraLarge ?? links.large ?? links.medium ?? links.thumbnail
-  return raw ? normaliseGoogleCover(raw) : undefined
+  for (const item of items) {
+    const links = (item as any)?.volumeInfo?.imageLinks as
+      | Record<string, string>
+      | undefined
+    if (!links) continue
+    const raw =
+      links.extraLarge ?? links.large ?? links.medium ?? links.thumbnail
+    if (raw) return normaliseGoogleCover(raw)
+  }
+  return undefined
 }
 
 /**
@@ -168,4 +173,67 @@ export async function fetchBookByISBN(
   if (!title && !author && !cover_url) return null
 
   return { title, author, cover_url }
+}
+
+// ─── Cover-only search by title + author ──────────────────────────────────────
+
+/**
+ * Search for a cover image using title + author across multiple sources in
+ * parallel. Returns the first cover URL found, or undefined if all fail.
+ *
+ * Sources tried simultaneously (first non-empty result wins):
+ *   1. Google Books  intitle + inauthor  (most precise)
+ *   2. OpenLibrary   title  + author
+ *   3. Google Books  title  only         (broader fallback)
+ *   4. OpenLibrary   title  only         (broadest fallback)
+ *
+ * A 4-second timeout prevents the caller from waiting too long.
+ */
+export async function fetchCoverByTitleAuthor(
+  title: string,
+  author: string
+): Promise<string | undefined> {
+  // Helper: resolves with the cover URL or rejects if none found
+  const coverOrReject = async (fn: () => Promise<string | undefined>): Promise<string> => {
+    const cover = await fn()
+    if (!cover) throw new Error('no cover')
+    return cover
+  }
+
+  const googleBooks = async (q: string): Promise<string | undefined> => {
+    const res = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=5`
+    )
+    if (!res.ok) return undefined
+    return googleCoverFromResponse(await res.json())
+  }
+
+  const openLibrary = async (params: Record<string, string>): Promise<string | undefined> => {
+    const qs = new URLSearchParams({ ...params, fields: 'cover_i,cover_edition_key,isbn', limit: '1' })
+    const res = await fetch(`https://openlibrary.org/search.json?${qs}`)
+    if (!res.ok) return undefined
+    const data = await res.json()
+    return olCoverFromDoc(data.docs?.[0])
+  }
+
+  const sources = [
+    // Most precise: exact title + author in Google Books
+    coverOrReject(() => googleBooks(`intitle:"${title}" inauthor:"${author}"`)),
+    // OpenLibrary title + author
+    coverOrReject(() => openLibrary({ title, author })),
+    // Broader: title only in Google Books
+    coverOrReject(() => googleBooks(`intitle:"${title}"`)),
+    // Broadest fallback: OpenLibrary title only
+    coverOrReject(() => openLibrary({ title })),
+  ]
+
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('timeout')), 4000)
+  )
+
+  try {
+    return await Promise.race([Promise.any(sources), timeout])
+  } catch {
+    return undefined
+  }
 }

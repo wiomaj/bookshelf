@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
-import { addBook } from '@/lib/bookApi'
+import { addBook, updateBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import BookForm from '@/components/BookForm'
 import { useApp, useT } from '@/contexts/AppContext'
+import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import type { Book } from '@/types/book'
 
 export default function AddBookPage() {
@@ -20,7 +21,18 @@ export default function AddBookPage() {
     if (!user) return
     setLoading(true)
     try {
-      await addBook(supabase, user.id, data)
+      const saved = await addBook(supabase, user.id, data)
+
+      // If the book was saved without a cover, search for one automatically
+      if (!data.cover_url && data.title) {
+        try {
+          const cover = await fetchCoverByTitleAuthor(data.title, data.author ?? '')
+          if (cover) await updateBook(supabase, user.id, saved.id, { cover_url: cover })
+        } catch {
+          // Cover search failed — proceed without cover
+        }
+      }
+
       router.push('/')
     } finally {
       setLoading(false)

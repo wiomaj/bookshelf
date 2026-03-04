@@ -58,6 +58,19 @@ export async function getToReadBooks(supabase: SupabaseClient, userId: string): 
   return data as Book[]
 }
 
+/** Books on the user's wishlist (status = 'wishlist'), newest first. */
+export async function getWishlistBooks(supabase: SupabaseClient, userId: string): Promise<Book[]> {
+  const { data, error } = await supabase
+    .from('books')
+    .select(COLUMNS)
+    .eq('user_id', userId)
+    .eq('status', 'wishlist')
+    .order('created_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  return data as Book[]
+}
+
 /** Single book by id. Returns null if not found. */
 export async function getBook(supabase: SupabaseClient, userId: string, id: string): Promise<Book | null> {
   const { data, error } = await supabase
