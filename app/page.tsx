@@ -456,7 +456,7 @@ export default function HomePage() {
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={() => router.push('/wishlist/add')}
-                className="w-full py-[14px] rounded-full text-white text-[17px] font-semibold"
+                className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold"
                 style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
               >
                 {t.addToWishlist}
