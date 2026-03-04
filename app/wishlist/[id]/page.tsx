@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { X, ShoppingCart } from 'lucide-react'
+import { X, Heart } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
@@ -130,7 +130,7 @@ export default function WishlistDetailPage() {
           ) : (
             <div className="absolute inset-0 flex items-center justify-center"
                  style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}>
-              <ShoppingCart size={48} style={{ color: 'var(--label-tertiary)' }} />
+              <Heart size={48} style={{ color: 'var(--label-tertiary)' }} />
             </div>
           )}
 

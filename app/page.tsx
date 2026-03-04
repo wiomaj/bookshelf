@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpen, BookMarked, Settings, Loader2, ShoppingCart } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpen, BookMarked, Settings, Loader2, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { getReadBooks, getToReadBooks, getWishlistBooks } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
@@ -441,7 +441,7 @@ export default function HomePage() {
           >
             <div className="w-20 h-20 rounded-[26px] flex items-center justify-center mb-6"
                  style={{ backgroundColor: 'var(--fill)' }}>
-              <ShoppingCart size={36} style={{ color: 'var(--label-secondary)' }} />
+              <Heart size={36} style={{ color: 'var(--label-secondary)' }} />
             </div>
             <div className="flex flex-col gap-5 text-center w-full">
               <div className="flex flex-col gap-2">
@@ -538,7 +538,7 @@ export default function HomePage() {
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
               />
             )}
-            <ShoppingCart
+            <Heart
               size={22}
               strokeWidth={activeTab === 'wishlist' ? 2 : 1.5}
               className="relative"

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, ShoppingCart } from 'lucide-react'
+import { ChevronDown, BookOpen } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { Book } from '@/types/book'
 
@@ -133,7 +133,7 @@ function WishlistYearSection({ year, books }: YearSectionProps) {
                         ) : (
                           <div className="w-full h-full flex items-center justify-center"
                                style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator) 100%)' }}>
-                            <ShoppingCart size={20} style={{ color: 'var(--label-tertiary)' }} />
+                            <BookOpen size={20} style={{ color: 'var(--label-tertiary)' }} />
                           </div>
                         )}
                       </div>
