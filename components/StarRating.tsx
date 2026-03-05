@@ -50,7 +50,7 @@ export default function StarRating({
                   ? 'text-[#171717] transition-colors'
                   : darkBg
                   ? 'fill-[#FFD60A]/30 text-[#FFD60A]/30 transition-colors'
-                  : 'fill-[#D1D1D6] text-[#D1D1D6] transition-colors'
+                  : 'fill-[hsla(240,6%,25%,0.3)] text-[hsla(240,6%,25%,0.3)] transition-colors'
               }
             />
           </motion.button>
