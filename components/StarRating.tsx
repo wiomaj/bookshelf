@@ -10,7 +10,7 @@ interface StarRatingProps {
   onRate?: (rating: number) => void // Omit for read-only display
   readonly?: boolean
   size?: number
-  darkBg?: boolean // true when rendered on a dark hero — inactive stars show as faint amber
+  darkBg?: boolean // kept for API compatibility; faded gold is used on all backgrounds
 }
 
 export default function StarRating({
@@ -21,13 +21,11 @@ export default function StarRating({
   darkBg = false,
 }: StarRatingProps) {
   const { cozyMode } = useApp()
-  // `hovered` tracks which star the cursor is over, for the preview highlight
   const [hovered, setHovered] = useState(0)
 
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-[3px]">
       {[1, 2, 3, 4, 5].map((star) => {
-        // A star is "active" if it's within the hover preview or the saved rating
         const isActive = star <= (hovered || rating)
 
         return (
@@ -48,9 +46,9 @@ export default function StarRating({
               className={
                 isActive
                   ? 'fill-[#FFD60A] text-[#FFD60A] transition-colors'
-                  : darkBg
-                  ? 'fill-[#FFD60A]/30 text-[#FFD60A]/30 transition-colors'
-                  : cozyMode ? 'text-[#171717] transition-colors' : 'text-gray-200 transition-colors'
+                  : cozyMode && !darkBg
+                  ? 'text-[#171717] transition-colors'
+                  : 'fill-[#FFD60A]/30 text-[#FFD60A]/30 transition-colors'
               }
             />
           </motion.button>
