@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Heart, Pencil } from 'lucide-react'
+import { X, Heart, Pencil, Calendar, Tag, type LucideIcon } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
@@ -29,11 +29,11 @@ function heroImageUrl(url: string): string {
 }
 
 function InfoChip({
-  symbol,
+  icon: Icon,
   label,
   value,
 }: {
-  symbol: string
+  icon: LucideIcon
   label: string
   value: string | undefined
 }) {
@@ -43,18 +43,7 @@ function InfoChip({
       className="shrink-0 flex items-center gap-3 rounded-[16px] px-4 py-2"
       style={{ backgroundColor: 'var(--bg)' }}
     >
-      <span
-        className="shrink-0 w-[20px] text-center text-[17px] leading-[22px]"
-        style={{
-          color: 'var(--label-secondary)',
-          fontFamily: "'SF Pro Text', 'SF Pro Icons', -apple-system, BlinkMacSystemFont, sans-serif",
-          fontFeatureSettings: "'ss16' 1",
-          WebkitFontSmoothing: 'antialiased',
-          fontVariant: 'normal',
-        }}
-      >
-        {symbol}
-      </span>
+      <Icon size={16} strokeWidth={1.8} className="shrink-0" style={{ color: 'var(--label-secondary)' }} />
       <div className="flex flex-col gap-[3px]">
         <span className="text-[12px] leading-[16px]" style={{ color: 'var(--label-secondary)' }}>
           {label}
@@ -330,10 +319,10 @@ export default function WishlistDetailPage() {
 
           {/* Info chips — horizontal scroll */}
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
-            <InfoChip symbol="􀤞" label={t.chipAdded} value={addedDate} />
-            <InfoChip symbol="􁒉" label={t.released} value={publishedYear} />
+            <InfoChip icon={Heart} label={t.chipAdded} value={addedDate} />
+            <InfoChip icon={Calendar} label={t.released} value={publishedYear} />
             {displayGenre && (
-              <InfoChip symbol="􀬒" label={t.genre} value={displayGenre} />
+              <InfoChip icon={Tag} label={t.genre} value={displayGenre} />
             )}
           </div>
 
