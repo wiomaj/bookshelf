@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { BookOpen } from 'lucide-react'
 import StarRating from './StarRating'
 import { formatMonthShort } from '@/lib/month'
+import { coverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
 
 export default function BookCard({ book }: { book: Book }) {
@@ -35,7 +36,7 @@ export default function BookCard({ book }: { book: Book }) {
           {book.cover_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={book.cover_url}
+              src={coverUrl(book.cover_url)}
               alt={book.title}
               className="w-full h-full object-cover"
             />

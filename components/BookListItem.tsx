@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { BookOpen } from 'lucide-react'
 import StarRating from './StarRating'
 import { formatMonthShort } from '@/lib/month'
+import { coverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
 
 export default function BookListItem({ book }: { book: Book }) {
@@ -20,7 +21,7 @@ export default function BookListItem({ book }: { book: Book }) {
       <div className="w-[56px] h-[76px] rounded-[10px] overflow-hidden shrink-0 shadow-sm">
         {book.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
+          <img src={coverUrl(book.cover_url)} alt={book.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center"
                style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator) 100%)' }}>

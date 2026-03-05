@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, BookOpen } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { coverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
 
 interface WishlistListProps {
@@ -110,7 +111,7 @@ function WishlistYearSection({ year, books }: YearSectionProps) {
                         {book.cover_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={book.cover_url}
+                            src={coverUrl(book.cover_url)}
                             alt={book.title}
                             className="w-full h-full object-cover"
                           />

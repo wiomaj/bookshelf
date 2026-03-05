@@ -11,21 +11,8 @@ import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { useApp, useT } from '@/contexts/AppContext'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
+import { heroCoverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
-
-/** Upgrade a cover URL to the highest resolution available for the full-width hero. */
-function heroImageUrl(url: string): string {
-  if (url.includes('books.google.com')) {
-    return url
-      .replace('http:', 'https:')
-      .replace(/zoom=\d+/, 'zoom=0')
-      .replace(/&fife=[^&]*/g, '') + '&fife=w1200'
-  }
-  if (url.includes('covers.openlibrary.org')) {
-    return url.replace(/-[SM]\.jpg$/, '-L.jpg')
-  }
-  return url
-}
 
 function InfoChip({
   icon: Icon,
@@ -201,7 +188,7 @@ export default function ToReadDetailPage() {
         <div className="absolute top-0 left-0 right-0 h-[360px] overflow-hidden z-0">
           {book.cover_url ? (
             <img
-              src={heroImageUrl(book.cover_url)}
+              src={heroCoverUrl(book.cover_url)}
               alt=""
               className="absolute inset-0 w-full h-full object-cover scale-[1.4] blur-[40px] opacity-90"
             />
@@ -250,7 +237,7 @@ export default function ToReadDetailPage() {
             {book.cover_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={heroImageUrl(book.cover_url)}
+                src={heroCoverUrl(book.cover_url)}
                 alt={book.title}
                 className="w-full h-full object-cover"
               />
