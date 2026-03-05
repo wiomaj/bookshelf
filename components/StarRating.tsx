@@ -47,9 +47,9 @@ export default function StarRating({
               size={size}
               className={
                 isActive
-                  ? 'fill-amber-400 text-amber-400 transition-colors'
+                  ? 'fill-[#FFD60A] text-[#FFD60A] transition-colors'
                   : darkBg
-                  ? 'fill-amber-400/30 text-amber-400/30 transition-colors'
+                  ? 'fill-[#FFD60A]/30 text-[#FFD60A]/30 transition-colors'
                   : cozyMode ? 'text-[#171717] transition-colors' : 'text-gray-200 transition-colors'
               }
             />
