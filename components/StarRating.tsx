@@ -49,7 +49,7 @@ export default function StarRating({
                 isActive
                   ? 'fill-amber-400 text-amber-400 transition-colors'
                   : darkBg
-                  ? 'fill-amber-400/25 text-amber-400/25 transition-colors'
+                  ? 'text-white/40 transition-colors'
                   : cozyMode ? 'text-[#171717] transition-colors' : 'text-gray-200 transition-colors'
               }
             />

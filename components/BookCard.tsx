@@ -63,7 +63,7 @@ export default function BookCard({ book }: { book: Book }) {
             </p>
           )}
 
-          <StarRating rating={book.rating} readonly size={16} />
+          <StarRating rating={book.rating} readonly size={16} darkBg />
         </div>
       </div>
     </motion.div>
