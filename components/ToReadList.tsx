@@ -2,10 +2,13 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, BookOpen } from 'lucide-react'
+import { ChevronDown, Book as BookIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { coverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
+
+const bookPatternUrl =
+  `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-4 -4 32 32' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20'/%3E%3C/svg%3E")`
 
 interface ToReadListProps {
   books: Book[]
@@ -132,9 +135,11 @@ function ToReadYearSection({ year, books }: YearSectionProps) {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center"
-                               style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator) 100%)' }}>
-                            <BookOpen size={20} style={{ color: 'var(--label-tertiary)' }} />
+                          <div className="relative w-full h-full flex items-center justify-center"
+                               style={{ backgroundColor: 'var(--primary)' }}>
+                            <div className="absolute inset-0 opacity-[0.08]"
+                                 style={{ backgroundImage: bookPatternUrl, backgroundSize: '18px 18px', backgroundRepeat: 'repeat' }} />
+                            <BookIcon size={16} color="white" className="relative z-10" />
                           </div>
                         )}
                       </div>
