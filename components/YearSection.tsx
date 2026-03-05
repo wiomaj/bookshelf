@@ -90,7 +90,7 @@ export default function YearSection({
                   <div key={book.id}>
                     <BookListItem book={book} />
                     {i < books.length - 1 && (
-                      <div className="h-px ml-[68px]" style={{ backgroundColor: 'var(--separator)' }} />
+                      <div className="h-px ml-[96px]" style={{ backgroundColor: 'var(--separator)' }} />
                     )}
                   </div>
                 ))}
