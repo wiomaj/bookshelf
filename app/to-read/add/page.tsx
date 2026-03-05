@@ -55,7 +55,7 @@ export default function ToReadAddPage() {
       <div className="flex items-center justify-between h-[60px] px-4">
         <div /> {/* spacer */}
         <button
-          onClick={() => router.back()}
+          onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'to_read'); router.back() }}
           className="w-9 h-9 flex items-center justify-center"
           style={{ color: 'var(--label)' }}
         >
