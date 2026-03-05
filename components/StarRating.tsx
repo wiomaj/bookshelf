@@ -10,7 +10,7 @@ interface StarRatingProps {
   onRate?: (rating: number) => void // Omit for read-only display
   readonly?: boolean
   size?: number
-  darkBg?: boolean // kept for API compatibility; faded gold is used on all backgrounds
+  darkBg?: boolean // true → empty stars are solid white; false → muted grey
 }
 
 export default function StarRating({
@@ -50,7 +50,7 @@ export default function StarRating({
                   : cozyMode && !darkBg
                   ? 'text-[#171717] transition-colors'
                   : darkBg
-                  ? 'fill-[#FFD60A]/40 text-[#FFD60A]/40 transition-colors'
+                  ? 'fill-white text-white transition-colors'
                   : 'fill-[hsla(240,6%,25%,0.3)] text-[hsla(240,6%,25%,0.3)] transition-colors'
               }
             />
