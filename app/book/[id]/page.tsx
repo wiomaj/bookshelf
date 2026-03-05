@@ -29,6 +29,45 @@ function heroImageUrl(url: string): string {
   return url
 }
 
+function InfoChip({
+  symbol,
+  label,
+  value,
+}: {
+  symbol: string
+  label: string
+  value: string | undefined
+}) {
+  if (!value) return null
+  return (
+    <div
+      className="shrink-0 flex items-center gap-3 rounded-[16px] px-4 py-2"
+      style={{ backgroundColor: 'var(--bg)' }}
+    >
+      <span
+        className="shrink-0 w-[20px] text-center text-[17px] leading-[22px]"
+        style={{
+          color: 'var(--label-secondary)',
+          fontFamily: "'SF Pro Text', 'SF Pro Icons', -apple-system, BlinkMacSystemFont, sans-serif",
+          fontFeatureSettings: "'ss16' 1",
+          WebkitFontSmoothing: 'antialiased',
+          fontVariant: 'normal',
+        }}
+      >
+        {symbol}
+      </span>
+      <div className="flex flex-col gap-[3px]">
+        <span className="text-[12px] leading-[16px]" style={{ color: 'var(--label-secondary)' }}>
+          {label}
+        </span>
+        <span className="text-[12px] leading-[16px] font-medium" style={{ color: 'var(--label)' }}>
+          {value}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 export default function BookDetailPage() {
   const router = useRouter()
   const params = useParams()
@@ -131,7 +170,6 @@ export default function BookDetailPage() {
   if (isEditing) {
     return (
       <div className="min-h-screen relative" style={{ backgroundColor: 'var(--bg)' }}>
-        {/* Close button — top right */}
         <button
           onClick={() => setIsEditing(false)}
           className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center z-10"
@@ -158,20 +196,66 @@ export default function BookDetailPage() {
     )
   }
 
+  const readDate = formatMonthShort(book.month)
+    ? `${formatMonthShort(book.month)} ${book.year}`
+    : book.year?.toString()
+
   // ── View mode ────────────────────────────────────────────────────────────────
   return (
     <>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+      <div className="relative" style={{ minHeight: '100vh' }}>
 
-        {/* ── Hero cover (230px) ──────────────────────────────────────── */}
+        {/* ── Blurred background ──────────────────────────────────────────── */}
+        <div className="absolute top-0 left-0 right-0 h-[360px] overflow-hidden z-0">
+          {book.cover_url ? (
+            <img
+              src={heroImageUrl(book.cover_url)}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover scale-[1.4] blur-[40px] opacity-90"
+            />
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}
+            />
+          )}
+          {/* Gentle fade at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60" />
+        </div>
+
+        {/* ── Toolbar (edit + close) ───────────────────────────────────────── */}
+        <div className="relative z-30 flex justify-end gap-2 pt-4 pr-4">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsEditing(true)}
+            className="glass w-11 h-11 rounded-full flex items-center justify-center"
+            aria-label="Edit"
+            style={{ color: 'var(--label)' }}
+          >
+            <Pencil size={16} strokeWidth={2} />
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => router.back()}
+            className="glass w-11 h-11 rounded-full flex items-center justify-center"
+            aria-label="Close"
+            style={{ color: 'var(--label)' }}
+          >
+            <X size={18} />
+          </motion.button>
+        </div>
+
+        {/* ── Book cover floating card ─────────────────────────────────────── */}
         <motion.div
-          initial={{ scale: 0.92, opacity: 0 }}
+          initial={{ scale: 0.88, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 26, mass: 0.85 }}
-          className="relative h-[260px] w-full overflow-hidden"
-          style={{ backgroundColor: 'var(--fill)' }}
+          transition={{ type: 'spring', stiffness: 300, damping: 26, mass: 0.8 }}
+          className="relative z-20 flex justify-center mt-3"
         >
-          <div className="absolute inset-0">
+          <div
+            className="w-[148px] h-[220px] rounded-[10px] overflow-hidden"
+            style={{ boxShadow: '0 20px 48px rgba(0,0,0,0.30), 0 4px 8px rgba(0,0,0,0.12)' }}
+          >
             {book.cover_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -180,103 +264,87 @@ export default function BookDetailPage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center"
-                   style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}>
-                <BookOpen size={60} style={{ color: 'var(--label-tertiary)' }} />
-              </div>
-            )}
-          </div>
-
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0)] to-[rgba(0,0,0,0.72)]" />
-
-          {/* Edit + Close buttons — top right */}
-          <div className="absolute top-4 right-4 flex items-center gap-1">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="w-9 h-9 flex items-center justify-center text-white"
-              aria-label="Edit"
-            >
-              <Pencil size={20} strokeWidth={2} />
-            </button>
-            <button
-              onClick={() => router.back()}
-              className="w-9 h-9 flex items-center justify-center text-white"
-              aria-label="Close"
-            >
-              <X size={24} />
-            </button>
-          </div>
-
-          {/* Info block at the bottom of the hero */}
-          <div className="absolute bottom-0 left-0 w-full px-4 pb-5 flex flex-col gap-2">
-            <StarRating rating={book.rating} readonly size={20} darkBg />
-            <div className="flex items-end gap-2 flex-wrap">
-              <h1 className="text-white text-[24px] font-bold leading-8">
-                {book.title}
-              </h1>
-              <span
-                className="px-2 py-1 mb-[2px] rounded-[8px] text-[12px] font-bold uppercase leading-4"
-                style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)' }}
+              <div
+                className="w-full h-full flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}
               >
-                {formatMonthShort(book.month)
-                  ? `${formatMonthShort(book.month)} ${book.year}`
-                  : book.year}
-              </span>
-            </div>
-            {book.author && (
-              <p className="text-[13px] font-medium leading-4" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                {book.author}
-              </p>
+                <BookOpen size={48} style={{ color: 'var(--label-tertiary)' }} />
+              </div>
             )}
           </div>
         </motion.div>
 
-        {/* ── Details ─────────────────────────────────── */}
+        {/* ── Details sheet ────────────────────────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-          className="px-4 pt-6 flex flex-col gap-6"
+          transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+          className="relative z-10 -mt-5 px-4 pt-[40px] pb-12 flex flex-col gap-5"
+          style={{
+            backgroundColor: 'var(--bg-elevated)',
+            boxShadow: '0 -4px 32px rgba(0,0,0,0.10), 0 -1px 0 rgba(0,0,0,0.04)',
+            minHeight: 'calc(100vh - 295px)',
+          }}
         >
-          {/* My notes */}
-          {book.notes ? (
-            <p className="text-[16px] font-normal leading-6 whitespace-pre-wrap" style={{ color: 'var(--label)' }}>
-              {book.notes}
-            </p>
-          ) : (
-            <p className="text-[16px] leading-6 italic" style={{ color: 'var(--label-tertiary)' }}>
-              {t.noNotesAdded}
-            </p>
-          )}
+          {/* Title + Author + Stars */}
+          <div className="flex flex-col gap-[6px]">
+            <h1
+              className="text-[28px] font-bold leading-[34px] tracking-[0.38px]"
+              style={{ color: 'var(--label)' }}
+            >
+              {book.title}
+            </h1>
+            {book.author && (
+              <p
+                className="text-[17px] font-semibold leading-[22px] tracking-[-0.43px]"
+                style={{ color: 'var(--label)' }}
+              >
+                {book.author}
+              </p>
+            )}
+            <StarRating rating={book.rating} readonly size={16} />
+          </div>
 
-          {/* Released + Genre */}
-          <div className="flex gap-4">
-            <div className="flex flex-col gap-1.5 w-[140px] shrink-0">
-              <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
-                {t.released}
-              </span>
-              <span className="text-[16px] leading-6" style={{ color: 'var(--label)' }}>
-                {formatMonthShort(book.month)
-                  ? `${formatMonthShort(book.month)} ${book.year}`
-                  : book.year}
-              </span>
-            </div>
+          {/* Info chips — horizontal scroll */}
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
+            <InfoChip
+              symbol="􀤞"
+              label={t.tabRead}
+              value={readDate}
+            />
+            <InfoChip
+              symbol="􁒉"
+              label={t.released}
+              value={book.year?.toString()}
+            />
             {(book.genre || apiGenre) && (
-              <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
-                  {t.genre}
-                </span>
-                <span className="text-[16px] leading-6" style={{ color: 'var(--label)' }}>
-                  {book.genre || apiGenre}
-                </span>
-              </div>
+              <InfoChip
+                symbol="􀬒"
+                label={t.genre}
+                value={book.genre || apiGenre}
+              />
+            )}
+          </div>
+
+          {/* My notes */}
+          <div className="flex flex-col gap-[6px]">
+            <span className="text-[12px] leading-[16px]" style={{ color: 'var(--label-secondary)' }}>
+              {t.myNotesLabel}
+            </span>
+            {book.notes ? (
+              <p className="text-[16px] font-normal leading-6 whitespace-pre-wrap" style={{ color: 'var(--label)' }}>
+                {book.notes}
+              </p>
+            ) : (
+              <p className="text-[16px] leading-6 italic" style={{ color: 'var(--label-tertiary)' }}>
+                {t.noNotesAdded}
+              </p>
             )}
           </div>
 
           {/* About the book */}
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
+          <div className="flex flex-col gap-[6px]">
+            <span className="text-[12px] leading-[16px]" style={{ color: 'var(--label-secondary)' }}>
               {t.aboutTheBook}
             </span>
             {bookDataLoading ? (
@@ -286,7 +354,7 @@ export default function BookDetailPage() {
                 <span className="text-[14px]" style={{ color: 'var(--label-tertiary)' }}>{t.loading}</span>
               </div>
             ) : description ? (
-              <p className="text-[16px] font-normal leading-6" style={{ color: 'var(--label)' }}>
+              <p className="text-[17px] leading-[22px] tracking-[-0.43px]" style={{ color: 'var(--label)' }}>
                 {description}
               </p>
             ) : (
@@ -295,19 +363,12 @@ export default function BookDetailPage() {
               </p>
             )}
           </div>
-        </motion.div>
 
-        {/* ── Delete CTA ──────────────────────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-          className="px-4 pt-4 pb-10"
-        >
+          {/* Delete CTA */}
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={() => setShowDeleteConfirm(true)}
-            className="px-6 py-[11px] rounded-[14px] text-[16px] font-semibold"
+            className="self-start px-4 py-[6px] rounded-full text-[15px]"
             style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
           >
             {t.deleteBook}

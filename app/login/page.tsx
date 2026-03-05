@@ -54,11 +54,12 @@ export default function LoginPage() {
   `
 
   const illustration = (
-    <img
-      src="https://www.figma.com/api/mcp/asset/08931233-4b71-4f5b-9798-90acd70ceff5"
-      alt="" width={160} height={160}
-      className="shrink-0"
-    />
+    <div className="overflow-hidden shrink-0" style={{ width: 300, height: 285 }}>
+      <img
+        src="https://www.figma.com/api/mcp/asset/08931233-4b71-4f5b-9798-90acd70ceff5"
+        alt="" width={300} height={300}
+      />
+    </div>
   )
 
   // ── Success screens ────────────────────────────────────────────────────────
@@ -91,9 +92,9 @@ export default function LoginPage() {
   // ── Forgot password ────────────────────────────────────────────────────────
   if (mode === 'forgot') {
     return (
-      <div className="min-h-screen flex flex-col items-center px-6 pt-16" style={{ backgroundColor: 'var(--bg)' }}>
+      <div className="min-h-screen flex flex-col items-center px-6" style={{ backgroundColor: 'var(--bg)' }}>
         {illustration}
-        <div className="mt-8 w-full max-w-[360px] flex flex-col gap-5">
+        <div className="w-full max-w-[360px] flex flex-col gap-5">
           <div className="text-center flex flex-col gap-2">
             <h1 className="text-[28px] font-bold tracking-[-0.4px]" style={{ color: 'var(--label)' }}>
               {t.resetYourPassword}
@@ -137,10 +138,10 @@ export default function LoginPage() {
 
   // ── Sign in / Sign up ──────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex flex-col items-center px-6 pt-16" style={{ backgroundColor: 'var(--bg)' }}>
+    <div className="min-h-screen flex flex-col items-center px-6" style={{ backgroundColor: 'var(--bg)' }}>
       {illustration}
 
-      <div className="mt-8 w-full max-w-[360px] flex flex-col gap-5">
+      <div className="w-full max-w-[360px] flex flex-col gap-5">
         {/* Title */}
         <div className="text-center flex flex-col gap-1.5">
           <h1 className="text-[28px] font-bold tracking-[-0.4px]" style={{ color: 'var(--label)' }}>
@@ -180,16 +181,6 @@ export default function LoginPage() {
             )}
           </div>
 
-          {/* Forgot password link (signin only) */}
-          {mode === 'signin' && (
-            <div className="flex justify-end -mt-1">
-              <button type="button" onClick={() => switchMode('forgot')}
-                      className="text-[15px] font-medium" style={{ color: 'var(--primary)' }}>
-                {t.forgotPassword}
-              </button>
-            </div>
-          )}
-
           {error && <p className="text-[14px] px-1" style={{ color: '#FF3B30' }}>{error}</p>}
 
           <motion.button
@@ -203,6 +194,16 @@ export default function LoginPage() {
             }
           </motion.button>
         </form>
+
+        {/* Forgot password link (signin only) */}
+        {mode === 'signin' && (
+          <div className="flex justify-center">
+            <button type="button" onClick={() => switchMode('forgot')}
+                    className="text-[15px] font-medium" style={{ color: 'var(--primary)' }}>
+              {t.forgotPassword}
+            </button>
+          </div>
+        )}
 
         {/* Mode toggle */}
         <p className="text-center text-[15px]" style={{ color: 'var(--label-secondary)' }}>
