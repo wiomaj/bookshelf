@@ -43,6 +43,7 @@ export default function StarRating({
           >
             <Star
               size={size}
+              strokeWidth={0}
               className={
                 isActive
                   ? 'fill-[#FFD60A] text-[#FFD60A] transition-colors'
