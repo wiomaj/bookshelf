@@ -119,6 +119,8 @@ export type Translations = {
   addToWishlist: string
   bookAddedToWishlist: string
   moveToReadingList: string
+  chipBought: string
+  chipAdded: string
   // Add to Home Screen
   athsTitle: string
   athsAndroid: string
@@ -225,6 +227,8 @@ const en: Translations = {
   addToWishlist: 'Add to Wishlist',
   bookAddedToWishlist: 'Added to wishlist!',
   moveToReadingList: 'Move to Reading List',
+  chipBought: 'Bought',
+  chipAdded: 'Added',
   toReadNotesPlaceholder: 'Why do you want to read this?',
   whenDidYouGetIt: 'When did you get it?',
   athsTitle: 'Add to Home Screen',
@@ -332,6 +336,8 @@ const de: Translations = {
   addToWishlist: 'Zur Wunschliste',
   bookAddedToWishlist: 'Zur Wunschliste hinzugefügt!',
   moveToReadingList: 'In Leseliste verschieben',
+  chipBought: 'Gekauft',
+  chipAdded: 'Hinzugefügt',
   whenDidYouGetIt: 'Wann hast du es bekommen?',
   toReadNotesPlaceholder: 'Warum möchtest du das lesen?',
   athsTitle: 'Zum Startbildschirm',
@@ -439,6 +445,8 @@ const fr: Translations = {
   addToWishlist: 'Ajouter à la liste',
   bookAddedToWishlist: 'Ajouté à la liste de souhaits !',
   moveToReadingList: 'Déplacer vers À lire',
+  chipBought: 'Acheté',
+  chipAdded: 'Ajouté',
   whenDidYouGetIt: 'Quand l\'avez-vous reçu ?',
   toReadNotesPlaceholder: 'Pourquoi voulez-vous le lire ?',
   athsTitle: 'Ajouter à l\'écran d\'accueil',
@@ -546,6 +554,8 @@ const es: Translations = {
   addToWishlist: 'Añadir a la lista',
   bookAddedToWishlist: '¡Añadido a la lista de deseos!',
   moveToReadingList: 'Mover a Por leer',
+  chipBought: 'Comprado',
+  chipAdded: 'Añadido',
   whenDidYouGetIt: '¿Cuándo lo conseguiste?',
   toReadNotesPlaceholder: '¿Por qué quieres leerlo?',
   athsTitle: 'Añadir a la pantalla de inicio',
@@ -653,6 +663,8 @@ const pl: Translations = {
   addToWishlist: 'Dodaj do listy życzeń',
   bookAddedToWishlist: 'Dodano do listy życzeń!',
   moveToReadingList: 'Przenieś do listy lektur',
+  chipBought: 'Kupiono',
+  chipAdded: 'Dodano',
   whenDidYouGetIt: 'Kiedy ją dostałeś?',
   toReadNotesPlaceholder: 'Dlaczego chcesz to przeczytać?',
   athsTitle: 'Dodaj do ekranu głównego',

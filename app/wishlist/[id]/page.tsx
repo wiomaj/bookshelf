@@ -14,20 +14,67 @@ import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
 import { LONG_MONTHS } from '@/lib/month'
 import type { Book } from '@/types/book'
 
-const currentDate = new Date()
-
-const MONTH_NAMES = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
-
-function getAddedTags(createdAt: string): { dateTag: string; durationTag: string } {
-  const added = new Date(createdAt)
-  const now = new Date()
-  const dateTag = `${MONTH_NAMES[added.getMonth()]} ${added.getFullYear()}`
-  const months =
-    (now.getFullYear() - added.getFullYear()) * 12 +
-    (now.getMonth() - added.getMonth())
-  const durationTag = months <= 0 ? 'THIS MONTH' : months === 1 ? '1 MONTH' : `${months} MONTHS`
-  return { dateTag, durationTag }
+/** Upgrade a cover URL to the highest resolution available for the full-width hero. */
+function heroImageUrl(url: string): string {
+  if (url.includes('books.google.com')) {
+    return url
+      .replace('http:', 'https:')
+      .replace(/zoom=\d+/, 'zoom=0')
+      .replace(/&fife=[^&]*/g, '') + '&fife=w1200'
+  }
+  if (url.includes('covers.openlibrary.org')) {
+    return url.replace(/-[SM]\.jpg$/, '-L.jpg')
+  }
+  return url
 }
+
+function InfoChip({
+  symbol,
+  label,
+  value,
+}: {
+  symbol: string
+  label: string
+  value: string | undefined
+}) {
+  if (!value) return null
+  return (
+    <div
+      className="shrink-0 flex items-center gap-3 rounded-[16px] px-4 py-2"
+      style={{ backgroundColor: 'var(--bg)' }}
+    >
+      <span
+        className="shrink-0 w-[20px] text-center text-[17px] leading-[22px]"
+        style={{
+          color: 'var(--label-secondary)',
+          fontFamily: "'SF Pro Text', 'SF Pro Icons', -apple-system, BlinkMacSystemFont, sans-serif",
+          fontFeatureSettings: "'ss16' 1",
+          WebkitFontSmoothing: 'antialiased',
+          fontVariant: 'normal',
+        }}
+      >
+        {symbol}
+      </span>
+      <div className="flex flex-col gap-[3px]">
+        <span className="text-[12px] leading-[16px]" style={{ color: 'var(--label-secondary)' }}>
+          {label}
+        </span>
+        <span className="text-[12px] leading-[16px] font-medium" style={{ color: 'var(--label)' }}>
+          {value}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+const SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
+function formatAddedDate(createdAt: string): string {
+  const d = new Date(createdAt)
+  return `${SHORT_MONTHS[d.getMonth()]} ${d.getFullYear()}`
+}
+
+const currentDate = new Date()
 
 export default function WishlistDetailPage() {
   const router = useRouter()
@@ -64,7 +111,6 @@ export default function WishlistDetailPage() {
             setPublishedYear(data.publishedYear)
             setBookDataLoading(false)
           })
-          // Retroactive cover search
           if (!b.cover_url && b.title) {
             fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
               if (!cover) return
@@ -116,6 +162,7 @@ export default function WishlistDetailPage() {
     }
   }
 
+  // ── Loading ──────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
@@ -125,17 +172,28 @@ export default function WishlistDetailPage() {
     )
   }
 
+  // ── Not found ────────────────────────────────────────────────────────────────
   if (!book) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
-        <p className="text-[16px]" style={{ color: 'var(--label-secondary)' }}>Book not found.</p>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4"
+           style={{ backgroundColor: 'var(--bg)' }}>
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
+             style={{ backgroundColor: 'var(--fill)' }}>
+          <Heart size={26} style={{ color: 'var(--label-tertiary)' }} />
+        </div>
+        <h2 className="text-[18px] font-bold" style={{ color: 'var(--label)' }}>{t.bookNotFound}</h2>
+        <button
+          onClick={() => router.replace('/')}
+          className="text-[16px] font-medium"
+          style={{ color: 'var(--primary)' }}
+        >
+          {t.backToBookshelf}
+        </button>
       </div>
     )
   }
 
-  const { dateTag, durationTag } = getAddedTags(book.created_at)
-  const displayGenre = book.genre || apiGenre
-
+  // ── Edit mode ────────────────────────────────────────────────────────────────
   if (isEditing) {
     return (
       <div className="min-h-screen relative" style={{ backgroundColor: 'var(--bg)' }}>
@@ -164,115 +222,151 @@ export default function WishlistDetailPage() {
     )
   }
 
+  const displayGenre = book.genre || apiGenre
+  const addedDate = formatAddedDate(book.created_at)
+
+  // ── View mode ────────────────────────────────────────────────────────────────
   return (
     <>
-      <div className="min-h-screen pb-8" style={{ backgroundColor: 'var(--bg)' }}>
+      <div className="relative" style={{ minHeight: '100vh' }}>
 
-        {/* ── Hero: full-width cover + gradient overlay ─────────────────── */}
-        <div className="relative w-full min-h-[260px]" style={{ backgroundColor: 'var(--fill)' }}>
+        {/* ── Blurred background ──────────────────────────────────────────── */}
+        <div className="absolute top-0 left-0 right-0 h-[360px] overflow-hidden z-0">
           {book.cover_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={book.cover_url}
-              alt={book.title}
-              className="absolute inset-0 w-full h-full object-cover"
+              src={heroImageUrl(book.cover_url)}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover scale-[1.4] blur-[40px] opacity-90"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center"
-                 style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}>
-              <Heart size={48} style={{ color: 'var(--label-tertiary)' }} />
-            </div>
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}
+            />
           )}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60" />
+        </div>
 
-          {/* Gradient overlay */}
+        {/* ── Toolbar (edit + close) ───────────────────────────────────────── */}
+        <div className="relative z-30 flex justify-end gap-2 pt-4 pr-4">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsEditing(true)}
+            className="glass w-11 h-11 rounded-full flex items-center justify-center"
+            aria-label="Edit"
+            style={{ color: 'var(--label)' }}
+          >
+            <Pencil size={16} strokeWidth={2} />
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'wishlist'); router.back() }}
+            className="glass w-11 h-11 rounded-full flex items-center justify-center"
+            aria-label="Close"
+            style={{ color: 'var(--label)' }}
+          >
+            <X size={18} />
+          </motion.button>
+        </div>
+
+        {/* ── Book cover floating card ─────────────────────────────────────── */}
+        <motion.div
+          initial={{ scale: 0.88, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 26, mass: 0.8 }}
+          className="relative z-20 flex justify-center mt-3"
+        >
           <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.72) 100%)' }}
-          />
-
-          {/* Edit + Close buttons */}
-          <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="w-9 h-9 flex items-center justify-center text-white"
-              aria-label="Edit"
-            >
-              <Pencil size={20} strokeWidth={2} />
-            </button>
-            <button
-              onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'wishlist'); router.push('/') }}
-              className="w-9 h-9 flex items-center justify-center text-white"
-              aria-label="Close"
-            >
-              <X size={24} strokeWidth={2} />
-            </button>
-          </div>
-
-          {/* Title + tags + author */}
-          <div className="relative z-[1] pt-12 px-4 pb-5 flex flex-col gap-2">
-            <div className="flex items-end gap-2 flex-wrap">
-              <h1 className="text-[24px] font-bold text-white leading-8">{book.title}</h1>
-              <div className="flex items-center gap-1 mb-[2px]">
-                <span
-                  className="px-2 py-1 rounded-[8px] text-[12px] font-bold uppercase leading-4"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)' }}
-                >
-                  {dateTag}
-                </span>
-                <span
-                  className="px-2 py-1 rounded-[8px] text-[12px] font-bold uppercase leading-4"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)' }}
-                >
-                  {durationTag}
-                </span>
+            className="w-[148px] h-[220px] rounded-[10px] overflow-hidden"
+            style={{ boxShadow: '0 20px 48px rgba(0,0,0,0.30), 0 4px 8px rgba(0,0,0,0.12)' }}
+          >
+            {book.cover_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={heroImageUrl(book.cover_url)}
+                alt={book.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div
+                className="w-full h-full flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}
+              >
+                <Heart size={48} style={{ color: 'var(--label-tertiary)' }} />
               </div>
-            </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* ── Details sheet ────────────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+          className="relative z-10 -mt-5 px-4 pt-[48px] pb-12 flex flex-col gap-5"
+          style={{
+            backgroundColor: 'var(--bg-elevated)',
+            boxShadow: '0 -4px 32px rgba(0,0,0,0.10), 0 -1px 0 rgba(0,0,0,0.04)',
+            minHeight: 'calc(100vh - 295px)',
+          }}
+        >
+          {/* Title + Author */}
+          <div className="flex flex-col gap-[6px]">
+            <h1
+              className="text-[28px] font-bold leading-[34px] tracking-[0.38px]"
+              style={{ color: 'var(--label)' }}
+            >
+              {book.title}
+            </h1>
             {book.author && (
-              <p className="text-[13px] font-medium leading-4" style={{ color: 'rgba(255,255,255,0.8)' }}>
+              <p
+                className="text-[17px] font-semibold leading-[22px] tracking-[-0.43px]"
+                style={{ color: 'var(--label)' }}
+              >
                 {book.author}
               </p>
             )}
           </div>
-        </div>
 
-        {/* ── CTA buttons ───────────────────────────────────────────────── */}
-        <div className="flex gap-3 px-4 pt-4">
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setShowDeleteConfirm(true)}
-            className="flex-1 py-[13px] rounded-[14px] text-[16px] font-semibold text-center"
-            style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
-          >
-            {t.deleteBook}
-          </motion.button>
+          {/* Info chips — horizontal scroll */}
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
+            <InfoChip symbol="􀤞" label={t.chipAdded} value={addedDate} />
+            <InfoChip symbol="􁒉" label={t.released} value={publishedYear} />
+            {displayGenre && (
+              <InfoChip symbol="􀬒" label={t.genre} value={displayGenre} />
+            )}
+          </div>
+
+          {/* Got this book CTA */}
           <motion.button
             whileTap={{ scale: 0.97 }}
             disabled={moveLoading}
             onClick={() => setShowMoveModal(true)}
-            className="flex-1 py-[13px] rounded-[14px] text-[16px] font-semibold text-white text-center disabled:opacity-50"
+            className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center disabled:opacity-50"
             style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
           >
             {moveLoading ? t.loading : t.moveToReadingList}
           </motion.button>
-        </div>
 
-        {/* ── Details section ───────────────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-          className="px-4 pt-6 flex flex-col gap-6"
-        >
           {/* My notes */}
-          {book.notes && (
-            <p className="text-[16px] font-normal leading-6 whitespace-pre-wrap" style={{ color: 'var(--label)' }}>
-              {book.notes}
-            </p>
-          )}
+          <div className="flex flex-col gap-[6px]">
+            <span className="text-[12px] leading-[16px]" style={{ color: 'var(--label-secondary)' }}>
+              {t.myNotesLabel}
+            </span>
+            {book.notes ? (
+              <p className="text-[16px] font-normal leading-6 whitespace-pre-wrap" style={{ color: 'var(--label)' }}>
+                {book.notes}
+              </p>
+            ) : (
+              <p className="text-[16px] leading-6 italic" style={{ color: 'var(--label-tertiary)' }}>
+                {t.noNotesAdded}
+              </p>
+            )}
+          </div>
 
           {/* About the book */}
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
+          <div className="flex flex-col gap-[6px]">
+            <span className="text-[12px] leading-[16px]" style={{ color: 'var(--label-secondary)' }}>
               {t.aboutTheBook}
             </span>
             {bookDataLoading ? (
@@ -282,7 +376,9 @@ export default function WishlistDetailPage() {
                 <span className="text-[14px]" style={{ color: 'var(--label-tertiary)' }}>{t.loading}</span>
               </div>
             ) : description ? (
-              <p className="text-[16px] font-normal leading-6" style={{ color: 'var(--label)' }}>{description}</p>
+              <p className="text-[17px] leading-[22px] tracking-[-0.43px]" style={{ color: 'var(--label)' }}>
+                {description}
+              </p>
             ) : (
               <p className="text-[16px] leading-6 italic" style={{ color: 'var(--label-tertiary)' }}>
                 {t.noDescriptionAvailable}
@@ -290,30 +386,16 @@ export default function WishlistDetailPage() {
             )}
           </div>
 
-          {/* Released + Genre */}
-          {(publishedYear || displayGenre) && (
-            <div className="flex gap-4">
-              {publishedYear && (
-                <div className="flex flex-col gap-1.5 w-[140px] shrink-0">
-                  <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
-                    {t.released}
-                  </span>
-                  <span className="text-[16px] leading-6" style={{ color: 'var(--label)' }}>{publishedYear}</span>
-                </div>
-              )}
-              {displayGenre && (
-                <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                  <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-tertiary)' }}>
-                    {t.genre}
-                  </span>
-                  <span className="text-[16px] leading-6" style={{ color: 'var(--label)' }}>{displayGenre}</span>
-                </div>
-              )}
-            </div>
-          )}
-
+          {/* Delete CTA */}
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setShowDeleteConfirm(true)}
+            className="self-start px-4 py-[6px] rounded-full text-[15px]"
+            style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+          >
+            {t.deleteBook}
+          </motion.button>
         </motion.div>
-
       </div>
 
       <ConfirmDialog
