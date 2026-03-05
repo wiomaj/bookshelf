@@ -2,11 +2,16 @@
 
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { BookOpen } from 'lucide-react'
 import StarRating from './StarRating'
 import { formatMonthShort } from '@/lib/month'
 import { coverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
+
+// Lucide Book icon (closed book) as a tiled SVG background pattern.
+// viewBox='-4 -4 32 32' adds ~4 px padding around the 24×24 icon so tiles
+// don't run edge-to-edge when rendered at backgroundSize '32px 32px'.
+const bookPatternUrl =
+  `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-4 -4 32 32' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20'/%3E%3C/svg%3E")`
 
 export default function BookCard({ book }: { book: Book }) {
   const router = useRouter()
@@ -33,17 +38,29 @@ export default function BookCard({ book }: { book: Book }) {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div
-              className="w-full h-full flex items-center justify-center"
-              style={{ backgroundColor: 'var(--primary)' }}
-            >
-              <BookOpen size={36} style={{ color: 'rgba(255,255,255,0.5)' }} />
+            <div className="relative w-full h-full" style={{ backgroundColor: 'var(--primary)' }}>
+              {/* Tiled book icon pattern at 16 % opacity */}
+              <div
+                className="absolute inset-0 opacity-[0.16]"
+                style={{
+                  backgroundImage: bookPatternUrl,
+                  backgroundSize: '32px 32px',
+                  backgroundRepeat: 'repeat',
+                }}
+              />
             </div>
           )}
         </div>
 
-        {/* Gradient overlay: transparent → dark at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70" />
+        {/* Gradient overlay — dark for photo covers, primary-to-transparent for pattern */}
+        {book.cover_url ? (
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70" />
+        ) : (
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(to bottom, rgba(0,136,255,0), #0088ff)' }}
+          />
+        )}
 
         {/* Content pinned to bottom */}
         <div className="relative z-10 flex flex-col gap-1 w-full">

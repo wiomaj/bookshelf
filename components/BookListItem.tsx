@@ -2,11 +2,16 @@
 
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { BookOpen } from 'lucide-react'
+import { Book as BookIcon } from 'lucide-react'
 import StarRating from './StarRating'
 import { formatMonthShort } from '@/lib/month'
 import { coverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
+
+// Same Book-icon SVG used for the tile pattern; at backgroundSize '22px 22px'
+// the 32-wide viewBox scales the icon down to ~16 px with ~3 px margin each side.
+const bookPatternUrl =
+  `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-4 -4 32 32' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20'/%3E%3C/svg%3E")`
 
 export default function BookListItem({ book }: { book: Book }) {
   const router = useRouter()
@@ -27,10 +32,20 @@ export default function BookListItem({ book }: { book: Book }) {
           <img src={coverUrl(book.cover_url)} alt={book.title} className="w-full h-full object-cover" />
         ) : (
           <div
-            className="w-full h-full flex items-center justify-center"
+            className="relative w-full h-full flex items-center justify-center"
             style={{ backgroundColor: 'var(--primary)' }}
           >
-            <BookOpen size={24} style={{ color: 'rgba(255,255,255,0.6)' }} />
+            {/* Tiled book icon pattern at 8 % opacity */}
+            <div
+              className="absolute inset-0 opacity-[0.08]"
+              style={{
+                backgroundImage: bookPatternUrl,
+                backgroundSize: '22px 22px',
+                backgroundRepeat: 'repeat',
+              }}
+            />
+            {/* Single centered full-opacity book icon */}
+            <BookIcon size={24} color="white" className="relative z-10" />
           </div>
         )}
       </div>
