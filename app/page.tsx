@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpen, BookMarked, Settings, Loader2, Heart } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpenCheck, Library, Settings, Loader2, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { getReadBooks, getToReadBooks, getWishlistBooks } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
@@ -489,7 +489,7 @@ export default function HomePage() {
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
               />
             )}
-            <BookOpen
+            <BookOpenCheck
               size={22}
               strokeWidth={activeTab === 'read' ? 2 : 1.5}
               className="relative"
@@ -514,7 +514,7 @@ export default function HomePage() {
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
               />
             )}
-            <BookMarked
+            <Library
               size={22}
               strokeWidth={activeTab === 'to_read' ? 2 : 1.5}
               className="relative"
