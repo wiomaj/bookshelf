@@ -48,7 +48,9 @@ export default function StarRating({
                   ? 'fill-[#FFD60A] text-[#FFD60A] transition-colors'
                   : cozyMode && !darkBg
                   ? 'text-[#171717] transition-colors'
-                  : 'fill-[#FFD60A]/30 text-[#FFD60A]/30 transition-colors'
+                  : darkBg
+                  ? 'fill-[#FFD60A]/30 text-[#FFD60A]/30 transition-colors'
+                  : 'fill-[#FFD60A]/50 text-[#FFD60A]/50 transition-colors'
               }
             />
           </motion.button>
