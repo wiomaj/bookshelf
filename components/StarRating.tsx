@@ -50,7 +50,7 @@ export default function StarRating({
                   : cozyMode && !darkBg
                   ? 'text-[#171717] transition-colors'
                   : darkBg
-                  ? 'fill-[#FFD60A]/30 text-[#FFD60A]/30 transition-colors'
+                  ? 'fill-[#FFD60A]/40 text-[#FFD60A]/40 transition-colors'
                   : 'fill-[hsla(240,6%,25%,0.3)] text-[hsla(240,6%,25%,0.3)] transition-colors'
               }
             />
