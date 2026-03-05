@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { BookOpen, Pencil, X, Calendar, Tag, type LucideIcon } from 'lucide-react'
+import { BookOpen, BookOpenText, Pencil, X, Rocket, LibraryBig, type LucideIcon } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
@@ -297,18 +297,18 @@ export default function BookDetailPage() {
           {/* Info chips — horizontal scroll */}
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
             <InfoChip
-              icon={BookOpen}
+              icon={BookOpenText}
               label={t.tabRead}
               value={readDate}
             />
             <InfoChip
-              icon={Calendar}
+              icon={Rocket}
               label={t.released}
               value={book.year?.toString()}
             />
             {(book.genre || apiGenre) && (
               <InfoChip
-                icon={Tag}
+                icon={LibraryBig}
                 label={t.genre}
                 value={book.genre || apiGenre}
               />
