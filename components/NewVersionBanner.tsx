@@ -11,8 +11,7 @@ export default function NewVersionBanner() {
   const buildId = useRef<string | null>(null)
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nextData = (window as any).__NEXT_DATA__
+    const nextData = (window as Window & { __NEXT_DATA__?: { buildId?: string } }).__NEXT_DATA__
     if (!nextData?.buildId) return
     buildId.current = nextData.buildId
 
