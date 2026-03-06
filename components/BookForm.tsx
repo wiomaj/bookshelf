@@ -8,7 +8,7 @@ import ISBNScanner from './ISBNScanner'
 import { LONG_MONTHS, SEASONS } from '@/lib/month'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
-import { normaliseGoogleCover, googleCoverFromResponse } from '@/lib/bookMetadata'
+import { googleCoverFromResponse } from '@/lib/bookMetadata'
 import { uploadCoverPhoto } from '@/lib/coverUpload'
 import { supabase } from '@/lib/supabase'
 
@@ -34,94 +34,9 @@ interface BookFormProps {
   loading?: boolean
 }
 
-// ─── Book Search APIs ─────────────────────────────────────────────────────────
+// ─── Book Search API ──────────────────────────────────────────────────────────
 
-async function searchOpenLibrary(query: string, language?: string): Promise<RichSuggestion[]> {
-  const lang = language ? `&language=${encodeURIComponent(language)}` : ''
-  const res = await fetch(
-    `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&fields=title,author_name,cover_i,cover_edition_key,isbn&limit=10${lang}`
-  )
-  if (!res.ok) throw new Error('Open Library request failed')
-  const data = await res.json()
-  return (data.docs ?? []).map((doc: any) => {
-    let cover_url: string | undefined
-    if (doc.cover_i) {
-      cover_url = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`
-    } else if (doc.cover_edition_key) {
-      cover_url = `https://covers.openlibrary.org/b/olid/${doc.cover_edition_key}-L.jpg`
-    } else if (doc.isbn?.[0]) {
-      cover_url = `https://covers.openlibrary.org/b/isbn/${doc.isbn[0]}-L.jpg`
-    }
-    return {
-      title: doc.title ?? '',
-      author: doc.author_name?.[0] ?? 'Unknown Author',
-      cover_url,
-      isbn: doc.isbn?.find((n: string) => n.length === 13) ?? doc.isbn?.[0],
-    }
-  })
-}
-
-
-async function searchGoogleBooks(query: string, langRestrict?: string): Promise<RichSuggestion[]> {
-  const lang = langRestrict ? `&langRestrict=${encodeURIComponent(langRestrict)}` : ''
-  const res = await fetch(
-    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=10${lang}`
-  )
-  if (!res.ok) throw new Error('Google Books request failed')
-  const data = await res.json()
-  return (data.items ?? []).map((item: any) => {
-    const links = item.volumeInfo?.imageLinks
-    const raw = links?.extraLarge ?? links?.large ?? links?.medium ?? links?.thumbnail
-    const ids: { type: string; identifier: string }[] = item.volumeInfo?.industryIdentifiers ?? []
-    const isbn =
-      ids.find((id) => id.type === 'ISBN_13')?.identifier ??
-      ids.find((id) => id.type === 'ISBN_10')?.identifier
-    return {
-      title: item.volumeInfo?.title ?? '',
-      author: item.volumeInfo?.authors?.[0] ?? 'Unknown Author',
-      cover_url: raw ? normaliseGoogleCover(raw) : undefined,
-      isbn,
-    }
-  })
-}
-
-/** Score how well a title matches the query — higher is better. */
-function relevanceScore(title: string, query: string): number {
-  const t = title.toLowerCase().trim()
-  const q = query.toLowerCase().trim()
-  if (t === q) return 100
-  if (t.startsWith(q)) return 80
-  if (t.includes(` ${q}`) || t.includes(`${q} `)) return 60
-  if (t.includes(q)) return 40
-  const words = q.split(/\s+/)
-  const matched = words.filter((w) => t.includes(w)).length
-  return Math.round((matched / words.length) * 20)
-}
-
-function rankAndDeduplicate(results: RichSuggestion[], query: string): RichSuggestion[] {
-  const map = new Map<string, RichSuggestion>()
-  for (const s of results) {
-    const key = s.title.toLowerCase().trim()
-    const existing = map.get(key)
-    if (!existing) {
-      map.set(key, s)
-    } else {
-      const better = !existing.cover_url && s.cover_url ? s : existing
-      map.set(key, { ...better, isbn: better.isbn ?? s.isbn ?? existing.isbn })
-    }
-  }
-
-  return [...map.values()]
-    .sort((a, b) => {
-      const scoreDiff = relevanceScore(b.title, query) - relevanceScore(a.title, query)
-      if (scoreDiff !== 0) return scoreDiff
-      return (b.cover_url ? 1 : 0) - (a.cover_url ? 1 : 0)
-    })
-    .slice(0, 8)
-}
-
-
-/** Query Google Books by exact ISBN — more precise than a title search. */
+/** Query Google Books by exact ISBN — fallback cover enrichment. */
 async function fetchCoverByISBN(isbn: string): Promise<string | undefined> {
   try {
     const res = await fetch(
@@ -132,7 +47,7 @@ async function fetchCoverByISBN(isbn: string): Promise<string | undefined> {
   } catch { return undefined }
 }
 
-/** Query Google Books with intitle: + inauthor: */
+/** Query Google Books with intitle: + inauthor: — fallback cover enrichment. */
 async function fetchCoverByTitleAuthor(title: string, author: string): Promise<string | undefined> {
   try {
     const q = `intitle:"${title}" inauthor:"${author}"`
@@ -144,24 +59,31 @@ async function fetchCoverByTitleAuthor(title: string, author: string): Promise<s
   } catch { return undefined }
 }
 
+/**
+ * Query the unified /api/search endpoint and return BookSuggestion[] for the UI.
+ * Falls back to an empty array if the request fails.
+ */
 async function searchAllSources(query: string): Promise<BookSuggestion[]> {
-  const [olGlobal, olGerman, googleGlobal, googleGerman] = await Promise.allSettled([
-    searchOpenLibrary(query),
-    searchOpenLibrary(query, 'ger'),
-    searchGoogleBooks(query),
-    searchGoogleBooks(query, 'de'),
-  ])
+  const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&max=8`)
+  if (!res.ok) return []
 
-  const combined: RichSuggestion[] = [
-    ...(olGlobal.status     === 'fulfilled' ? olGlobal.value     : []),
-    ...(olGerman.status     === 'fulfilled' ? olGerman.value     : []),
-    ...(googleGlobal.status === 'fulfilled' ? googleGlobal.value : []),
-    ...(googleGerman.status === 'fulfilled' ? googleGerman.value : []),
-  ]
+  const { results } = await res.json() as { results: Array<{
+    title: string
+    authors: string[]
+    coverImageUrl?: string
+    isbn13?: string[]
+    isbn10?: string[]
+  }> }
 
-  const ranked = rankAndDeduplicate(combined, query)
+  const suggestions: RichSuggestion[] = (results ?? []).map((r) => ({
+    title: r.title,
+    author: r.authors?.[0] ?? 'Unknown Author',
+    cover_url: r.coverImageUrl,
+    isbn: r.isbn13?.[0] ?? r.isbn10?.[0],
+  }))
 
-  const needsCover = ranked.filter((r) => !r.cover_url)
+  // Cover enrichment pass for the few results without a cover image
+  const needsCover = suggestions.filter((r) => !r.cover_url)
   if (needsCover.length > 0) {
     const coverResults = await Promise.allSettled(
       needsCover.map(async (r) => {
@@ -171,9 +93,9 @@ async function searchAllSources(query: string): Promise<BookSuggestion[]> {
           attempts.push(fetchCoverByTitleAuthor(r.title, r.author))
         }
         if (attempts.length === 0) return undefined
-        const results = await Promise.allSettled(attempts)
-        for (const res of results) {
-          if (res.status === 'fulfilled' && res.value) return res.value
+        const settled = await Promise.allSettled(attempts)
+        for (const s of settled) {
+          if (s.status === 'fulfilled' && s.value) return s.value
         }
         return undefined
       })
@@ -181,13 +103,13 @@ async function searchAllSources(query: string): Promise<BookSuggestion[]> {
     coverResults.forEach((result, i) => {
       if (result.status === 'fulfilled' && result.value) {
         const key = needsCover[i].title.toLowerCase().trim()
-        const idx = ranked.findIndex((r) => r.title.toLowerCase().trim() === key)
-        if (idx !== -1) ranked[idx].cover_url = result.value
+        const idx = suggestions.findIndex((r) => r.title.toLowerCase().trim() === key)
+        if (idx !== -1) suggestions[idx].cover_url = result.value
       }
     })
   }
 
-  return ranked.map(({ isbn: _isbn, ...rest }) => rest)
+  return suggestions.map(({ isbn: _isbn, ...rest }) => rest)
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
