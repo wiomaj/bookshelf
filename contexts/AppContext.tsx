@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { type Locale, type Translations, translations } from '@/lib/translations'
 
 export type ViewMode = 'grid' | 'list'
+export type Theme = 'system' | 'dark'
 
 const VALID_LOCALES: Locale[] = ['en', 'de', 'fr', 'es', 'pl']
 
@@ -26,6 +27,13 @@ interface AppContextValue {
   setViewMode: (mode: ViewMode) => void
   cozyMode: boolean
   setCozyMode: (enabled: boolean) => void
+  theme: Theme
+  setTheme: (theme: Theme) => void
+  isDark: boolean
+  toReadCount: number
+  setToReadCount: (n: number) => void
+  wishlistCount: number
+  setWishlistCount: (n: number) => void
   language: Locale
   setLanguage: (lang: Locale) => void
   user: User | null
@@ -43,6 +51,10 @@ const AppContext = createContext<AppContextValue | null>(null)
 export function AppProvider({ children }: { children: ReactNode }) {
   const [viewMode, setViewModeState] = useState<ViewMode>('grid')
   const [cozyMode, setCozyModeState] = useState(false)
+  const [theme, setThemeState] = useState<Theme>('system')
+  const [isDark, setIsDark] = useState(false)
+  const [toReadCount, setToReadCountState] = useState(0)
+  const [wishlistCount, setWishlistCountState] = useState(0)
   const [language, setLanguageState] = useState<Locale>('en')
   const [user, setUser] = useState<User | null>(null)
   const [isAuthLoading, setIsAuthLoading] = useState(true)
@@ -57,11 +69,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (v === 'grid' || v === 'list') setViewModeState(v)
       const c = localStorage.getItem('bookshelf_cozy_mode')
       if (c === 'true') setCozyModeState(true)
+      const th = localStorage.getItem('bookshelf_theme') as Theme | null
+      if (th === 'dark' || th === 'system') setThemeState(th)
       const l = localStorage.getItem('bookshelf_language') as Locale | null
       if (l && VALID_LOCALES.includes(l)) setLanguageState(l)
       else setLanguageState(detectBrowserLocale())
     } catch { /* ignore */ }
   }, [])
+
+  // ── Apply dark class to <html> based on theme + system preference ────────────
+  useEffect(() => {
+    function apply() {
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      const dark = theme === 'dark' || (theme === 'system' && systemDark)
+      document.documentElement.classList.toggle('dark', dark)
+      setIsDark(dark)
+    }
+    apply()
+    if (theme === 'system') {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)')
+      mq.addEventListener('change', apply)
+      return () => mq.removeEventListener('change', apply)
+    }
+  }, [theme])
 
   // ── Auth init ────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -95,10 +125,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem('bookshelf_cozy_mode', String(enabled)) } catch { /* ignore */ }
   }
 
+  function setTheme(t: Theme) {
+    setThemeState(t)
+    try { localStorage.setItem('bookshelf_theme', t) } catch { /* ignore */ }
+  }
+
   function setLanguage(lang: Locale) {
     setLanguageState(lang)
     try { localStorage.setItem('bookshelf_language', lang) } catch { /* ignore */ }
   }
+
+  function setToReadCount(n: number) { setToReadCountState(n) }
+  function setWishlistCount(n: number) { setWishlistCountState(n) }
 
   // ── Auth methods ─────────────────────────────────────────────────────────────
   async function signIn(email: string, password: string): Promise<{ error: string | null; needsConfirmation: boolean }> {
@@ -146,6 +184,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       viewMode, setViewMode,
       cozyMode, setCozyMode,
+      theme, setTheme,
+      isDark,
+      toReadCount, setToReadCount,
+      wishlistCount, setWishlistCount,
       language, setLanguage,
       user, isAuthLoading,
       signIn, signUp, signOut, resetPassword, changePassword, deleteAccount,

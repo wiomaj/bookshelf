@@ -80,6 +80,12 @@ export default function BookCard({ book }: { book: Book }) {
             </p>
           )}
 
+          {book.author && (
+            <p className="font-semibold text-[11px] leading-[13px] tracking-[0.06px] line-clamp-1" style={{ color: 'rgba(255,255,255,0.80)' }}>
+              {book.author}
+            </p>
+          )}
+
           <StarRating rating={book.rating} readonly size={16} darkBg />
         </div>
       </div>

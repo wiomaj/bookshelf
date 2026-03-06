@@ -58,6 +58,8 @@ export type Translations = {
   // Settings
   cozyMode: string
   cozyModeDescription: string
+  darkMode: string
+  darkModeDescription: string
   language: string
   signOut: string
   // Auth
@@ -127,6 +129,8 @@ export type Translations = {
   athsIosTap: string
   athsIosThen: string
   athsInstall: string
+  // New version banner
+  newVersionBanner: string
 }
 
 const en: Translations = {
@@ -173,6 +177,8 @@ const en: Translations = {
   cancel: 'Cancel',
   cozyMode: 'Cozy mode',
   cozyModeDescription: 'Cozy mode makes your app feel like a warm living room!',
+  darkMode: 'Dark mode',
+  darkModeDescription: 'Always use dark appearance',
   language: 'Language',
   signOut: 'Sign out',
   email: 'Email',
@@ -236,6 +242,7 @@ const en: Translations = {
   athsIosTap: 'Tap',
   athsIosThen: 'then',
   athsInstall: 'Install',
+  newVersionBanner: 'A newer version of bookshelf is available. Click here to refresh.',
 }
 
 const de: Translations = {
@@ -282,6 +289,8 @@ const de: Translations = {
   cancel: 'Abbrechen',
   cozyMode: 'Gemütlichkeitsmodus',
   cozyModeDescription: 'Der Gemütlichkeitsmodus lässt die App wie ein warmes Wohnzimmer wirken!',
+  darkMode: 'Dunkelmodus',
+  darkModeDescription: 'Immer dunkles Erscheinungsbild verwenden',
   language: 'Sprache',
   signOut: 'Abmelden',
   email: 'E-Mail',
@@ -345,6 +354,7 @@ const de: Translations = {
   athsIosTap: 'Tippe auf',
   athsIosThen: 'dann auf',
   athsInstall: 'Installieren',
+  newVersionBanner: 'Eine neuere Version von Bookshelf ist verfügbar. Hier klicken zum Aktualisieren.',
 }
 
 const fr: Translations = {
@@ -391,6 +401,8 @@ const fr: Translations = {
   cancel: 'Annuler',
   cozyMode: 'Mode cosy',
   cozyModeDescription: "Le mode cosy donne à l'application l'ambiance d'un salon chaleureux !",
+  darkMode: 'Mode sombre',
+  darkModeDescription: 'Toujours utiliser l\'apparence sombre',
   language: 'Langue',
   signOut: 'Se déconnecter',
   email: 'E-mail',
@@ -454,6 +466,7 @@ const fr: Translations = {
   athsIosTap: 'Appuyez sur',
   athsIosThen: 'puis sur',
   athsInstall: 'Installer',
+  newVersionBanner: 'Une nouvelle version de Bookshelf est disponible. Cliquez ici pour rafraîchir.',
 }
 
 const es: Translations = {
@@ -500,6 +513,8 @@ const es: Translations = {
   cancel: 'Cancelar',
   cozyMode: 'Modo acogedor',
   cozyModeDescription: '¡El modo acogedor hace que la app parezca una sala de estar cálida!',
+  darkMode: 'Modo oscuro',
+  darkModeDescription: 'Usar siempre apariencia oscura',
   language: 'Idioma',
   signOut: 'Cerrar sesión',
   email: 'Correo electrónico',
@@ -563,6 +578,7 @@ const es: Translations = {
   athsIosTap: 'Pulsa',
   athsIosThen: 'luego',
   athsInstall: 'Instalar',
+  newVersionBanner: 'Hay una nueva versión de Bookshelf disponible. Haz clic aquí para actualizar.',
 }
 
 const pl: Translations = {
@@ -609,6 +625,8 @@ const pl: Translations = {
   cancel: 'Anuluj',
   cozyMode: 'Tryb przytulny',
   cozyModeDescription: 'Tryb przytulny sprawia, że aplikacja wygląda jak ciepły salon!',
+  darkMode: 'Tryb ciemny',
+  darkModeDescription: 'Zawsze używaj ciemnego wyglądu',
   language: 'Język',
   signOut: 'Wyloguj się',
   email: 'E-mail',
@@ -672,6 +690,7 @@ const pl: Translations = {
   athsIosTap: 'Dotknij',
   athsIosThen: 'a następnie',
   athsInstall: 'Zainstaluj',
+  newVersionBanner: 'Dostępna jest nowsza wersja Bookshelf. Kliknij tutaj, aby odświeżyć.',
 }
 
 export const translations: Record<Locale, Translations> = { en, de, fr, es, pl }

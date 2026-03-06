@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, ChevronLeft, Check, BookOpen, BookMarked, Settings } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Check, BookOpenCheck, Library, Heart, Settings } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useApp, useT } from '@/contexts/AppContext'
@@ -13,27 +13,40 @@ type View = 'settings' | 'changePassword'
 // ── Shared: floating glass bottom nav ────────────────────────────────────────
 function BottomNav({ t }: { t: ReturnType<typeof useT> }) {
   const router = useRouter()
+  const { toReadCount, wishlistCount } = useApp()
   return (
     <nav className="fixed bottom-5 left-4 right-4 z-50 max-w-[568px] mx-auto">
       <div className="glass flex items-center rounded-[28px] px-2 py-2"
            style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)' }}>
-        <Link href="/"
+        <button
+              onClick={() => router.push('/')}
               className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
               style={{ color: 'var(--label-secondary)' }}>
-          <BookOpen size={24} strokeWidth={1.5} />
-          <span className="text-[11px] font-medium tracking-[-0.1px]">{t.tabRead}</span>
-        </Link>
+          <BookOpenCheck size={22} strokeWidth={1.5} />
+          <span className="text-[10px] font-medium tracking-[-0.1px]">{t.tabRead}</span>
+        </button>
         <button
               onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'to_read'); router.push('/') }}
               className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
               style={{ color: 'var(--label-secondary)' }}>
-          <BookMarked size={24} strokeWidth={1.5} />
-          <span className="text-[11px] font-medium tracking-[-0.1px]">{t.tabToRead}</span>
+          <Library size={22} strokeWidth={1.5} />
+          <span className="text-[10px] font-medium tracking-[-0.1px]">
+            {toReadCount > 0 ? `${t.tabToRead} (${toReadCount})` : t.tabToRead}
+          </span>
+        </button>
+        <button
+              onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'wishlist'); router.push('/') }}
+              className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
+              style={{ color: 'var(--label-secondary)' }}>
+          <Heart size={22} strokeWidth={1.5} />
+          <span className="text-[10px] font-medium tracking-[-0.1px]">
+            {wishlistCount > 0 ? `${t.tabWishlist} (${wishlistCount})` : t.tabWishlist}
+          </span>
         </button>
         <button className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px] relative">
           <div className="absolute inset-0 rounded-[22px]" style={{ backgroundColor: 'var(--primary-muted)' }} />
-          <Settings size={24} strokeWidth={2} className="relative" style={{ color: 'var(--primary)' }} />
-          <span className="text-[11px] font-medium tracking-[-0.1px] relative" style={{ color: 'var(--primary)' }}>
+          <Settings size={22} strokeWidth={2} className="relative" style={{ color: 'var(--primary)' }} />
+          <span className="text-[10px] font-medium tracking-[-0.1px] relative" style={{ color: 'var(--primary)' }}>
             {t.settings}
           </span>
         </button>
@@ -86,7 +99,7 @@ function ListRow({
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { cozyMode, setCozyMode, language, setLanguage, signOut, changePassword, deleteAccount } = useApp()
+  const { cozyMode, setCozyMode, theme, setTheme, language, setLanguage, signOut, changePassword, deleteAccount } = useApp()
   const t = useT()
 
   const [view, setView] = useState<View>('settings')
@@ -242,10 +255,37 @@ export default function SettingsPage() {
             {/* Separator */}
             <div className="h-px ml-4" style={{ backgroundColor: 'var(--separator)' }} />
 
+            {/* Dark mode row */}
+            <div className="flex items-center px-4 min-h-[52px] gap-3">
+              <div className="flex-1 py-3">
+                <p className="text-[17px]" style={{ color: 'var(--label)' }}>{t.darkMode}</p>
+                <p className="text-[13px] mt-0.5" style={{ color: 'var(--label-secondary)' }}>
+                  {t.darkModeDescription}
+                </p>
+              </div>
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'system' : 'dark')}
+                className="relative w-[51px] h-[31px] rounded-full shrink-0 transition-colors duration-300"
+                style={{ backgroundColor: theme === 'dark' ? '#34C759' : 'rgba(120,120,128,0.22)' }}
+                aria-pressed={theme === 'dark'}
+              >
+                <div
+                  className="absolute top-[2px] w-[27px] h-[27px] bg-white rounded-full transition-transform duration-300"
+                  style={{
+                    transform: theme === 'dark' ? 'translateX(22px)' : 'translateX(2px)',
+                    boxShadow: '0 3px 8px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.06)',
+                  }}
+                />
+              </button>
+            </div>
+
+            {/* Separator */}
+            <div className="h-px ml-4" style={{ backgroundColor: 'var(--separator)' }} />
+
             {/* Language row */}
             <button
               onClick={() => setLangOpen(o => !o)}
-              className="w-full flex items-center px-4 min-h-[52px] gap-3 transition-colors active:opacity-60"
+              className="w-full flex items-center px-4 min-h-[52px] gap-3 text-left transition-colors active:opacity-60"
             >
               <span className="flex-1 text-[17px] py-3" style={{ color: 'var(--label)' }}>
                 {t.language}

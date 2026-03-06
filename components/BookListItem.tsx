@@ -50,7 +50,7 @@ export default function BookListItem({ book }: { book: Book }) {
         )}
       </div>
 
-      {/* Content: month → stars → title */}
+      {/* Content: month → title → author → stars */}
       <div className="flex-1 min-w-0 flex flex-col gap-[4px]">
         {formatMonthShort(book.month) && (
           <p
@@ -60,13 +60,18 @@ export default function BookListItem({ book }: { book: Book }) {
             {formatMonthShort(book.month)}
           </p>
         )}
-        <StarRating rating={book.rating} readonly size={16} />
         <p
           className="text-[17px] font-semibold leading-[22px] tracking-[-0.43px] line-clamp-2"
           style={{ color: 'var(--label)' }}
         >
           {book.title}
         </p>
+        {book.author && (
+          <p className="font-medium text-[12px] leading-[16px]" style={{ color: 'var(--label-secondary)' }}>
+            {book.author}
+          </p>
+        )}
+        <StarRating rating={book.rating} readonly size={16} />
       </div>
     </motion.div>
   )

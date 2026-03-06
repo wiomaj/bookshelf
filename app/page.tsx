@@ -23,7 +23,7 @@ const PULL_MAX = 64
 
 export default function HomePage() {
   const router = useRouter()
-  const { viewMode, setViewMode, user } = useApp()
+  const { viewMode, setViewMode, user, setToReadCount, setWishlistCount } = useApp()
   const t = useT()
   const [activeTab, setActiveTab] = useState<Tab>('read')
   const [books, setBooks] = useState<Book[]>([])
@@ -55,7 +55,9 @@ export default function HomePage() {
     setBooks(read)
     setToReadBooks(toRead)
     setWishlistBooks(wishlist)
-  }, [user])
+    setToReadCount(toRead.length)
+    setWishlistCount(wishlist.length)
+  }, [user, setToReadCount, setWishlistCount])
 
   // ── Scroll shadow trigger ─────────────────────────────────────────────────
   useEffect(() => {
@@ -190,8 +192,8 @@ export default function HomePage() {
     (activeTab === 'wishlist' && wishlistBooks.length === 0)
 
   const title =
-    activeTab === 'read'    ? t.readBooksTitle :
-    activeTab === 'to_read' ? t.toReadBooksTitle :
+    activeTab === 'read'    ? t.tabRead :
+    activeTab === 'to_read' ? t.tabToRead :
     t.wishlistTitle
 
   const pullProgress = Math.min(pullY / PULL_MAX, 1)
