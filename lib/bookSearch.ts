@@ -212,16 +212,16 @@ async function fetchOpenLibrary(query: string, _isbn: null, isAuthor: boolean, s
 
 async function fetchGoogleBooks(query: string, _isbn: null, isAuthor: boolean, signal: AbortSignal): Promise<Candidate[]> {
   // Build the GB query string.
-  // For title queries we use intitle: so GB searches the title field specifically
-  // rather than doing full-text matching across descriptions, reviews, etc.
-  // This makes "geh langsam" find "Geh langsam, wenn du es eilig hast" instead of
-  // loosely-related books that happen to contain those words somewhere.
-  // Multi-word phrases are quoted so GB treats them as an ordered phrase.
+  // For title queries we use intitle: so GB searches the title field specifically.
+  // Multi-word: each word gets its own intitle: operator so any title order is accepted.
+  // Quoted exact phrases (intitle:"word1 word2") return zero results for non-English
+  // titles in practice, so we avoid them.
+  const buildTitleQ = (q: string) =>
+    q.split(/\s+/).map((w) => `intitle:${w}`).join(' ')
+
   const q = isAuthor
     ? `inauthor:"${query}"`
-    : query.includes(' ')
-      ? `intitle:"${query}"`   // multi-word → exact phrase in title
-      : `intitle:${query}`     // single word → any title containing it
+    : buildTitleQ(query)  // each word must appear in title, any order
 
   const params = new URLSearchParams({
     q,
@@ -267,6 +267,31 @@ function merge(a: Candidate, b: Candidate): Candidate {
   }
 }
 
+// ─── DNB title search via server route ───────────────────────────────────────
+
+/**
+ * Call the server-side /api/search route which queries DNB by title.
+ * DNB has comprehensive coverage of German, Austrian, and Swiss books that
+ * Google Books and Open Library largely miss.
+ */
+async function fetchDNBSearch(query: string, signal: AbortSignal): Promise<Candidate[]> {
+  try {
+    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal })
+    if (!res.ok) return []
+    const data = await res.json() as {
+      results?: Array<{ title: string; author: string; cover_url?: string }>
+    }
+    return (data.results ?? []).map((r, position) => ({
+      title: r.title,
+      author: normalizeAuthorName(r.author),
+      cover_url: r.cover_url,
+      score: (8 - position) * 10 + titleRelevanceBonus(r.title, query),
+    }))
+  } catch {
+    return []
+  }
+}
+
 // ─── ISBN lookup via server route ─────────────────────────────────────────────
 
 /**
@@ -293,7 +318,7 @@ async function fetchByISBN(isbn: string): Promise<BookSuggestion | null> {
  * - Raw ISBN numbers (10 or 13 digits, with or without dashes) are routed to
  *   /api/isbn (server-side Google Books + DNB) for reliable German book support.
  * - Two-word proper-name queries use author-specific search endpoints.
- * - Everything else uses OL + GB in parallel (client-side, both allow CORS).
+ * - Everything else uses OL + GB + DNB in parallel (OL/GB client-side, DNB via /api/search).
  *
  * Returns at most `maxResults` suggestions, covers-first, sorted by score.
  * Never throws — returns [] on network errors or empty queries.
@@ -312,7 +337,7 @@ export async function searchBooks(
     return result ? [result] : []
   }
 
-  // ── Text search: OL + GB in parallel ───────────────────────────────────────
+  // ── Text search: OL + GB + DNB in parallel ─────────────────────────────────
   const isAuthor = looksLikeAuthorName(q)
 
   const controller = new AbortController()
@@ -320,21 +345,24 @@ export async function searchBooks(
 
   let olResults: Candidate[] = []
   let gbResults: Candidate[] = []
+  let dnbResults: Candidate[] = []
 
   try {
-    const [ol, gb] = await Promise.allSettled([
+    const [ol, gb, dnb] = await Promise.allSettled([
       fetchOpenLibrary(q, null, isAuthor, controller.signal),
       fetchGoogleBooks(q, null, isAuthor, controller.signal),
+      isAuthor ? Promise.resolve([]) : fetchDNBSearch(q, controller.signal),
     ])
     if (ol.status === 'fulfilled') olResults = ol.value
     if (gb.status === 'fulfilled') gbResults = gb.value
+    if (dnb.status === 'fulfilled') dnbResults = dnb.value
   } finally {
     clearTimeout(timeoutId)
   }
 
   // Deduplicate: merge candidates that refer to the same work
   const seen = new Map<string, Candidate>()
-  for (const c of [...olResults, ...gbResults]) {
+  for (const c of [...olResults, ...gbResults, ...dnbResults]) {
     if (!c.title) continue
     const key = dedupKey(c.title, c.author)
     const existing = seen.get(key)
