@@ -6,17 +6,12 @@ import { Camera, Loader2, Search } from 'lucide-react'
 import ISBNScanner from './ISBNScanner'
 import { useApp, useT } from '@/contexts/AppContext'
 import { LONG_MONTHS, SEASONS } from '@/lib/month'
-import { normaliseGoogleCover } from '@/lib/bookMetadata'
 import { uploadCoverPhoto } from '@/lib/coverUpload'
 import { supabase } from '@/lib/supabase'
+import { searchBooks } from '@/lib/bookSearch'
+import type { BookSuggestion } from '@/lib/bookSearch'
 
 const currentYear = new Date().getFullYear()
-
-type BookSuggestion = {
-  title: string
-  author: string
-  cover_url?: string
-}
 
 export type ToReadFormData = {
   title: string
@@ -34,45 +29,7 @@ interface ToReadFormProps {
   hideDateField?: boolean
 }
 
-// ─── Book Search ──────────────────────────────────────────────────────────────
-
-async function searchBooks(query: string): Promise<BookSuggestion[]> {
-  const [olRes, gRes] = await Promise.allSettled([
-    fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&fields=title,author_name,cover_i&limit=6`).then(r => r.json()),
-    fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=6`).then(r => r.json()),
-  ])
-
-  const results: BookSuggestion[] = []
-
-  if (olRes.status === 'fulfilled') {
-    for (const doc of olRes.value.docs ?? []) {
-      results.push({
-        title: doc.title ?? '',
-        author: doc.author_name?.[0] ?? '',
-        cover_url: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg` : undefined,
-      })
-    }
-  }
-  if (gRes.status === 'fulfilled') {
-    for (const item of gRes.value.items ?? []) {
-      const links = item.volumeInfo?.imageLinks
-      const raw = links?.extraLarge ?? links?.large ?? links?.medium ?? links?.thumbnail ?? links?.smallThumbnail
-      results.push({
-        title: item.volumeInfo?.title ?? '',
-        author: item.volumeInfo?.authors?.[0] ?? '',
-        cover_url: raw ? normaliseGoogleCover(raw) : undefined,
-      })
-    }
-  }
-
-  const seen = new Set<string>()
-  return results.filter(r => {
-    const key = r.title.toLowerCase().trim()
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
-  }).slice(0, 8)
-}
+// searchBooks is imported from @/lib/bookSearch — supports title, author, ISBN
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
