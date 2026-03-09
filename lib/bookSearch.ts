@@ -9,8 +9,13 @@
  * Design:
  *  - ISBN queries → server-side /api/isbn (GB + DNB; handles German books OL misses)
  *  - Text queries → client-side OL + GB in parallel (both allow CORS)
+ *  - OL uses title= (field-scoped) not q= (full-text) to avoid noisy matches
+ *  - GB uses intitle: operator for title-field search
  *  - Dedup key = normalised title + first author (not just title)
  *  - OL edition_count used as a popularity signal so classics rise
+ *  - Title-relevance bonus: exact phrase (80) > prefix (60) > all words (40) > partial
+ *  - Word-boundary check: "langsam" does NOT match inside "langsamer"
+ *  - Multi-word post-filter: drops results missing any query word from the title
  *  - Results with covers are preferred in the final sort
  *  - 6-second shared abort timeout
  */
@@ -127,6 +132,43 @@ function dedupKey(title: string, author: string): string {
   return `${normalizeKey(title)}|||${normalizeKey(normalizeAuthorName(author))}`
 }
 
+// ─── Title relevance scoring ──────────────────────────────────────────────────
+
+/**
+ * Returns a bonus score reflecting how well the candidate title matches the
+ * search query. Uses \b word-boundary matching so "langsam" does NOT match
+ * inside "langsamer", preventing false near-matches from outranking exact hits.
+ *
+ * Tiers (highest → lowest):
+ *  80 – exact phrase found in title   ("geh langsam" in "Geh langsam, wenn…")
+ *  60 – title starts with the query   (prefix, after stripping leading articles)
+ *  40 – all query words present as whole words, any order
+ *  ≤15 – partial credit proportional to fraction of matching whole words
+ *   0  – no whole-word query term appears in title
+ */
+function titleRelevanceBonus(title: string, query: string): number {
+  if (!title || !query) return 0
+  const t = title.toLowerCase()
+  const q = query.toLowerCase()
+  const words = q.split(/\s+/).filter((w) => w.length >= 2)
+  if (words.length === 0) return 0
+
+  // Tier 1: exact phrase present anywhere in title
+  if (t.includes(q)) return 80
+
+  // Tier 2: title starts with the query (strip leading articles for robustness)
+  const stripArticle = (s: string) => s.replace(/^(der|die|das|ein|eine|the|a|an)\s+/i, '')
+  if (stripArticle(t).startsWith(stripArticle(q))) return 60
+
+  // Tier 3: all query words present as whole words (any order)
+  const allMatch = words.every((w) => new RegExp(`\\b${w}\\b`).test(t))
+  if (allMatch) return 40
+
+  // Tier 4: partial credit — proportional to fraction of matching whole words
+  const matchCount = words.filter((w) => new RegExp(`\\b${w}\\b`).test(t)).length
+  return matchCount > 0 ? Math.round((matchCount / words.length) * 15) : 0
+}
+
 // ─── Provider fetchers ────────────────────────────────────────────────────────
 
 async function fetchOpenLibrary(query: string, _isbn: null, isAuthor: boolean, signal: AbortSignal): Promise<Candidate[]> {
@@ -139,8 +181,10 @@ async function fetchOpenLibrary(query: string, _isbn: null, isAuthor: boolean, s
     // Author-focused query: OL's author field gives better results than q=
     params.set('author', query)
   } else {
-    // General relevance search across title, author, subject
-    params.set('q', query)
+    // title= restricts search to the title field only.
+    // q= does full-text matching (descriptions, subjects, …) which returns
+    // notebooks, softcover journals and other noise for queries like "geh langsam".
+    params.set('title', query)
   }
 
   try {
@@ -150,7 +194,8 @@ async function fetchOpenLibrary(query: string, _isbn: null, isAuthor: boolean, s
 
     return (data.docs ?? []).map((doc, position) => {
       const editionBoost = Math.min(doc.edition_count ?? 0, 60)
-      const score = (12 - position) * 10 + editionBoost
+      const titleBonus = isAuthor ? 0 : titleRelevanceBonus(doc.title ?? '', query)
+      const score = (12 - position) * 10 + editionBoost + titleBonus
 
       return {
         title: doc.title ?? '',
@@ -195,7 +240,8 @@ async function fetchGoogleBooks(query: string, _isbn: null, isAuthor: boolean, s
       const rawCover = links?.thumbnail ?? links?.smallThumbnail
       const cover_url = rawCover ? cleanGoogleCover(rawCover) : undefined
 
-      const score = (10 - position) * 10
+      const titleBonus = isAuthor ? 0 : titleRelevanceBonus(info?.title ?? '', query)
+      const score = (10 - position) * 10 + titleBonus
 
       return {
         title: info?.title ?? '',
@@ -295,8 +341,22 @@ export async function searchBooks(
     seen.set(key, existing ? merge(existing, c) : c)
   }
 
+  // For multi-word title queries, suppress candidates that are missing at least
+  // one query word from their title entirely (substring check — not word-boundary,
+  // so this is a broad safety net, not a strict filter).
+  // This removes genuine noise like unrelated notebooks or softcover design journals
+  // that happen to mention one word somewhere in a long subtitle.
+  const qWords = isAuthor ? [] : q.toLowerCase().split(/\s+/).filter((w) => w.length >= 2)
+  const needsTitleFilter = !isAuthor && qWords.length >= 2
+
   // Sort: covers first, then by score descending
   const ranked = [...seen.values()]
+    .filter((c) => {
+      if (!needsTitleFilter) return true
+      const tl = c.title.toLowerCase()
+      // Keep only if every query word appears somewhere in the title
+      return qWords.every((w) => tl.includes(w))
+    })
     .sort((a, b) => {
       const coverDiff = (b.cover_url ? 1 : 0) - (a.cover_url ? 1 : 0)
       if (coverDiff !== 0) return coverDiff
