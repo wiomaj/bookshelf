@@ -82,7 +82,7 @@ async function gbCoverByISBN(isbn: string): Promise<string | undefined> {
   try {
     const res = await fetch(
       `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&maxResults=1&fields=items(volumeInfo/imageLinks)`,
-      { signal: AbortSignal.timeout(3000) }
+      { next: { revalidate: 86400 } }  // cache 24h to conserve GB quota
     )
     if (!res.ok) return undefined
     const data = await res.json() as {
@@ -100,52 +100,21 @@ async function gbCoverByISBN(isbn: string): Promise<string | undefined> {
 async function olCoverByISBN(isbn: string): Promise<string | undefined> {
   try {
     const url = `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg?default=false`
-    const res = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(3000) })
+    const res = await fetch(url, { method: 'HEAD', next: { revalidate: 86400 } })
     return res.ok ? url.replace('?default=false', '') : undefined
   } catch {
     return undefined
   }
 }
 
-/** Google Books cover by title + author — fallback when ISBN lookup misses. */
-async function gbCoverByTitleAuthor(title: string, author: string): Promise<string | undefined> {
-  try {
-    const titleHint = title.split(/\s+/).slice(0, 4).join(' ')
-    const authorHint = author.split(/\s+/).slice(0, 2).join(' ')
-    const q = authorHint
-      ? `intitle:"${titleHint}" inauthor:"${authorHint}"`
-      : `intitle:"${titleHint}"`
-    const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=1&fields=items(volumeInfo/imageLinks)`,
-      { signal: AbortSignal.timeout(3000) }
-    )
-    if (!res.ok) return undefined
-    const data = await res.json() as {
-      items?: Array<{ volumeInfo?: { imageLinks?: { thumbnail?: string; smallThumbnail?: string } } }>
-    }
-    const links = data.items?.[0]?.volumeInfo?.imageLinks
-    const raw = links?.thumbnail ?? links?.smallThumbnail
-    return raw ? raw.replace(/^http:/, 'https:').replace(/zoom=\d/, 'zoom=1') : undefined
-  } catch {
-    return undefined
-  }
-}
-
 /**
- * Fetch cover: GB by ISBN → (OL by ISBN ∥ GB by title+author).
- * Runs fallbacks in parallel once the ISBN path fails to keep latency low.
+ * Fetch cover: GB by ISBN → OL by ISBN (in parallel).
+ * Both results are cached 24h to avoid burning GB quota on repeated searches.
  */
-async function fetchCover(isbn: string | undefined, title: string, author: string): Promise<string | undefined> {
-  if (isbn) {
-    const gbIsbn = await gbCoverByISBN(isbn)
-    if (gbIsbn) return gbIsbn
-    const [ol, gbTitle] = await Promise.all([
-      olCoverByISBN(isbn),
-      gbCoverByTitleAuthor(title, author),
-    ])
-    return ol ?? gbTitle
-  }
-  return gbCoverByTitleAuthor(title, author)
+async function fetchCover(isbn: string | undefined): Promise<string | undefined> {
+  if (!isbn) return undefined
+  const [gb, ol] = await Promise.all([gbCoverByISBN(isbn), olCoverByISBN(isbn)])
+  return gb ?? ol
 }
 
 // ── Route handler ─────────────────────────────────────────────────────────────
@@ -203,10 +172,10 @@ export async function GET(req: NextRequest) {
       })
       .filter((r): r is NonNullable<typeof r> => r !== null && r.title.length > 0)
 
-    // Fetch covers in parallel (GB by ISBN → OL by ISBN → GB by title+author)
+    // Fetch covers in parallel (GB by ISBN ∥ OL by ISBN), cached 24h
     const results: SearchResult[] = await Promise.all(
       parsed.map(async (r) => {
-        const cover_url = await fetchCover(r.isbn, r.title, r.author)
+        const cover_url = await fetchCover(r.isbn)
         return { title: r.title, author: r.author, isbn: r.isbn, cover_url }
       })
     )
