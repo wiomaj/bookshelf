@@ -166,8 +166,17 @@ async function fetchOpenLibrary(query: string, _isbn: null, isAuthor: boolean, s
 }
 
 async function fetchGoogleBooks(query: string, _isbn: null, isAuthor: boolean, signal: AbortSignal): Promise<Candidate[]> {
-  // Build the GB query string
-  const q = isAuthor ? `inauthor:"${query}"` : query
+  // Build the GB query string.
+  // For title queries we use intitle: so GB searches the title field specifically
+  // rather than doing full-text matching across descriptions, reviews, etc.
+  // This makes "geh langsam" find "Geh langsam, wenn du es eilig hast" instead of
+  // loosely-related books that happen to contain those words somewhere.
+  // Multi-word phrases are quoted so GB treats them as an ordered phrase.
+  const q = isAuthor
+    ? `inauthor:"${query}"`
+    : query.includes(' ')
+      ? `intitle:"${query}"`   // multi-word → exact phrase in title
+      : `intitle:${query}`     // single word → any title containing it
 
   const params = new URLSearchParams({
     q,
