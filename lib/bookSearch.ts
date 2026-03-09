@@ -7,9 +7,8 @@
  * Imported by BookForm and ToReadForm — both use the same function.
  *
  * Design:
- *  - Client-side only (both APIs allow CORS; no server hop needed)
- *  - ISBN is auto-detected and routed to a targeted exact lookup
- *  - Text queries hit both OL and GB in parallel; APIs handle relevance
+ *  - ISBN queries → server-side /api/isbn (GB + DNB; handles German books OL misses)
+ *  - Text queries → client-side OL + GB in parallel (both allow CORS)
  *  - Dedup key = normalised title + first author (not just title)
  *  - OL edition_count used as a popularity signal so classics rise
  *  - Results with covers are preferred in the final sort
@@ -112,16 +111,13 @@ function dedupKey(title: string, author: string): string {
 
 // ─── Provider fetchers ────────────────────────────────────────────────────────
 
-async function fetchOpenLibrary(query: string, isbn: string | null, isAuthor: boolean, signal: AbortSignal): Promise<Candidate[]> {
+async function fetchOpenLibrary(query: string, _isbn: null, isAuthor: boolean, signal: AbortSignal): Promise<Candidate[]> {
   const params = new URLSearchParams({
     fields: 'title,author_name,cover_i,cover_edition_key,isbn,edition_count',
     limit: '12',
   })
 
-  if (isbn) {
-    // Exact ISBN lookup — OL's isbn field returns a precise match
-    params.set('isbn', isbn)
-  } else if (isAuthor) {
+  if (isAuthor) {
     // Author-focused query: OL's author field gives better results than q=
     params.set('author', query)
   } else {
@@ -150,16 +146,9 @@ async function fetchOpenLibrary(query: string, isbn: string | null, isAuthor: bo
   }
 }
 
-async function fetchGoogleBooks(query: string, isbn: string | null, isAuthor: boolean, signal: AbortSignal): Promise<Candidate[]> {
+async function fetchGoogleBooks(query: string, _isbn: null, isAuthor: boolean, signal: AbortSignal): Promise<Candidate[]> {
   // Build the GB query string
-  let q: string
-  if (isbn) {
-    q = `isbn:${isbn}`
-  } else if (isAuthor) {
-    q = `inauthor:"${query}"`
-  } else {
-    q = query
-  }
+  const q = isAuthor ? `inauthor:"${query}"` : query
 
   const params = new URLSearchParams({
     q,
@@ -203,15 +192,33 @@ function merge(a: Candidate, b: Candidate): Candidate {
   }
 }
 
+// ─── ISBN lookup via server route ─────────────────────────────────────────────
+
+/**
+ * For ISBN queries, call the server-side /api/isbn route which tries:
+ *  1. Google Books (no CORS/rate-limit issues server-side)
+ *  2. DNB (Deutsche Nationalbibliothek) — catches German books that GB misses
+ */
+async function fetchByISBN(isbn: string): Promise<BookSuggestion | null> {
+  try {
+    const res = await fetch(`/api/isbn?isbn=${encodeURIComponent(isbn)}`)
+    if (!res.ok) return null
+    const data = await res.json() as { result: BookSuggestion | null }
+    return data.result ?? null
+  } catch {
+    return null
+  }
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
  * Search for books by title, author, or ISBN.
  *
- * - Raw ISBN numbers (10 or 13 digits, with or without dashes) trigger an
- *   exact ISBN lookup that reliably returns the specific edition.
+ * - Raw ISBN numbers (10 or 13 digits, with or without dashes) are routed to
+ *   /api/isbn (server-side Google Books + DNB) for reliable German book support.
  * - Two-word proper-name queries use author-specific search endpoints.
- * - Everything else uses a general relevance search.
+ * - Everything else uses OL + GB in parallel (client-side, both allow CORS).
  *
  * Returns at most `maxResults` suggestions, covers-first, sorted by score.
  * Never throws — returns [] on network errors or empty queries.
@@ -223,8 +230,15 @@ export async function searchBooks(
   const q = query.trim()
   if (!q) return []
 
+  // ── ISBN: single exact lookup via server route ──────────────────────────────
   const isbn = detectISBN(q)
-  const isAuthor = !isbn && looksLikeAuthorName(q)
+  if (isbn) {
+    const result = await fetchByISBN(isbn)
+    return result ? [result] : []
+  }
+
+  // ── Text search: OL + GB in parallel ───────────────────────────────────────
+  const isAuthor = looksLikeAuthorName(q)
 
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 6_000)
@@ -234,8 +248,8 @@ export async function searchBooks(
 
   try {
     const [ol, gb] = await Promise.allSettled([
-      fetchOpenLibrary(q, isbn, isAuthor, controller.signal),
-      fetchGoogleBooks(q, isbn, isAuthor, controller.signal),
+      fetchOpenLibrary(q, null, isAuthor, controller.signal),
+      fetchGoogleBooks(q, null, isAuthor, controller.signal),
     ])
     if (ol.status === 'fulfilled') olResults = ol.value
     if (gb.status === 'fulfilled') gbResults = gb.value
