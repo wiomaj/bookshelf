@@ -187,22 +187,22 @@ export default function BookDetailPage() {
       <div className="relative" style={{ minHeight: '100vh' }}>
 
         {/* ── Blurred background ──────────────────────────────────────────── */}
-        <div className="absolute top-0 left-0 right-0 h-[360px] overflow-hidden z-0">
-          {book.cover_url ? (
+        {book.cover_url ? (
+          <div className="absolute top-0 left-0 right-0 h-[360px] overflow-hidden z-0">
             <img
               src={heroCoverUrl(book.cover_url)}
               alt=""
               className="absolute inset-0 w-full h-full object-cover scale-[1.4] blur-[40px] opacity-90"
             />
-          ) : (
-            <div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(to bottom, #0088ff, #065ba6)' }}
-            />
-          )}
-          {/* Gentle fade at bottom */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60" />
-        </div>
+            {/* Gentle fade at bottom */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60" />
+          </div>
+        ) : (
+          <div
+            className="absolute inset-0 z-0"
+            style={{ background: 'linear-gradient(to bottom, #0088ff, #065ba6)' }}
+          />
+        )}
 
         {/* ── Toolbar (edit + close) ───────────────────────────────────────── */}
         <div className="relative z-30 flex justify-end gap-2 pt-4 pr-4">
