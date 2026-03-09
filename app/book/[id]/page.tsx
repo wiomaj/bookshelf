@@ -195,16 +195,10 @@ export default function BookDetailPage() {
               className="absolute inset-0 w-full h-full object-cover scale-[1.4] blur-[40px] opacity-90"
             />
           ) : (
-            <div className="absolute inset-0" style={{ backgroundColor: 'var(--primary)' }}>
-              <div
-                className="absolute inset-0 opacity-[0.16]"
-                style={{
-                  backgroundImage: bookPatternUrl,
-                  backgroundSize: '32px 32px',
-                  backgroundRepeat: 'repeat',
-                }}
-              />
-            </div>
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(to bottom, #0088ff, #065ba6)' }}
+            />
           )}
           {/* Gentle fade at bottom */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60" />
