@@ -87,6 +87,22 @@ function looksLikeAuthorName(query: string): boolean {
   return words.every((w) => w.length >= 2 && /^[A-ZÁÉÍÓÚÜÖÄ][a-záéíóúüöäß]+$/.test(w))
 }
 
+// ─── Author normalisation ─────────────────────────────────────────────────────
+
+/**
+ * Normalise bibliographic "Lastname, Firstname" → "Firstname Lastname".
+ * Some sources (GB for German books, OL in MARC mode) store names inverted.
+ * Only inverts when exactly one comma is present (avoids "Jr., III" edge cases).
+ */
+function normalizeAuthorName(name: string): string {
+  if (!name) return name
+  const commaIdx = name.indexOf(',')
+  if (commaIdx === -1) return name          // already "First Last" — nothing to do
+  const last  = name.slice(0, commaIdx).trim()
+  const first = name.slice(commaIdx + 1).trim()
+  return first ? `${first} ${last}` : last  // "Marjolein Bastin"
+}
+
 // ─── Cover / URL helpers ──────────────────────────────────────────────────────
 
 function cleanGoogleCover(url: string): string {
@@ -106,7 +122,9 @@ function normalizeKey(s: string): string {
 }
 
 function dedupKey(title: string, author: string): string {
-  return `${normalizeKey(title)}|||${normalizeKey(author)}`
+  // Normalise the author before keying so "Bastin, Marjolein" and "Marjolein Bastin"
+  // map to the same slot and get merged rather than shown as separate results.
+  return `${normalizeKey(title)}|||${normalizeKey(normalizeAuthorName(author))}`
 }
 
 // ─── Provider fetchers ────────────────────────────────────────────────────────
@@ -136,7 +154,8 @@ async function fetchOpenLibrary(query: string, _isbn: null, isAuthor: boolean, s
 
       return {
         title: doc.title ?? '',
-        author: doc.author_name?.[0] ?? '',
+        // OL can return names in MARC "Lastname, Firstname" order — normalise to natural order
+        author: normalizeAuthorName(doc.author_name?.[0] ?? ''),
         cover_url: olCover(doc),
         score,
       }
@@ -171,7 +190,8 @@ async function fetchGoogleBooks(query: string, _isbn: null, isAuthor: boolean, s
 
       return {
         title: info?.title ?? '',
-        author: info?.authors?.[0] ?? '',
+        // GB occasionally returns German/Dutch authors in MARC inverted format
+        author: normalizeAuthorName(info?.authors?.[0] ?? ''),
         cover_url,
         score,
       }
