@@ -86,13 +86,13 @@ function AddBookContent() {
 
   // Read-specific state
   const [year, setYear] = useState(currentYear)
-  const [month, setMonth] = useState<number | null>(null)
+  const [month, setMonth] = useState<number | null>(new Date().getMonth() + 1)
   const [rating, setRating] = useState(0)
   const [notes, setNotes] = useState('')
 
-  // To Read-specific state (reuses month/year from above)
-  const [trYear, setTrYear] = useState(0)
-  const [trMonth, setTrMonth] = useState<number | null>(null)
+  // To Read-specific state
+  const [trYear, setTrYear] = useState(currentYear)
+  const [trMonth, setTrMonth] = useState<number | null>(new Date().getMonth() + 1)
 
   // Autocomplete
   const [suggestions, setSuggestions] = useState<BookSuggestion[]>([])
