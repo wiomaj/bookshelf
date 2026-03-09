@@ -93,6 +93,26 @@ function dcField(xml: string, tag: string): string | undefined {
   return m?.[1]?.trim()
 }
 
+/**
+ * Strip ISBD/MARC formatting from a DNB dc:title value.
+ * DNB titles often look like: "[Parallel title] ; Main title : Subtitle / Responsibility"
+ * Returns the plain main title only.
+ */
+function cleanDnbTitle(raw: string): string {
+  let s = raw.trim()
+  // Drop optional leading parallel-title in brackets + semicolon separator
+  // e.g. "[Geh langsam…] ; Geh langsam…" → "Geh langsam…"
+  s = s.replace(/^\[.*?\]\s*;\s*/, '')
+  // Drop subtitle (" : …") and responsibility statement (" / …")
+  s = s.replace(/\s*[:/].*$/, '')
+  return s.trim()
+}
+
+/** Remove role annotations like [Illustrator], [Verfasser], [Übers.] from creator */
+function stripCreatorRole(raw: string): string {
+  return raw.replace(/\s*\[.*?\]/g, '').trim()
+}
+
 /** Invert "Lastname, Firstname" → "Firstname Lastname" */
 function normaliseCreator(raw: string): string {
   if (raw.includes(',')) {
@@ -123,11 +143,14 @@ async function fromDNB(isbn: string): Promise<IsbnResult | null> {
     const numRecords = /<numberOfRecords>(\d+)<\/numberOfRecords>/.exec(xml)?.[1]
     if (!numRecords || numRecords === '0') return null
 
-    const title = dcField(xml, 'title')
+    const rawTitle = dcField(xml, 'title')
+    if (!rawTitle) return null
+    const title = cleanDnbTitle(rawTitle)
     if (!title) return null
 
     const creatorRaw = dcField(xml, 'creator')
-    const author = creatorRaw ? normaliseCreator(creatorRaw) : ''
+    // Strip role annotations (e.g. [Illustrator]) before inverting name order
+    const author = creatorRaw ? normaliseCreator(stripCreatorRole(creatorRaw)) : ''
 
     const dateRaw = dcField(xml, 'date')
     const yearMatch = dateRaw?.match(/\b(\d{4})\b/)
