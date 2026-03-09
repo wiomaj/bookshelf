@@ -15,6 +15,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { gbUrl } from '@/lib/gbUrl'
 
 export const runtime = 'nodejs'
 
@@ -30,7 +31,7 @@ export interface IsbnResult {
 async function fromGoogleBooks(isbn: string): Promise<IsbnResult | null> {
   try {
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&maxResults=1`,
+      gbUrl({ q: `isbn:${isbn}`, maxResults: '1' }),
       { next: { revalidate: 3600 } }
     )
     if (!res.ok) return null
@@ -70,7 +71,7 @@ async function gbCoverByTitleAuthor(title: string, author: string): Promise<stri
     const titleHint = title.split(/\s+/).slice(0, 4).join(' ')
     const q = `intitle:"${titleHint}" inauthor:"${authorHint}"`
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=1`,
+      gbUrl({ q, maxResults: '1' }),
       { next: { revalidate: 86400 } }
     )
     if (!res.ok) return undefined

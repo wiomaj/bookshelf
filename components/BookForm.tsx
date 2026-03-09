@@ -13,6 +13,7 @@ import { uploadCoverPhoto } from '@/lib/coverUpload'
 import { supabase } from '@/lib/supabase'
 import { searchBooks } from '@/lib/bookSearch'
 import type { BookSuggestion } from '@/lib/bookSearch'
+import { gbUrl } from '@/lib/gbUrl'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -32,9 +33,7 @@ interface BookFormProps {
 
 async function fetchCoverByISBN(isbn: string): Promise<string | undefined> {
   try {
-    const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}&maxResults=1`
-    )
+    const res = await fetch(gbUrl({ q: `isbn:${isbn}`, maxResults: '1' }))
     if (!res.ok) return undefined
     return googleCoverFromResponse(await res.json())
   } catch { return undefined }
@@ -42,10 +41,7 @@ async function fetchCoverByISBN(isbn: string): Promise<string | undefined> {
 
 async function fetchCoverByTitleAuthor(title: string, author: string): Promise<string | undefined> {
   try {
-    const q = `intitle:"${title}" inauthor:"${author}"`
-    const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=1`
-    )
+    const res = await fetch(gbUrl({ q: `intitle:"${title}" inauthor:"${author}"`, maxResults: '1' }))
     if (!res.ok) return undefined
     return googleCoverFromResponse(await res.json())
   } catch { return undefined }

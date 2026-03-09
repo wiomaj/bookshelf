@@ -15,6 +15,7 @@ import { LONG_MONTHS, SEASONS } from '@/lib/month'
 import { searchBooks } from '@/lib/bookSearch'
 import type { BookSuggestion } from '@/lib/bookSearch'
 import { googleCoverFromResponse } from '@/lib/bookMetadata'
+import { gbUrl } from '@/lib/gbUrl'
 
 type ListTab = 'read' | 'to_read' | 'wishlist'
 
@@ -24,9 +25,7 @@ const currentYear = new Date().getFullYear()
 
 async function fetchCoverByISBN(isbn: string): Promise<string | undefined> {
   try {
-    const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}&maxResults=1`
-    )
+    const res = await fetch(gbUrl({ q: `isbn:${isbn}`, maxResults: '1' }))
     if (!res.ok) return undefined
     return googleCoverFromResponse(await res.json())
   } catch { return undefined }
