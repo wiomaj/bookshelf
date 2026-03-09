@@ -56,7 +56,7 @@ export default function LoginPage() {
   const illustration = (
     <div className="overflow-hidden shrink-0" style={{ width: 300, height: 285 }}>
       <img
-        src="https://www.figma.com/api/mcp/asset/08931233-4b71-4f5b-9798-90acd70ceff5"
+        src="/login-cat.png"
         alt="" width={300} height={300}
       />
     </div>

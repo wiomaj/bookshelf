@@ -71,7 +71,7 @@ async function gbCoverByTitleAuthor(title: string, author: string): Promise<stri
     const q = `intitle:"${titleHint}" inauthor:"${authorHint}"`
     const res = await fetch(
       `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=1`,
-      { next: { revalidate: 3600 } }
+      { next: { revalidate: 86400 } }
     )
     if (!res.ok) return undefined
     const data = await res.json() as { items?: Array<{ volumeInfo?: {

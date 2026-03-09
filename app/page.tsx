@@ -362,7 +362,7 @@ export default function HomePage() {
             <div className="w-[280px] h-[280px] relative shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img alt="" className="w-full h-full object-contain"
-                   src="https://www.figma.com/api/mcp/asset/f5d561e7-b783-4dd8-82bc-7ea2ff94c6b2" />
+                   src="/empty-read.png" />
             </div>
             <div className="mt-6 w-full px-6 flex flex-col gap-5 text-center">
               <div className="flex flex-col gap-2">
@@ -407,7 +407,7 @@ export default function HomePage() {
               <img alt=""
                    className="absolute h-full left-1/2 -translate-x-1/2 max-w-none"
                    style={{ width: 400 }}
-                   src="https://www.figma.com/api/mcp/asset/31efe637-7ca3-4ec0-9e1e-191cbaab36c6" />
+                   src="/empty-toread.png" />
             </div>
             <div className="mt-4 w-full px-6 flex flex-col gap-5 text-center">
               <div className="flex flex-col gap-2">
@@ -444,7 +444,7 @@ export default function HomePage() {
             <div className="w-[320px] h-[320px] relative shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img alt="" className="w-full h-full object-contain"
-                   src="https://www.figma.com/api/mcp/asset/03707860-f3ad-43d2-8e13-02239d2e4497" />
+                   src="/empty-wishlist.png" />
             </div>
             <div className="mt-4 w-full px-6 flex flex-col gap-5 text-center">
               <div className="flex flex-col gap-2">

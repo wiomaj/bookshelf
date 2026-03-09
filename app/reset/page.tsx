@@ -43,7 +43,7 @@ function ResetContent() {
   `
 
   const illustration = (
-    <img src="https://www.figma.com/api/mcp/asset/08931233-4b71-4f5b-9798-90acd70ceff5"
+    <img src="/login-cat.png"
          alt="" width={160} height={160} className="shrink-0" />
   )
 
