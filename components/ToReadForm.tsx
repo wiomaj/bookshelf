@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Camera, Loader2, Search } from 'lucide-react'
+import { Camera, Loader2, Search, ScanBarcode } from 'lucide-react'
 import ISBNScanner from './ISBNScanner'
 import { useApp, useT } from '@/contexts/AppContext'
 import { LONG_MONTHS, SEASONS } from '@/lib/month'
@@ -157,7 +157,7 @@ export default function ToReadForm({
             style={{ backgroundColor: 'var(--fill)', color: 'var(--label-secondary)' }}
             aria-label="Scan ISBN barcode"
           >
-            <Camera size={20} />
+            <ScanBarcode size={20} />
           </button>
 
           <div className="relative flex-1 rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>

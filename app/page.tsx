@@ -182,9 +182,9 @@ export default function HomePage() {
   }
 
   const fabRoute =
-    activeTab === 'read'     ? '/add' :
-    activeTab === 'to_read'  ? '/to-read/add' :
-    '/wishlist/add'
+    activeTab === 'read'     ? '/add?tab=read' :
+    activeTab === 'to_read'  ? '/add?tab=to_read' :
+    '/add?tab=wishlist'
 
   const isEmptyState =
     (activeTab === 'read'     && books.length === 0) ||
@@ -420,7 +420,7 @@ export default function HomePage() {
               </div>
               <motion.button
                 whileTap={{ scale: 0.96 }}
-                onClick={() => router.push('/to-read/add')}
+                onClick={() => router.push('/add?tab=to_read')}
                 className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold"
                 style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
               >
@@ -457,7 +457,7 @@ export default function HomePage() {
               </div>
               <motion.button
                 whileTap={{ scale: 0.96 }}
-                onClick={() => router.push('/wishlist/add')}
+                onClick={() => router.push('/add?tab=wishlist')}
                 className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold"
                 style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
               >
