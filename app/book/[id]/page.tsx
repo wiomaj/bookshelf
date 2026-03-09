@@ -60,6 +60,7 @@ export default function BookDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [description, setDescription] = useState<string | undefined>(undefined)
   const [apiGenre, setApiGenre] = useState<string | undefined>(undefined)
+  const [apiPublishedYear, setApiPublishedYear] = useState<string | undefined>(undefined)
   const [bookDataLoading, setBookDataLoading] = useState(false)
 
   useEffect(() => {
@@ -72,6 +73,7 @@ export default function BookDetailPage() {
         fetchBookData(b.title, b.author).then((data) => {
           setDescription(data.description)
           setApiGenre(data.genre)
+          setApiPublishedYear(data.publishedYear)
           setBookDataLoading(false)
         })
         // If no cover, search for one in the background and update silently
@@ -291,7 +293,7 @@ export default function BookDetailPage() {
             <InfoChip
               icon={Rocket}
               label={t.released}
-              value={book.year?.toString()}
+              value={apiPublishedYear}
             />
             {(book.genre || apiGenre) && (
               <InfoChip
