@@ -16,6 +16,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { gbUrl } from '@/lib/gbUrl'
 
 export const runtime = 'nodejs'
 
@@ -81,7 +82,7 @@ function marcSubfieldAll(xml: string, tag: string, code: string): string[] {
 async function gbCoverByISBN(isbn: string): Promise<string | undefined> {
   try {
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&maxResults=1&fields=items(volumeInfo/imageLinks)`,
+      gbUrl({ q: `isbn:${isbn}`, maxResults: '1', fields: 'items(volumeInfo/imageLinks)' }),
       { next: { revalidate: 86400 } }  // cache 24h to conserve GB quota
     )
     if (!res.ok) return undefined

@@ -63,6 +63,8 @@ interface Candidate {
   score: number
 }
 
+import { gbUrl } from '@/lib/gbUrl'
+
 // ─── Query type detection ─────────────────────────────────────────────────────
 
 /**
@@ -223,14 +225,8 @@ async function fetchGoogleBooks(query: string, _isbn: null, isAuthor: boolean, s
     ? `inauthor:"${query}"`
     : buildTitleQ(query)  // each word must appear in title, any order
 
-  const params = new URLSearchParams({
-    q,
-    maxResults: '10',
-    printType: 'books',
-  })
-
   try {
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?${params}`, { signal })
+    const res = await fetch(gbUrl({ q, maxResults: '10', printType: 'books' }), { signal })
     if (!res.ok) return []
     const data = await res.json() as { items?: GBItem[] }
 
