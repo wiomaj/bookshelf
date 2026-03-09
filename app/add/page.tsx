@@ -162,8 +162,8 @@ function AddBookContent() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (!title.trim()) { setError(t.titleRequired ?? 'Title is required'); return }
-    if (tab === 'read' && rating === 0) { setError(t.ratingRequired ?? 'Please add a star rating'); return }
+    if (!title.trim()) { setError('Title is required'); return }
+    if (tab === 'read' && rating === 0) { setError('Please add a star rating'); return }
     if (!user) return
 
     setLoading(true)
