@@ -46,7 +46,8 @@ export default function HomePage() {
   const [refreshing, setRefreshing] = useState(false)
   const [isTracking, setIsTracking] = useState(false)
 
-  const yearPickerRef = useRef<HTMLDivElement>(null)
+  const yearPickerRef    = useRef<HTMLDivElement>(null)
+  const yearPickerTopRef = useRef<HTMLDivElement>(null)
 
   // Mutable refs so touch handlers don't form stale closures
   const pullStartYRef  = useRef(0)
@@ -83,9 +84,10 @@ export default function HomePage() {
   useEffect(() => {
     if (!yearPickerOpen) return
     function handler(e: MouseEvent) {
-      if (yearPickerRef.current && !yearPickerRef.current.contains(e.target as Node)) {
-        setYearPickerOpen(false)
-      }
+      const target = e.target as Node
+      const insideLarge = yearPickerRef.current?.contains(target)
+      const insideTop   = yearPickerTopRef.current?.contains(target)
+      if (!insideLarge && !insideTop) setYearPickerOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -266,6 +268,66 @@ export default function HomePage() {
                     style={{ color: 'var(--label)' }}>
                 {title}
               </span>
+
+              {/* Year picker — dashboard, scrolled top bar */}
+              {activeTab === 'dashboard' && (
+                <div className="relative" ref={yearPickerTopRef}>
+                  <button
+                    onClick={() => setYearPickerOpen(o => !o)}
+                    className="flex items-center gap-[5px] rounded-full px-[12px] py-[6px]"
+                    style={{ backgroundColor: 'var(--fill)' }}
+                  >
+                    <span className="text-[13px] font-semibold" style={{ color: 'var(--label)' }}>
+                      {effectiveYear === 'all' ? t.allTime : String(effectiveYear)}
+                    </span>
+                    <ChevronDown size={12} style={{ color: 'var(--label-secondary)' }} />
+                  </button>
+
+                  <AnimatePresence>
+                    {yearPickerOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                        transition={{ duration: 0.12 }}
+                        className="absolute right-0 top-full mt-[6px] rounded-[12px] overflow-hidden z-[60]"
+                        style={{
+                          backgroundColor: 'var(--bg-elevated)',
+                          boxShadow: '0 4px 24px rgba(0,0,0,0.14)',
+                          minWidth: '110px',
+                        }}
+                      >
+                        {years.map(y => (
+                          <button
+                            key={y}
+                            onClick={() => { setDashboardYear(y); setYearPickerOpen(false) }}
+                            className="w-full px-[16px] py-[10px] text-left text-[15px]"
+                            style={{
+                              color: effectiveYear === y ? 'var(--primary)' : 'var(--label)',
+                              fontWeight: effectiveYear === y ? 600 : 400,
+                            }}
+                          >
+                            {y}
+                          </button>
+                        ))}
+                        {years.length > 0 && (
+                          <div className="mx-[12px] h-px" style={{ backgroundColor: 'var(--separator)' }} />
+                        )}
+                        <button
+                          onClick={() => { setDashboardYear('all'); setYearPickerOpen(false) }}
+                          className="w-full px-[16px] py-[10px] text-left text-[15px]"
+                          style={{
+                            color: effectiveYear === 'all' ? 'var(--primary)' : 'var(--label)',
+                            fontWeight: effectiveYear === 'all' ? 600 : 400,
+                          }}
+                        >
+                          {t.allTime}
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
 
               {fabRoute && (
                 <motion.button
