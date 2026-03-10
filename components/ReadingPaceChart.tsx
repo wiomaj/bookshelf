@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useT } from '@/contexts/AppContext'
 import { SHORT_MONTHS } from '@/lib/month'
 import type { Book } from '@/types/book'
@@ -11,6 +12,11 @@ interface Props {
 
 export default function ReadingPaceChart({ books, year }: Props) {
   const t = useT()
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setReady(true))
+    return () => cancelAnimationFrame(raf)
+  }, [])
 
   const counts = Array.from({ length: 12 }, (_, i) => {
     const m = i + 1
@@ -77,10 +83,11 @@ export default function ReadingPaceChart({ books, year }: Props) {
                   </span>
                   {/* Bar */}
                   <div
-                    className="w-full rounded-[4px] transition-all duration-300"
+                    className="w-full rounded-[4px]"
                     style={{
-                      height: barH,
+                      height: ready ? barH : 0,
                       backgroundColor: count > 0 ? 'var(--primary-muted)' : 'var(--fill)',
+                      transition: `height 0.5s cubic-bezier(0.34,1.56,0.64,1) ${i * 0.04}s`,
                     }}
                   />
                   {/* Month label */}

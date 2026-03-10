@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
@@ -9,6 +10,11 @@ interface Props {
 
 export default function GenreBreakdown({ books }: Props) {
   const t = useT()
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setReady(true))
+    return () => cancelAnimationFrame(raf)
+  }, [])
 
   // Count books per genre (only books that have a genre set)
   const countMap = new Map<string, number>()
@@ -51,7 +57,7 @@ export default function GenreBreakdown({ books }: Props) {
 
       {/* Horizontal bar list */}
       <div className="flex flex-col gap-[10px]">
-        {sorted.map(([genre, count]) => {
+        {sorted.map(([genre, count], i) => {
           const isMax = count === maxCount
           const barW = Math.max(8, Math.round((count / maxCount) * 100))
           return (
@@ -66,11 +72,12 @@ export default function GenreBreakdown({ books }: Props) {
               {/* Bar + count */}
               <div className="flex items-center gap-[6px] shrink-0">
                 <div
-                  className="h-[8px] rounded-full transition-all duration-300"
+                  className="h-[8px] rounded-full"
                   style={{
-                    width: `${barW}px`,
+                    width: ready ? `${barW}px` : 0,
                     maxWidth: '100px',
                     backgroundColor: isMax ? 'var(--primary)' : 'var(--primary-muted)',
+                    transition: `width 0.5s cubic-bezier(0.34,1.56,0.64,1) ${i * 0.07}s`,
                   }}
                 />
                 <span

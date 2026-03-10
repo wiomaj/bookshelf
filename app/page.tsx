@@ -21,6 +21,16 @@ import type { Book } from '@/types/book'
 type Tab = 'books' | 'dashboard'
 type BookTab = 'read' | 'to_read' | 'wishlist'
 
+// ── Dashboard entrance animation variants ────────────────────────────────────
+const dashContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.09 } },
+}
+const dashCard = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+}
+
 /** Raw touch travel (px) needed to trigger a refresh */
 const PULL_THRESHOLD = 72
 /** Max visual height (px) of the pull indicator */
@@ -653,14 +663,28 @@ export default function HomePage() {
 
       {/* ── Dashboard tab ────────────────────────────────────────────── */}
       {activeTab === 'dashboard' && (
-        <div className="pb-4 pt-2">
+        <motion.div
+          key="dashboard"
+          className="pb-4 pt-2"
+          variants={dashContainer}
+          initial="hidden"
+          animate="show"
+        >
           {effectiveYear !== 'all' && (
-            <ReadingPaceChart books={books} year={effectiveYear} />
+            <motion.div variants={dashCard}>
+              <ReadingPaceChart books={books} year={effectiveYear} />
+            </motion.div>
           )}
-          <RatingDistributionChart books={books} />
-          <FavouriteAuthors books={books} />
-          <GenreBreakdown books={books} />
-        </div>
+          <motion.div variants={dashCard}>
+            <RatingDistributionChart books={books} />
+          </motion.div>
+          <motion.div variants={dashCard}>
+            <FavouriteAuthors books={books} />
+          </motion.div>
+          <motion.div variants={dashCard}>
+            <GenreBreakdown books={books} />
+          </motion.div>
+        </motion.div>
       )}
 
       {/* ── Add to Home Screen prompt ────────────────────────────────── */}

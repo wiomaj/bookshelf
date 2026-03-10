@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useT } from '@/contexts/AppContext'
 import StarRating from '@/components/StarRating'
 import type { Book } from '@/types/book'
@@ -10,6 +11,11 @@ interface Props {
 
 export default function RatingDistributionChart({ books }: Props) {
   const t = useT()
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setReady(true))
+    return () => cancelAnimationFrame(raf)
+  }, [])
 
   const ratedBooks = books.filter((b) => b.rating >= 1 && b.rating <= 5)
   if (ratedBooks.length === 0) return null
@@ -77,10 +83,11 @@ export default function RatingDistributionChart({ books }: Props) {
               <div key={i} className="flex items-center gap-[8px] py-[4px]">
                 <div className="flex-1 min-w-0">
                   <div
-                    className="h-[16px] rounded-[4px] transition-all duration-300"
+                    className="h-[16px] rounded-[4px]"
                     style={{
-                      width: count === 0 ? '5px' : `${Math.round(pct * 100)}%`,
+                      width: count === 0 ? '5px' : ready ? `${Math.round(pct * 100)}%` : '0%',
                       backgroundColor: count === 0 ? 'var(--fill)' : 'var(--primary-muted)',
+                      transition: `width 0.5s cubic-bezier(0.34,1.56,0.64,1) ${i * 0.07}s`,
                     }}
                   />
                 </div>
