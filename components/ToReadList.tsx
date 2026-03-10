@@ -33,12 +33,13 @@ const SEASON_MIDPOINT: Record<number, number> = {
 
 type RelativeStrings = { justNow: string; month: string; months: string; year: string; years: string }
 
-function formatAcquiredDate(year: number, month: number | null, r: RelativeStrings): string | null {
+function formatAcquiredDate(year: number, month: number | null, r: RelativeStrings, createdAt: string): string | null {
   if (!year || year === 0) return null
 
   const now = new Date()
   const nowYear = now.getFullYear()
   const nowMonth = now.getMonth() + 1
+  const minutesDiff = (now.getTime() - new Date(createdAt).getTime()) / 60000
 
   let prefix = ''
   let midpoint = 6
@@ -55,7 +56,7 @@ function formatAcquiredDate(year: number, month: number | null, r: RelativeStrin
   const monthsDiff = (nowYear * 12 + nowMonth) - (year * 12 + midpoint)
 
   let relative: string
-  if (monthsDiff < 1) {
+  if (minutesDiff < 30) {
     relative = r.justNow
   } else if (monthsDiff < 12) {
     relative = `${monthsDiff} ${monthsDiff !== 1 ? r.months : r.month}`
@@ -132,7 +133,7 @@ function ToReadYearSection({ year, books, viewMode }: YearSectionProps) {
             ) : (
               <div className="flex flex-col px-5 pb-2">
                 {books.map((book, i) => {
-                  const dateLabel = formatAcquiredDate(book.year, book.month ?? null, { justNow: t.relativeJustNow, month: t.relativeMonth, months: t.relativeMonths, year: t.relativeYear, years: t.relativeYears })
+                  const dateLabel = formatAcquiredDate(book.year, book.month ?? null, { justNow: t.relativeJustNow, month: t.relativeMonth, months: t.relativeMonths, year: t.relativeYear, years: t.relativeYears }, book.created_at)
                   return (
                     <div key={book.id}>
                       <motion.button

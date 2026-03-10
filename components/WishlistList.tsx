@@ -37,9 +37,10 @@ function formatCreatedAt(createdAt: string, r: RelativeStrings): string {
   const addedMonth = added.getMonth() + 1
 
   const monthsDiff = (nowYear * 12 + nowMonth) - (year * 12 + addedMonth)
+  const minutesDiff = (now.getTime() - added.getTime()) / 60000
 
   let relative: string
-  if (monthsDiff < 1) {
+  if (minutesDiff < 30) {
     relative = r.justNow
   } else if (monthsDiff < 12) {
     relative = `${monthsDiff} ${monthsDiff !== 1 ? r.months : r.month}`
