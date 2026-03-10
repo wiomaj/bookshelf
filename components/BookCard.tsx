@@ -13,7 +13,7 @@ import type { Book } from '@/types/book'
 const bookPatternUrl =
   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-4 -4 32 32' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20'/%3E%3C/svg%3E")`
 
-export default function BookCard({ book }: { book: Book }) {
+export default function BookCard({ book, href }: { book: Book; href?: string }) {
   const router = useRouter()
 
   return (
@@ -22,7 +22,7 @@ export default function BookCard({ book }: { book: Book }) {
       animate={{ opacity: 1, y: 0 }}
       whileTap={{ scale: 0.97 }}
       transition={{ duration: 0.2 }}
-      onClick={() => router.push(`/book/${book.id}`)}
+      onClick={() => router.push(href ?? `/book/${book.id}`)}
       className="cursor-pointer rounded-[8px] h-[230px] overflow-hidden
                  shadow-[0_16px_32px_-4px_rgba(12,12,13,0.10),0_4px_4px_-4px_rgba(12,12,13,0.05)]"
     >
@@ -86,7 +86,7 @@ export default function BookCard({ book }: { book: Book }) {
             </p>
           )}
 
-          <StarRating rating={book.rating} readonly size={16} darkBg />
+          {book.rating >= 1 && <StarRating rating={book.rating} readonly size={16} darkBg />}
         </div>
       </div>
     </motion.div>

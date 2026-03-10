@@ -323,7 +323,7 @@ function AddBookContent() {
         </div>
 
         {/* ── Segmented control ─────────────────────────────────────────────── */}
-        <div className="flex p-[3px] rounded-[10px]" style={{ backgroundColor: 'var(--fill)' }}>
+        <div className="flex p-[3px] rounded-full" style={{ backgroundColor: 'var(--fill)' }}>
           {([
             { key: 'read',     label: t.tabRead },
             { key: 'to_read',  label: t.tabToRead },
@@ -333,7 +333,7 @@ function AddBookContent() {
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className="flex-1 py-[6px] rounded-[8px] text-[13px] font-medium transition-all"
+              className="flex-1 py-[6px] rounded-full text-[13px] font-medium transition-all"
               style={
                 tab === key
                   ? { backgroundColor: 'var(--bg-elevated)', color: 'var(--label)', fontWeight: 600, boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }

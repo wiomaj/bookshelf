@@ -55,6 +55,10 @@ export type Translations = {
   deleteDialogSuffix: string
   deleting: string
   cancel: string
+  // Settings — Profile
+  profileSection: string
+  yourName: string
+  yourNamePlaceholder: string
   // Settings
   cozyMode: string
   cozyModeDescription: string
@@ -109,6 +113,8 @@ export type Translations = {
   tabRead: string
   tabToRead: string
   tabWishlist: string
+  tabBooks: string
+  tabDashboard: string
   toReadEmptyTitle: string
   toReadEmptyCopy: string
   addToReadingList: string
@@ -123,6 +129,22 @@ export type Translations = {
   moveToReadingList: string
   chipBought: string
   chipAdded: string
+  // Stats
+  dashboardTitle: string
+  dashboardEmptyTitle: string
+  dashboardEmptyCopy: string
+  statsReadingPace: string
+  statsBooksPerMonth: string
+  statsNoBooks: string
+  statsBooks: string
+  statsRatingDistribution: string
+  statsAllTime: string
+  statsAverageRating: string
+  statsFavouriteAuthors: string
+  statsByBooksRead: string
+  statsFavouriteAuthorsSub: string
+  statsGenreBreakdown: string
+  allTime: string
   // Add to Home Screen
   athsTitle: string
   athsAndroid: string
@@ -134,7 +156,7 @@ export type Translations = {
 }
 
 const en: Translations = {
-  myBookshelf: 'My bookshelf',
+  myBookshelf: 'Bookshelf',
   loadingBookshelf: 'Loading your bookshelf…',
   noBooks: 'Welcome to your bookshelf!',
   addFirstBook: 'Track the books you\'ve read:',
@@ -175,6 +197,9 @@ const en: Translations = {
   deleteDialogSuffix: 'will be permanently removed from your bookshelf.',
   deleting: 'Deleting…',
   cancel: 'Cancel',
+  profileSection: 'Profile',
+  yourName: 'Name',
+  yourNamePlaceholder: 'Add your name',
   cozyMode: 'Cozy mode',
   cozyModeDescription: 'Cozy mode makes your app feel like a warm living room!',
   darkMode: 'Dark mode',
@@ -223,6 +248,8 @@ const en: Translations = {
   tabRead: 'Read',
   tabToRead: 'To Read',
   tabWishlist: 'Wishlist',
+  tabBooks: 'Books',
+  tabDashboard: 'Dashboard',
   toReadEmptyTitle: 'Unread books',
   toReadEmptyCopy: 'Add the books you already own, but haven\'t read so far... So many books, so little time.',
   addToReadingList: 'Add a book to be read',
@@ -237,6 +264,21 @@ const en: Translations = {
   chipAdded: 'Added',
   toReadNotesPlaceholder: 'Why do you want to read this?',
   whenDidYouGetIt: 'When did you get it?',
+  dashboardTitle: 'Dashboard',
+  dashboardEmptyTitle: 'No stats yet',
+  dashboardEmptyCopy: 'Add books to your shelf to start tracking your reading stats.',
+  statsReadingPace: 'Reading speed',
+  statsBooksPerMonth: 'How many books I\'ve read over the year',
+  statsNoBooks: 'No books logged this year yet',
+  statsBooks: 'Books',
+  statsRatingDistribution: 'My ratings',
+  statsAllTime: 'What I thought about the books I\'ve read',
+  statsAverageRating: 'Average rating',
+  statsFavouriteAuthors: 'Favorite authors',
+  statsByBooksRead: 'My top 5 authors',
+  statsFavouriteAuthorsSub: 'My favourite authors',
+  statsGenreBreakdown: 'Genre Breakdown',
+  allTime: 'All time',
   athsTitle: 'Add to Home Screen',
   athsAndroid: 'Install for the full app experience',
   athsIosTap: 'Tap',
@@ -246,7 +288,7 @@ const en: Translations = {
 }
 
 const de: Translations = {
-  myBookshelf: 'Mein Bücherregal',
+  myBookshelf: 'Bücherregal',
   loadingBookshelf: 'Bücherregal wird geladen…',
   noBooks: 'Willkommen in deinem Bücherregal!',
   addFirstBook: 'Verfolge deine gelesenen Bücher:',
@@ -287,6 +329,9 @@ const de: Translations = {
   deleteDialogSuffix: 'wird dauerhaft aus deinem Regal entfernt.',
   deleting: 'Wird gelöscht…',
   cancel: 'Abbrechen',
+  profileSection: 'Profil',
+  yourName: 'Name',
+  yourNamePlaceholder: 'Name hinzufügen',
   cozyMode: 'Gemütlichkeitsmodus',
   cozyModeDescription: 'Der Gemütlichkeitsmodus lässt die App wie ein warmes Wohnzimmer wirken!',
   darkMode: 'Dunkelmodus',
@@ -335,6 +380,8 @@ const de: Translations = {
   tabRead: 'Gelesen',
   tabToRead: 'Leseliste',
   tabWishlist: 'Wunschliste',
+  tabBooks: 'Bücher',
+  tabDashboard: 'Dashboard',
   toReadEmptyTitle: 'Ungelesene Bücher',
   toReadEmptyCopy: 'Füge Bücher hinzu, die du schon besitzt, aber noch nicht gelesen hast… So viele Bücher, so wenig Zeit.',
   addToReadingList: 'Buch hinzufügen',
@@ -349,6 +396,21 @@ const de: Translations = {
   chipAdded: 'Hinzugefügt',
   whenDidYouGetIt: 'Wann hast du es bekommen?',
   toReadNotesPlaceholder: 'Warum möchtest du das lesen?',
+  dashboardTitle: 'Dashboard',
+  dashboardEmptyTitle: 'Noch keine Statistiken',
+  dashboardEmptyCopy: 'Füge Bücher hinzu, um deine Lesestatistiken zu sehen.',
+  statsReadingPace: 'Lesegeschwindigkeit',
+  statsBooksPerMonth: 'Wie viele Bücher ich im Jahr gelesen habe',
+  statsNoBooks: 'Noch keine Bücher in diesem Jahr',
+  statsBooks: 'Bücher',
+  statsRatingDistribution: 'Meine Bewertungen',
+  statsAllTime: 'Was ich über die gelesenen Bücher dachte',
+  statsAverageRating: 'Durchschnittsbewertung',
+  statsFavouriteAuthors: 'Lieblingsautoren',
+  statsByBooksRead: 'Meine Top-5-Autoren',
+  statsFavouriteAuthorsSub: 'Meine Lieblingsautoren',
+  statsGenreBreakdown: 'Genre-Übersicht',
+  allTime: 'Alle Jahre',
   athsTitle: 'Zum Startbildschirm',
   athsAndroid: 'Installieren für das volle App-Erlebnis',
   athsIosTap: 'Tippe auf',
@@ -358,7 +420,7 @@ const de: Translations = {
 }
 
 const fr: Translations = {
-  myBookshelf: 'Ma bibliothèque',
+  myBookshelf: 'Bibliothèque',
   loadingBookshelf: 'Chargement…',
   noBooks: 'Bienvenue dans ta bibliothèque !',
   addFirstBook: 'Suis les livres que tu as lus :',
@@ -399,6 +461,9 @@ const fr: Translations = {
   deleteDialogSuffix: 'sera définitivement supprimé de votre bibliothèque.',
   deleting: 'Suppression…',
   cancel: 'Annuler',
+  profileSection: 'Profil',
+  yourName: 'Nom',
+  yourNamePlaceholder: 'Ajouter ton nom',
   cozyMode: 'Mode cosy',
   cozyModeDescription: "Le mode cosy donne à l'application l'ambiance d'un salon chaleureux !",
   darkMode: 'Mode sombre',
@@ -447,6 +512,8 @@ const fr: Translations = {
   tabRead: 'Lus',
   tabToRead: 'À lire',
   tabWishlist: 'Souhaits',
+  tabBooks: 'Livres',
+  tabDashboard: 'Dashboard',
   toReadEmptyTitle: 'Livres non lus',
   toReadEmptyCopy: 'Ajoute les livres que tu possèdes déjà mais que tu n\'as pas encore lus… Tant de livres, si peu de temps.',
   addToReadingList: 'Ajouter un livre à lire',
@@ -461,6 +528,21 @@ const fr: Translations = {
   chipAdded: 'Ajouté',
   whenDidYouGetIt: 'Quand l\'avez-vous reçu ?',
   toReadNotesPlaceholder: 'Pourquoi voulez-vous le lire ?',
+  dashboardTitle: 'Tableau de bord',
+  dashboardEmptyTitle: 'Pas encore de stats',
+  dashboardEmptyCopy: 'Ajoute des livres à ta bibliothèque pour voir tes statistiques.',
+  statsReadingPace: 'Vitesse de lecture',
+  statsBooksPerMonth: 'Combien de livres j\'ai lus dans l\'année',
+  statsNoBooks: 'Aucun livre enregistré cette année',
+  statsBooks: 'Livres',
+  statsRatingDistribution: 'Mes notes',
+  statsAllTime: 'Ce que j\'ai pensé des livres lus',
+  statsAverageRating: 'Note moyenne',
+  statsFavouriteAuthors: 'Auteurs préférés',
+  statsByBooksRead: 'Mes 5 auteurs préférés',
+  statsFavouriteAuthorsSub: 'Mes auteurs préférés',
+  statsGenreBreakdown: 'Répartition par genre',
+  allTime: 'Toute la période',
   athsTitle: 'Ajouter à l\'écran d\'accueil',
   athsAndroid: 'Installez pour une expérience complète',
   athsIosTap: 'Appuyez sur',
@@ -470,7 +552,7 @@ const fr: Translations = {
 }
 
 const es: Translations = {
-  myBookshelf: 'Mi estantería',
+  myBookshelf: 'Estantería',
   loadingBookshelf: 'Cargando tu estantería…',
   noBooks: '¡Bienvenido a tu estantería!',
   addFirstBook: 'Lleva el registro de tus lecturas:',
@@ -511,6 +593,9 @@ const es: Translations = {
   deleteDialogSuffix: 'se eliminará permanentemente de tu estantería.',
   deleting: 'Eliminando…',
   cancel: 'Cancelar',
+  profileSection: 'Perfil',
+  yourName: 'Nombre',
+  yourNamePlaceholder: 'Añadir tu nombre',
   cozyMode: 'Modo acogedor',
   cozyModeDescription: '¡El modo acogedor hace que la app parezca una sala de estar cálida!',
   darkMode: 'Modo oscuro',
@@ -559,6 +644,8 @@ const es: Translations = {
   tabRead: 'Leídos',
   tabToRead: 'Por leer',
   tabWishlist: 'Deseos',
+  tabBooks: 'Libros',
+  tabDashboard: 'Dashboard',
   toReadEmptyTitle: 'Libros sin leer',
   toReadEmptyCopy: 'Añade los libros que ya tienes pero aún no has leído… Tantos libros, tan poco tiempo.',
   addToReadingList: 'Añadir un libro por leer',
@@ -573,6 +660,21 @@ const es: Translations = {
   chipAdded: 'Añadido',
   whenDidYouGetIt: '¿Cuándo lo conseguiste?',
   toReadNotesPlaceholder: '¿Por qué quieres leerlo?',
+  dashboardTitle: 'Panel',
+  dashboardEmptyTitle: 'Sin estadísticas aún',
+  dashboardEmptyCopy: 'Añade libros a tu biblioteca para ver tus estadísticas.',
+  statsReadingPace: 'Velocidad de lectura',
+  statsBooksPerMonth: 'Cuántos libros he leído en el año',
+  statsNoBooks: 'Aún no hay libros registrados este año',
+  statsBooks: 'Libros',
+  statsRatingDistribution: 'Mis valoraciones',
+  statsAllTime: 'Lo que pensé de los libros que leí',
+  statsAverageRating: 'Valoración media',
+  statsFavouriteAuthors: 'Autores favoritos',
+  statsByBooksRead: 'Mis 5 autores favoritos',
+  statsFavouriteAuthorsSub: 'Mis autores favoritos',
+  statsGenreBreakdown: 'Por género',
+  allTime: 'Todo el tiempo',
   athsTitle: 'Añadir a la pantalla de inicio',
   athsAndroid: 'Instala para una experiencia completa',
   athsIosTap: 'Pulsa',
@@ -582,7 +684,7 @@ const es: Translations = {
 }
 
 const pl: Translations = {
-  myBookshelf: 'Moja półka',
+  myBookshelf: 'Półka',
   loadingBookshelf: 'Ładowanie półki…',
   noBooks: 'Witaj na swojej półce!',
   addFirstBook: 'Śledź przeczytane przez siebie książki:',
@@ -623,6 +725,9 @@ const pl: Translations = {
   deleteDialogSuffix: 'zostanie trwale usunięta z twojej półki.',
   deleting: 'Usuwanie…',
   cancel: 'Anuluj',
+  profileSection: 'Profil',
+  yourName: 'Imię',
+  yourNamePlaceholder: 'Dodaj imię',
   cozyMode: 'Tryb przytulny',
   cozyModeDescription: 'Tryb przytulny sprawia, że aplikacja wygląda jak ciepły salon!',
   darkMode: 'Tryb ciemny',
@@ -671,6 +776,8 @@ const pl: Translations = {
   tabRead: 'Przeczytane',
   tabToRead: 'Do przeczytania',
   tabWishlist: 'Lista życzeń',
+  tabBooks: 'Książki',
+  tabDashboard: 'Dashboard',
   toReadEmptyTitle: 'Nieprzeczytane książki',
   toReadEmptyCopy: 'Dodaj książki, które już masz, ale jeszcze nie przeczytałeś… Tyle książek, tak mało czasu.',
   addToReadingList: 'Dodaj książkę do przeczytania',
@@ -685,6 +792,21 @@ const pl: Translations = {
   chipAdded: 'Dodano',
   whenDidYouGetIt: 'Kiedy ją dostałeś?',
   toReadNotesPlaceholder: 'Dlaczego chcesz to przeczytać?',
+  dashboardTitle: 'Dashboard',
+  dashboardEmptyTitle: 'Brak statystyk',
+  dashboardEmptyCopy: 'Dodaj książki do swojej półki, aby zobaczyć statystyki.',
+  statsReadingPace: 'Prędkość czytania',
+  statsBooksPerMonth: 'Ile książek przeczytałem w roku',
+  statsNoBooks: 'Brak książek w tym roku',
+  statsBooks: 'Książek',
+  statsRatingDistribution: 'Moje oceny',
+  statsAllTime: 'Co myślałem o przeczytanych książkach',
+  statsAverageRating: 'Średnia ocena',
+  statsFavouriteAuthors: 'Ulubieni autorzy',
+  statsByBooksRead: 'Moi 5 ulubionych autorów',
+  statsFavouriteAuthorsSub: 'Moi ulubieni autorzy',
+  statsGenreBreakdown: 'Podział gatunków',
+  allTime: 'Cały czas',
   athsTitle: 'Dodaj do ekranu głównego',
   athsAndroid: 'Zainstaluj dla pełnego doświadczenia',
   athsIosTap: 'Dotknij',

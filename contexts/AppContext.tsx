@@ -38,6 +38,8 @@ interface AppContextValue {
   setLanguage: (lang: Locale) => void
   user: User | null
   isAuthLoading: boolean
+  displayName: string
+  updateDisplayName: (name: string) => Promise<{ error: string | null }>
   signIn: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>
   signUp: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>
   signOut: () => Promise<void>
@@ -58,6 +60,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Locale>('en')
   const [user, setUser] = useState<User | null>(null)
   const [isAuthLoading, setIsAuthLoading] = useState(true)
+  const [displayName, setDisplayName] = useState('')
 
   const router = useRouter()
   const pathname = usePathname()
@@ -96,12 +99,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // ── Auth init ────────────────────────────────────────────────────────────────
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null)
+      const u = data.session?.user ?? null
+      setUser(u)
+      setDisplayName(u?.user_metadata?.display_name ?? '')
       setIsAuthLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null)
+      const u = session?.user ?? null
+      setUser(u)
+      setDisplayName(u?.user_metadata?.display_name ?? '')
     })
 
     return () => subscription.unsubscribe()
@@ -165,6 +172,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null }
   }
 
+  async function updateDisplayName(name: string): Promise<{ error: string | null }> {
+    const { error } = await supabase.auth.updateUser({ data: { display_name: name } })
+    if (!error) setDisplayName(name)
+    return { error: error?.message ?? null }
+  }
+
   async function deleteAccount(): Promise<{ error: string | null }> {
     const { error } = await supabase.rpc('delete_user')
     if (!error) await supabase.auth.signOut()
@@ -190,6 +203,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       wishlistCount, setWishlistCount,
       language, setLanguage,
       user, isAuthLoading,
+      displayName, updateDisplayName,
       signIn, signUp, signOut, resetPassword, changePassword, deleteAccount,
     }}>
       {children}

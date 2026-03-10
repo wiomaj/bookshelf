@@ -5,13 +5,16 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Book as BookIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { coverUrl } from '@/lib/coverUrl'
+import BookCard from '@/components/BookCard'
 import type { Book } from '@/types/book'
+import type { ViewMode } from '@/contexts/AppContext'
 
 const bookPatternUrl =
   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-4 -4 32 32' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20'/%3E%3C/svg%3E")`
 
 interface WishlistListProps {
   books: Book[]
+  viewMode?: ViewMode
 }
 
 // ─── Date formatting ──────────────────────────────────────────────────────────
@@ -50,9 +53,10 @@ function formatCreatedAt(createdAt: string): string {
 interface YearSectionProps {
   year: number
   books: Book[]
+  viewMode: ViewMode
 }
 
-function WishlistYearSection({ year, books }: YearSectionProps) {
+function WishlistYearSection({ year, books, viewMode }: YearSectionProps) {
   const [isOpen, setIsOpen] = useState(true)
   const [expanded, setExpanded] = useState(true)
   const router = useRouter()
@@ -99,66 +103,74 @@ function WishlistYearSection({ year, books }: YearSectionProps) {
             className={expanded ? 'overflow-visible' : 'overflow-hidden'}
             onAnimationComplete={() => { if (isOpen) setExpanded(true) }}
           >
-            <div className="flex flex-col px-5 pb-2">
-              {books.map((book, i) => {
-                const dateLabel = formatCreatedAt(book.created_at)
-                return (
-                  <div key={book.id}>
-                    <motion.button
-                      whileTap={{ scale: 0.99, opacity: 0.85 }}
-                      onClick={() => router.push(`/wishlist/${book.id}`)}
-                      className="w-full flex items-center gap-3 py-3 pr-4 text-left"
-                    >
-                      {/* Cover */}
-                      <div className="w-[56px] h-[76px] rounded-[10px] overflow-hidden flex-shrink-0 shadow-sm">
-                        {book.cover_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={coverUrl(book.cover_url)}
-                            alt={book.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="relative w-full h-full flex items-center justify-center"
-                               style={{ backgroundColor: 'var(--primary)' }}>
-                            <div className="absolute inset-0 opacity-[0.08]"
-                                 style={{ backgroundImage: bookPatternUrl, backgroundSize: '18px 18px', backgroundRepeat: 'repeat' }} />
-                            <BookIcon size={16} color="white" className="relative z-10" />
-                          </div>
-                        )}
-                      </div>
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-2 min-[500px]:grid-cols-3 gap-x-[12px] gap-y-3 px-4 pb-4">
+                {books.map((book) => (
+                  <BookCard key={book.id} book={book} href={`/wishlist/${book.id}`} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col px-5 pb-2">
+                {books.map((book, i) => {
+                  const dateLabel = formatCreatedAt(book.created_at)
+                  return (
+                    <div key={book.id}>
+                      <motion.button
+                        whileTap={{ scale: 0.99, opacity: 0.85 }}
+                        onClick={() => router.push(`/wishlist/${book.id}`)}
+                        className="w-full flex items-center gap-3 py-3 pr-4 text-left"
+                      >
+                        {/* Cover */}
+                        <div className="w-[56px] h-[76px] rounded-[10px] overflow-hidden flex-shrink-0 shadow-sm">
+                          {book.cover_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={coverUrl(book.cover_url)}
+                              alt={book.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="relative w-full h-full flex items-center justify-center"
+                                 style={{ backgroundColor: 'var(--primary)' }}>
+                              <div className="absolute inset-0 opacity-[0.08]"
+                                   style={{ backgroundImage: bookPatternUrl, backgroundSize: '18px 18px', backgroundRepeat: 'repeat' }} />
+                              <BookIcon size={16} color="white" className="relative z-10" />
+                            </div>
+                          )}
+                        </div>
 
-                      {/* Text */}
-                      <div className="flex-1 min-w-0 flex flex-col gap-1">
-                        {dateLabel && (
-                          <p className="text-[12px] font-medium leading-4" style={{ color: 'var(--label-tertiary)' }}>
-                            {dateLabel}
+                        {/* Text */}
+                        <div className="flex-1 min-w-0 flex flex-col gap-1">
+                          {dateLabel && (
+                            <p className="text-[12px] font-medium leading-4" style={{ color: 'var(--label-tertiary)' }}>
+                              {dateLabel}
+                            </p>
+                          )}
+                          <p className="font-semibold text-[16px] leading-5 line-clamp-2" style={{ color: 'var(--label)' }}>
+                            {book.title}
                           </p>
-                        )}
-                        <p className="font-semibold text-[16px] leading-5 line-clamp-2" style={{ color: 'var(--label)' }}>
-                          {book.title}
-                        </p>
-                        {book.author && (
-                          <p className="text-[13px]" style={{ color: 'var(--label-secondary)' }}>
-                            {book.author}
-                          </p>
-                        )}
-                      </div>
+                          {book.author && (
+                            <p className="text-[13px]" style={{ color: 'var(--label-secondary)' }}>
+                              {book.author}
+                            </p>
+                          )}
+                        </div>
 
-                      {/* Chevron */}
-                      <div style={{ color: 'var(--label-quaternary)' }}>
-                        <svg width="8" height="13" viewBox="0 0 8 13" fill="none">
-                          <path d="M1 1.5L6.5 6.5L1 11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    </motion.button>
-                    {i < books.length - 1 && (
-                      <div className="h-px ml-[68px]" style={{ backgroundColor: 'var(--separator)' }} />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
+                        {/* Chevron */}
+                        <div style={{ color: 'var(--label-quaternary)' }}>
+                          <svg width="8" height="13" viewBox="0 0 8 13" fill="none">
+                            <path d="M1 1.5L6.5 6.5L1 11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </motion.button>
+                      {i < books.length - 1 && (
+                        <div className="h-px ml-[68px]" style={{ backgroundColor: 'var(--separator)' }} />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -168,7 +180,7 @@ function WishlistYearSection({ year, books }: YearSectionProps) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function WishlistList({ books }: WishlistListProps) {
+export default function WishlistList({ books, viewMode = 'list' }: WishlistListProps) {
   const byYear = books.reduce<Record<number, Book[]>>((acc, book) => {
     const y = new Date(book.created_at).getFullYear()
     acc[y] = [...(acc[y] ?? []), book]
@@ -186,6 +198,7 @@ export default function WishlistList({ books }: WishlistListProps) {
           key={year}
           year={year}
           books={byYear[year]}
+          viewMode={viewMode}
         />
       ))}
     </div>
