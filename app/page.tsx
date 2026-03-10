@@ -38,7 +38,7 @@ const PULL_MAX = 64
 
 export default function HomePage() {
   const router = useRouter()
-  const { viewMode, setViewMode, user, setToReadCount, setWishlistCount, displayName } = useApp()
+  const { viewMode, setViewMode, user, setToReadCount, setWishlistCount, displayName, updateDisplayName } = useApp()
   const t = useT()
   const [activeTab, setActiveTab] = useState<Tab>('books')
   const [activeBookTab, setActiveBookTab] = useState<BookTab>('read')
@@ -50,6 +50,11 @@ export default function HomePage() {
   const [scrolled, setScrolled] = useState(false)
   const [dashboardYear, setDashboardYear] = useState<number | 'all' | null>(null)
   const [yearPickerSource, setYearPickerSource] = useState<'large' | 'top' | null>(null)
+
+  // Name prompt overlay
+  const [showNamePrompt, setShowNamePrompt] = useState(false)
+  const [namePromptInput, setNamePromptInput] = useState('')
+  const [namePromptSaving, setNamePromptSaving] = useState(false)
 
   // Pull-to-refresh visual state
   const [pullY, setPullY] = useState(0)
@@ -141,6 +146,30 @@ export default function HomePage() {
       }
     }
   }, [])
+
+  // ── Name prompt on first login ────────────────────────────────────────────
+  useEffect(() => {
+    if (!user || displayName) return
+    try {
+      if (!localStorage.getItem('bookshelf_name_prompted')) setShowNamePrompt(true)
+    } catch { /* ignore */ }
+  }, [user, displayName])
+
+  async function handleNamePromptSave() {
+    const trimmed = namePromptInput.trim()
+    try { localStorage.setItem('bookshelf_name_prompted', 'true') } catch { /* ignore */ }
+    if (trimmed) {
+      setNamePromptSaving(true)
+      await updateDisplayName(trimmed)
+      setNamePromptSaving(false)
+    }
+    setShowNamePrompt(false)
+  }
+
+  function handleNamePromptSkip() {
+    try { localStorage.setItem('bookshelf_name_prompted', 'true') } catch { /* ignore */ }
+    setShowNamePrompt(false)
+  }
 
   // ── Pull-to-refresh touch handlers ───────────────────────────────────────
   useEffect(() => {
@@ -799,6 +828,74 @@ export default function HomePage() {
 
         </div>
       </nav>
+
+      {/* ── Name prompt overlay ───────────────────────────────────────── */}
+      <AnimatePresence>
+        {showNamePrompt && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center"
+            style={{ backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)' }}
+          >
+            <motion.div
+              initial={{ y: 120, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 120, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+              className="w-full max-w-[600px] rounded-t-[28px] px-6 pt-5 pb-10"
+              style={{ backgroundColor: 'var(--bg-elevated)' }}
+            >
+              {/* Drag handle */}
+              <div className="w-10 h-1 rounded-full mx-auto mb-6"
+                   style={{ backgroundColor: 'var(--separator-opaque)' }} />
+
+              <div className="flex flex-col gap-1 mb-6">
+                <h2 className="text-[24px] font-bold tracking-[-0.3px]" style={{ color: 'var(--label)' }}>
+                  {t.namePromptTitle}
+                </h2>
+                <p className="text-[15px] leading-5" style={{ color: 'var(--label-secondary)' }}>
+                  {t.namePromptSub}
+                </p>
+              </div>
+
+              <div className="rounded-[14px] overflow-hidden mb-4" style={{ backgroundColor: 'var(--fill)' }}>
+                <input
+                  type="text"
+                  autoFocus
+                  autoComplete="given-name"
+                  placeholder={t.yourNamePlaceholder}
+                  value={namePromptInput}
+                  onChange={e => setNamePromptInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleNamePromptSave() }}
+                  className="w-full px-4 py-[14px] text-[17px] bg-transparent focus:outline-none"
+                  style={{ color: 'var(--label)', caretColor: 'var(--primary)' }}
+                />
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleNamePromptSave}
+                  disabled={namePromptSaving}
+                  className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold disabled:opacity-50"
+                  style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+                >
+                  {namePromptSaving ? '…' : t.namePromptCta}
+                </motion.button>
+                <button
+                  onClick={handleNamePromptSkip}
+                  className="w-full py-[12px] text-[16px] font-medium"
+                  style={{ color: 'var(--label-secondary)' }}
+                >
+                  {t.namePromptSkip}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   )
