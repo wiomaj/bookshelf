@@ -37,9 +37,6 @@ export default function FavouriteAuthors({ books }: Props) {
 
   const maxCount = sorted[0][1]
 
-  // Only show if we have at least 2 authors or the top author has > 1 book
-  if (maxCount === 1 && sorted.length < 2) return null
-
   return (
     <div
       className="mx-4 mb-4 rounded-[16px] p-[16px]"
@@ -56,7 +53,7 @@ export default function FavouriteAuthors({ books }: Props) {
         className="text-[12px] mt-[2px] mb-[24px]"
         style={{ color: 'var(--label-secondary)' }}
       >
-        {t.statsByBooksRead}
+        {sorted.length >= MAX_AUTHORS ? t.statsByBooksRead : t.statsFavouriteAuthorsSub}
       </p>
 
       {/* Author rows */}

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, ChevronLeft, Check, BookOpenCheck, Library, Heart, Settings } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Check, BookOpenCheck, User, Settings } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useApp, useT } from '@/contexts/AppContext'
@@ -11,38 +11,34 @@ import { LANGUAGES } from '@/lib/translations'
 type View = 'settings' | 'changePassword'
 
 // ── Shared: floating glass bottom nav ────────────────────────────────────────
-function BottomNav({ t }: { t: ReturnType<typeof useT> }) {
+function BottomNav({ t, displayName }: { t: ReturnType<typeof useT>; displayName: string }) {
   const router = useRouter()
-  const { toReadCount, wishlistCount } = useApp()
   return (
     <nav className="fixed bottom-5 left-4 right-4 z-50 max-w-[568px] mx-auto">
       <div className="glass flex items-center rounded-[28px] px-2 py-2"
            style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)' }}>
+
+        {/* Books tab */}
         <button
-              onClick={() => router.push('/')}
-              className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
-              style={{ color: 'var(--label-secondary)' }}>
+          onClick={() => router.push('/')}
+          className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
+          style={{ color: 'var(--label-secondary)' }}
+        >
           <BookOpenCheck size={22} strokeWidth={1.5} />
-          <span className="text-[10px] font-medium tracking-[-0.1px]">{t.tabRead}</span>
+          <span className="text-[10px] font-medium tracking-[-0.1px]">{t.tabBooks}</span>
         </button>
+
+        {/* Dashboard tab */}
         <button
-              onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'to_read'); router.push('/') }}
-              className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
-              style={{ color: 'var(--label-secondary)' }}>
-          <Library size={22} strokeWidth={1.5} />
-          <span className="text-[10px] font-medium tracking-[-0.1px]">
-            {toReadCount > 0 ? `${t.tabToRead} (${toReadCount})` : t.tabToRead}
-          </span>
+          onClick={() => { sessionStorage.setItem('bookshelf_returnMainTab', 'dashboard'); router.push('/') }}
+          className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
+          style={{ color: 'var(--label-secondary)' }}
+        >
+          <User size={22} strokeWidth={1.5} />
+          <span className="text-[10px] font-medium tracking-[-0.1px] max-w-[64px] truncate">{displayName || t.tabDashboard}</span>
         </button>
-        <button
-              onClick={() => { sessionStorage.setItem('bookshelf_returnTab', 'wishlist'); router.push('/') }}
-              className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
-              style={{ color: 'var(--label-secondary)' }}>
-          <Heart size={22} strokeWidth={1.5} />
-          <span className="text-[10px] font-medium tracking-[-0.1px]">
-            {wishlistCount > 0 ? `${t.tabWishlist} (${wishlistCount})` : t.tabWishlist}
-          </span>
-        </button>
+
+        {/* Settings tab — active */}
         <button className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px] relative">
           <div className="absolute inset-0 rounded-[22px]" style={{ backgroundColor: 'var(--primary-muted)' }} />
           <Settings size={22} strokeWidth={2} className="relative" style={{ color: 'var(--primary)' }} />
@@ -50,6 +46,7 @@ function BottomNav({ t }: { t: ReturnType<typeof useT> }) {
             {t.settings}
           </span>
         </button>
+
       </div>
     </nav>
   )
@@ -99,11 +96,24 @@ function ListRow({
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { cozyMode, setCozyMode, theme, setTheme, language, setLanguage, signOut, changePassword, deleteAccount } = useApp()
+  const { cozyMode, setCozyMode, theme, setTheme, language, setLanguage, signOut, changePassword, deleteAccount, displayName, updateDisplayName } = useApp()
   const t = useT()
 
   const [view, setView] = useState<View>('settings')
   const [langOpen, setLangOpen] = useState(false)
+  const [nameValue, setNameValue] = useState(displayName)
+  const [nameSaving, setNameSaving] = useState(false)
+
+  // Sync once displayName is loaded from Supabase
+  useEffect(() => { setNameValue(displayName) }, [displayName])
+
+  async function handleNameBlur() {
+    const trimmed = nameValue.trim()
+    if (trimmed === displayName) return
+    setNameSaving(true)
+    await updateDisplayName(trimmed)
+    setNameSaving(false)
+  }
 
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
@@ -202,7 +212,7 @@ export default function SettingsPage() {
           </motion.button>
         </form>
 
-        <BottomNav t={t} />
+        <BottomNav t={t} displayName={displayName} />
       </div>
     )
   }
@@ -219,6 +229,33 @@ export default function SettingsPage() {
       </div>
 
       <div className="px-4 flex flex-col gap-8">
+
+        {/* ── Profile section ─────────────────────────────────────────── */}
+        <div className="flex flex-col gap-2">
+          <p className="text-[13px] font-medium uppercase tracking-wide px-1"
+             style={{ color: 'var(--label-secondary)' }}>
+            {t.profileSection}
+          </p>
+          <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            <div className="flex items-center px-4 min-h-[52px] gap-3">
+              <label className="text-[17px] shrink-0" style={{ color: 'var(--label)' }}>
+                {t.yourName}
+              </label>
+              <input
+                type="text"
+                value={nameValue}
+                onChange={e => setNameValue(e.target.value)}
+                onBlur={handleNameBlur}
+                placeholder={t.yourNamePlaceholder}
+                className="flex-1 text-[17px] text-right bg-transparent focus:outline-none min-w-0"
+                style={{
+                  color: nameSaving ? 'var(--label-secondary)' : 'var(--label)',
+                  caretColor: 'var(--primary)',
+                }}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* ── Preferences section ─────────────────────────────────────── */}
         <div className="flex flex-col gap-2">
@@ -418,7 +455,7 @@ export default function SettingsPage() {
         </motion.div>
       )}
 
-      <BottomNav t={t} />
+      <BottomNav t={t} displayName={displayName} />
     </div>
   )
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpenCheck, BarChart2, Settings, Loader2, ChevronDown } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpenCheck, User, Settings, Loader2, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { getReadBooks, getToReadBooks, getWishlistBooks } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
@@ -38,7 +38,7 @@ const PULL_MAX = 64
 
 export default function HomePage() {
   const router = useRouter()
-  const { viewMode, setViewMode, user, setToReadCount, setWishlistCount } = useApp()
+  const { viewMode, setViewMode, user, setToReadCount, setWishlistCount, displayName } = useApp()
   const t = useT()
   const [activeTab, setActiveTab] = useState<Tab>('books')
   const [activeBookTab, setActiveBookTab] = useState<BookTab>('read')
@@ -116,6 +116,11 @@ export default function HomePage() {
 
   // ── Session-storage flash / tab restore ───────────────────────────────────
   useEffect(() => {
+    const returnMainTab = sessionStorage.getItem('bookshelf_returnMainTab')
+    if (returnMainTab === 'dashboard') {
+      sessionStorage.removeItem('bookshelf_returnMainTab')
+      setActiveTab('dashboard')
+    }
     const returnTab = sessionStorage.getItem('bookshelf_returnTab')
     if (returnTab === 'read' || returnTab === 'to_read' || returnTab === 'wishlist') {
       sessionStorage.removeItem('bookshelf_returnTab')
@@ -226,13 +231,14 @@ export default function HomePage() {
     activeTab === 'books'                                 ? '/add?tab=wishlist' :
     null  // no FAB on Dashboard
 
+  const hasAnyBooks = books.length > 0 || toReadBooks.length > 0 || wishlistBooks.length > 0
+
   const isEmptyState =
-    (activeTab === 'books' && activeBookTab === 'read'     && books.length === 0) ||
-    (activeTab === 'books' && activeBookTab === 'to_read'  && toReadBooks.length === 0) ||
-    (activeTab === 'books' && activeBookTab === 'wishlist' && wishlistBooks.length === 0)
+    (activeTab === 'books' && !hasAnyBooks) ||
+    (activeTab === 'dashboard' && books.length === 0)
 
   const title =
-    activeTab === 'dashboard' ? t.dashboardTitle : t.myBookshelf
+    activeTab === 'dashboard' ? (displayName || t.dashboardTitle) : t.myBookshelf
 
   const pullProgress = Math.min(pullY / PULL_MAX, 1)
 
@@ -355,11 +361,7 @@ export default function HomePage() {
                 </motion.button>
               )}
 
-              {activeTab === 'books' && (
-                (activeBookTab === 'read' && books.length > 0) ||
-                (activeBookTab === 'to_read' && toReadBooks.length > 0) ||
-                (activeBookTab === 'wishlist' && wishlistBooks.length > 0)
-              ) && (
+              {activeTab === 'books' && hasAnyBooks && (
                 <div className="flex items-center gap-0.5 rounded-[8px] p-0.5"
                      style={{ backgroundColor: 'var(--fill)' }}>
                   <button
@@ -486,11 +488,7 @@ export default function HomePage() {
               </motion.button>
             )}
 
-            {activeTab === 'books' && (
-              (activeBookTab === 'read' && books.length > 0) ||
-              (activeBookTab === 'to_read' && toReadBooks.length > 0) ||
-              (activeBookTab === 'wishlist' && wishlistBooks.length > 0)
-            ) && (
+            {activeTab === 'books' && hasAnyBooks && (
               <div className="flex items-center gap-0.5 rounded-[10px] p-0.5"
                    style={{ backgroundColor: 'var(--fill)' }}>
                 <button
@@ -553,14 +551,14 @@ export default function HomePage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center pt-10"
+            className="flex flex-col items-center"
           >
             <div className="w-[280px] h-[280px] relative shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img alt="" className="w-full h-full object-contain"
                    src="/empty-read.png" />
             </div>
-            <div className="mt-6 w-full px-6 flex flex-col gap-5 text-center">
+            <div className="w-full px-6 flex flex-col gap-5 text-center">
               <div className="flex flex-col gap-2">
                 <h2 className="text-[24px] font-bold tracking-[-0.3px]" style={{ color: 'var(--label)' }}>
                   {t.noBooks}
@@ -596,7 +594,7 @@ export default function HomePage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center pt-6"
+            className="flex flex-col items-center"
           >
             <div className="w-full h-[280px] overflow-hidden relative shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -605,7 +603,7 @@ export default function HomePage() {
                    style={{ width: 400 }}
                    src="/empty-toread.png" />
             </div>
-            <div className="mt-4 w-full px-6 flex flex-col gap-5 text-center">
+            <div className="w-full px-6 flex flex-col gap-5 text-center">
               <div className="flex flex-col gap-2">
                 <h2 className="text-[24px] font-bold tracking-[-0.3px]" style={{ color: 'var(--label)' }}>
                   {t.toReadEmptyTitle}
@@ -635,14 +633,14 @@ export default function HomePage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center pt-6"
+            className="flex flex-col items-center"
           >
             <div className="w-[320px] h-[320px] relative shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img alt="" className="w-full h-full object-contain"
                    src="/empty-wishlist.png" />
             </div>
-            <div className="mt-4 w-full px-6 flex flex-col gap-5 text-center">
+            <div className="w-full px-6 flex flex-col gap-5 text-center">
               <div className="flex flex-col gap-2">
                 <h2 className="text-[22px] font-bold tracking-[-0.3px]" style={{ color: 'var(--label)' }}>
                   {t.wishlistEmptyTitle}
@@ -679,13 +677,15 @@ export default function HomePage() {
             /* ── Empty state ── */
             <motion.div
               variants={dashCard}
-              className="flex flex-col items-center text-center px-8 pt-12 pb-8"
+              className="flex flex-col items-center text-center px-8 pt-6 pb-8"
             >
-              <div
-                className="w-[80px] h-[80px] rounded-[28px] flex items-center justify-center mb-6"
-                style={{ backgroundColor: 'var(--primary-muted)' }}
-              >
-                <BarChart2 size={36} style={{ color: 'var(--primary)' }} />
+              <div className="w-[260px] h-[260px] relative shrink-0 mb-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt=""
+                  className="w-full h-full object-contain"
+                  src="/empty-dashboard.png"
+                />
               </div>
               <h2
                 className="text-[22px] font-bold tracking-[-0.3px] mb-2"
@@ -775,15 +775,15 @@ export default function HomePage() {
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
               />
             )}
-            <BarChart2
+            <User
               size={22}
               strokeWidth={activeTab === 'dashboard' ? 2 : 1.5}
               className="relative"
               style={{ color: activeTab === 'dashboard' ? 'var(--primary)' : 'var(--label-secondary)' }}
             />
-            <span className="text-[10px] font-medium relative tracking-[-0.1px]"
+            <span className="text-[10px] font-medium relative tracking-[-0.1px] max-w-[64px] truncate"
                   style={{ color: activeTab === 'dashboard' ? 'var(--primary)' : 'var(--label-secondary)' }}>
-              {t.tabDashboard}
+              {displayName || t.tabDashboard}
             </span>
           </button>
 
