@@ -15,6 +15,9 @@ import { LONG_MONTHS } from '@/lib/month'
 import { heroCoverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
 
+const bookPatternUrl =
+  `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-4 -4 32 32' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20'/%3E%3C/svg%3E")`
+
 function InfoChip({
   icon: Icon,
   label,
@@ -207,21 +210,21 @@ export default function WishlistDetailPage() {
       <div className="relative" style={{ minHeight: '100vh' }}>
 
         {/* ── Blurred background ──────────────────────────────────────────── */}
-        <div className="absolute top-0 left-0 right-0 h-[360px] overflow-hidden z-0">
-          {book.cover_url ? (
+        {book.cover_url ? (
+          <div className="absolute top-0 left-0 right-0 h-[360px] overflow-hidden z-0">
             <img
               src={heroCoverUrl(book.cover_url)}
               alt=""
               className="absolute inset-0 w-full h-full object-cover scale-[1.4] blur-[40px] opacity-90"
             />
-          ) : (
-            <div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60" />
-        </div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60" />
+          </div>
+        ) : (
+          <div
+            className="absolute inset-0 z-0"
+            style={{ background: 'linear-gradient(to bottom, #0088ff, #065ba6)' }}
+          />
+        )}
 
         {/* ── Toolbar (edit + close) ───────────────────────────────────────── */}
         <div className="relative z-30 flex justify-end gap-2 pt-4 pr-4">
@@ -264,11 +267,15 @@ export default function WishlistDetailPage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div
-                className="w-full h-full flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, var(--fill) 0%, var(--separator-opaque) 100%)' }}
-              >
-                <Heart size={48} style={{ color: 'var(--label-tertiary)' }} />
+              <div className="relative w-full h-full" style={{ backgroundColor: 'var(--primary)' }}>
+                <div
+                  className="absolute inset-0 opacity-[0.16]"
+                  style={{
+                    backgroundImage: bookPatternUrl,
+                    backgroundSize: '32px 32px',
+                    backgroundRepeat: 'repeat',
+                  }}
+                />
               </div>
             )}
           </div>
