@@ -369,7 +369,7 @@ export default function HomePage() {
       {/* ── Books tab: segmented control ─────────────────────────────── */}
       {activeTab === 'books' && !isEmptyState && (
         <div className="px-4 pb-3">
-          <div className="flex p-[3px] rounded-[10px]" style={{ backgroundColor: 'var(--fill)' }}>
+          <div className="flex p-[3px] rounded-full" style={{ backgroundColor: 'var(--fill)' }}>
             {([
               { key: 'read',     label: t.tabRead },
               { key: 'to_read',  label: toReadBooks.length > 0 ? `${t.tabToRead} (${toReadBooks.length})` : t.tabToRead },
@@ -379,7 +379,7 @@ export default function HomePage() {
                 key={key}
                 type="button"
                 onClick={() => setActiveBookTab(key)}
-                className="flex-1 py-[6px] rounded-[8px] text-[13px] font-medium transition-all"
+                className="flex-1 py-[6px] rounded-full text-[13px] font-medium transition-all"
                 style={activeBookTab === key
                   ? { backgroundColor: 'var(--bg-elevated)', color: 'var(--label)', fontWeight: 600, boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }
                   : { color: 'var(--label-secondary)' }
