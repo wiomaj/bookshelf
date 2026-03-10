@@ -90,6 +90,11 @@ export default function HomePage() {
     return () => el.removeEventListener('scroll', onScroll)
   }, [])
 
+  // ── Scroll-to-top on tab change ───────────────────────────────────────────
+  useEffect(() => {
+    document.getElementById('scroll-container')?.scrollTo({ top: 0 })
+  }, [activeTab, activeBookTab])
+
   // ── Year picker click-outside ─────────────────────────────────────────────
   useEffect(() => {
     if (!yearPickerSource) return
