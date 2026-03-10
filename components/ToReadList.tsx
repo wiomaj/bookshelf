@@ -87,6 +87,12 @@ function ToReadYearSection({ year, books, viewMode }: YearSectionProps) {
     setIsOpen(!isOpen)
   }
 
+  const sortedBooks = [...books].sort((a, b) => {
+    const aM = a.month ? (SEASON_MIDPOINT[a.month] ?? a.month) : 6
+    const bM = b.month ? (SEASON_MIDPOINT[b.month] ?? b.month) : 6
+    return bM - aM
+  })
+
   const yearLabel = year === 0 ? 'Unknown Year' : String(year)
   const count = books.length
 
@@ -126,13 +132,13 @@ function ToReadYearSection({ year, books, viewMode }: YearSectionProps) {
           >
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-2 min-[500px]:grid-cols-3 gap-x-[12px] gap-y-3 px-4 pb-4">
-                {books.map((book) => (
+                {sortedBooks.map((book) => (
                   <BookCard key={book.id} book={book} href={`/to-read/${book.id}`} />
                 ))}
               </div>
             ) : (
               <div className="flex flex-col px-5 pb-2">
-                {books.map((book, i) => {
+                {sortedBooks.map((book, i) => {
                   const dateLabel = formatAcquiredDate(book.year, book.month ?? null, { justNow: t.relativeJustNow, month: t.relativeMonth, months: t.relativeMonths, year: t.relativeYear, years: t.relativeYears }, book.created_at)
                   return (
                     <div key={book.id}>
@@ -184,7 +190,7 @@ function ToReadYearSection({ year, books, viewMode }: YearSectionProps) {
                           </svg>
                         </div>
                       </motion.button>
-                      {i < books.length - 1 && (
+                      {i < sortedBooks.length - 1 && (
                         <div className="h-px ml-[68px]" style={{ backgroundColor: 'var(--separator)' }} />
                       )}
                     </div>
