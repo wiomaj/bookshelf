@@ -59,6 +59,11 @@ export type Translations = {
   profileSection: string
   yourName: string
   yourNamePlaceholder: string
+  // Name prompt overlay
+  namePromptTitle: string
+  namePromptSub: string
+  namePromptCta: string
+  namePromptSkip: string
   // Settings
   cozyMode: string
   cozyModeDescription: string
@@ -200,6 +205,10 @@ const en: Translations = {
   profileSection: 'Profile',
   yourName: 'Name',
   yourNamePlaceholder: 'Add your name',
+  namePromptTitle: 'What\'s your name?',
+  namePromptSub: 'We\'ll use it to personalise your bookshelf.',
+  namePromptCta: 'Continue',
+  namePromptSkip: 'Skip for now',
   cozyMode: 'Cozy mode',
   cozyModeDescription: 'Cozy mode makes your app feel like a warm living room!',
   darkMode: 'Dark mode',
@@ -332,6 +341,10 @@ const de: Translations = {
   profileSection: 'Profil',
   yourName: 'Name',
   yourNamePlaceholder: 'Name hinzufügen',
+  namePromptTitle: 'Wie heißt du?',
+  namePromptSub: 'Wir nutzen deinen Namen, um dein Bücherregal zu personalisieren.',
+  namePromptCta: 'Weiter',
+  namePromptSkip: 'Jetzt überspringen',
   cozyMode: 'Gemütlichkeitsmodus',
   cozyModeDescription: 'Der Gemütlichkeitsmodus lässt die App wie ein warmes Wohnzimmer wirken!',
   darkMode: 'Dunkelmodus',
@@ -464,6 +477,10 @@ const fr: Translations = {
   profileSection: 'Profil',
   yourName: 'Nom',
   yourNamePlaceholder: 'Ajouter ton nom',
+  namePromptTitle: 'Comment tu t\'appelles ?',
+  namePromptSub: 'On l\'utilisera pour personnaliser ta bibliothèque.',
+  namePromptCta: 'Continuer',
+  namePromptSkip: 'Passer pour l\'instant',
   cozyMode: 'Mode cosy',
   cozyModeDescription: "Le mode cosy donne à l'application l'ambiance d'un salon chaleureux !",
   darkMode: 'Mode sombre',
@@ -596,6 +613,10 @@ const es: Translations = {
   profileSection: 'Perfil',
   yourName: 'Nombre',
   yourNamePlaceholder: 'Añadir tu nombre',
+  namePromptTitle: '¿Cómo te llamas?',
+  namePromptSub: 'Lo usaremos para personalizar tu estantería.',
+  namePromptCta: 'Continuar',
+  namePromptSkip: 'Omitir por ahora',
   cozyMode: 'Modo acogedor',
   cozyModeDescription: '¡El modo acogedor hace que la app parezca una sala de estar cálida!',
   darkMode: 'Modo oscuro',
@@ -728,6 +749,10 @@ const pl: Translations = {
   profileSection: 'Profil',
   yourName: 'Imię',
   yourNamePlaceholder: 'Dodaj imię',
+  namePromptTitle: 'Jak masz na imię?',
+  namePromptSub: 'Użyjemy go, aby spersonalizować twoją półkę.',
+  namePromptCta: 'Kontynuuj',
+  namePromptSkip: 'Pomiń na razie',
   cozyMode: 'Tryb przytulny',
   cozyModeDescription: 'Tryb przytulny sprawia, że aplikacja wygląda jak ciepły salon!',
   darkMode: 'Tryb ciemny',
