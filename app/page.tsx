@@ -675,20 +675,57 @@ export default function HomePage() {
           initial="hidden"
           animate="show"
         >
-          {effectiveYear !== 'all' && (
-            <motion.div variants={dashCard}>
-              <ReadingPaceChart books={books} year={effectiveYear} />
+          {books.length === 0 ? (
+            /* ── Empty state ── */
+            <motion.div
+              variants={dashCard}
+              className="flex flex-col items-center text-center px-8 pt-12 pb-8"
+            >
+              <div
+                className="w-[80px] h-[80px] rounded-[28px] flex items-center justify-center mb-6"
+                style={{ backgroundColor: 'var(--primary-muted)' }}
+              >
+                <BarChart2 size={36} style={{ color: 'var(--primary)' }} />
+              </div>
+              <h2
+                className="text-[22px] font-bold tracking-[-0.3px] mb-2"
+                style={{ color: 'var(--label)' }}
+              >
+                {t.dashboardEmptyTitle}
+              </h2>
+              <p
+                className="text-[15px] leading-[22px] mb-8"
+                style={{ color: 'var(--label-secondary)' }}
+              >
+                {t.dashboardEmptyCopy}
+              </p>
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                onClick={() => { setActiveTab('books'); router.push('/add') }}
+                className="w-full max-w-[280px] py-[15px] rounded-[14px] text-white text-[17px] font-semibold"
+                style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+              >
+                {t.addFirstBookCta}
+              </motion.button>
             </motion.div>
+          ) : (
+            <>
+              {effectiveYear !== 'all' && (
+                <motion.div variants={dashCard}>
+                  <ReadingPaceChart books={books} year={effectiveYear} />
+                </motion.div>
+              )}
+              <motion.div variants={dashCard}>
+                <RatingDistributionChart books={books} />
+              </motion.div>
+              <motion.div variants={dashCard}>
+                <FavouriteAuthors books={books} />
+              </motion.div>
+              <motion.div variants={dashCard}>
+                <GenreBreakdown books={books} />
+              </motion.div>
+            </>
           )}
-          <motion.div variants={dashCard}>
-            <RatingDistributionChart books={books} />
-          </motion.div>
-          <motion.div variants={dashCard}>
-            <FavouriteAuthors books={books} />
-          </motion.div>
-          <motion.div variants={dashCard}>
-            <GenreBreakdown books={books} />
-          </motion.div>
         </motion.div>
       )}
 

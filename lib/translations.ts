@@ -127,6 +127,8 @@ export type Translations = {
   chipAdded: string
   // Stats
   dashboardTitle: string
+  dashboardEmptyTitle: string
+  dashboardEmptyCopy: string
   statsReadingPace: string
   statsBooksPerMonth: string
   statsNoBooks: string
@@ -255,6 +257,8 @@ const en: Translations = {
   toReadNotesPlaceholder: 'Why do you want to read this?',
   whenDidYouGetIt: 'When did you get it?',
   dashboardTitle: 'My dashboard',
+  dashboardEmptyTitle: 'No stats yet',
+  dashboardEmptyCopy: 'Add books to your shelf to start tracking your reading stats.',
   statsReadingPace: 'Reading speed',
   statsBooksPerMonth: 'How many books I\'ve read over the year',
   statsNoBooks: 'No books logged this year yet',
@@ -381,6 +385,8 @@ const de: Translations = {
   whenDidYouGetIt: 'Wann hast du es bekommen?',
   toReadNotesPlaceholder: 'Warum möchtest du das lesen?',
   dashboardTitle: 'Mein Dashboard',
+  dashboardEmptyTitle: 'Noch keine Statistiken',
+  dashboardEmptyCopy: 'Füge Bücher hinzu, um deine Lesestatistiken zu sehen.',
   statsReadingPace: 'Lesegeschwindigkeit',
   statsBooksPerMonth: 'Wie viele Bücher ich im Jahr gelesen habe',
   statsNoBooks: 'Noch keine Bücher in diesem Jahr',
@@ -507,6 +513,8 @@ const fr: Translations = {
   whenDidYouGetIt: 'Quand l\'avez-vous reçu ?',
   toReadNotesPlaceholder: 'Pourquoi voulez-vous le lire ?',
   dashboardTitle: 'Mon tableau de bord',
+  dashboardEmptyTitle: 'Pas encore de stats',
+  dashboardEmptyCopy: 'Ajoute des livres à ta bibliothèque pour voir tes statistiques.',
   statsReadingPace: 'Vitesse de lecture',
   statsBooksPerMonth: 'Combien de livres j\'ai lus dans l\'année',
   statsNoBooks: 'Aucun livre enregistré cette année',
@@ -633,6 +641,8 @@ const es: Translations = {
   whenDidYouGetIt: '¿Cuándo lo conseguiste?',
   toReadNotesPlaceholder: '¿Por qué quieres leerlo?',
   dashboardTitle: 'Mi panel',
+  dashboardEmptyTitle: 'Sin estadísticas aún',
+  dashboardEmptyCopy: 'Añade libros a tu biblioteca para ver tus estadísticas.',
   statsReadingPace: 'Velocidad de lectura',
   statsBooksPerMonth: 'Cuántos libros he leído en el año',
   statsNoBooks: 'Aún no hay libros registrados este año',
@@ -759,6 +769,8 @@ const pl: Translations = {
   whenDidYouGetIt: 'Kiedy ją dostałeś?',
   toReadNotesPlaceholder: 'Dlaczego chcesz to przeczytać?',
   dashboardTitle: 'Mój dashboard',
+  dashboardEmptyTitle: 'Brak statystyk',
+  dashboardEmptyCopy: 'Dodaj książki do swojej półki, aby zobaczyć statystyki.',
   statsReadingPace: 'Prędkość czytania',
   statsBooksPerMonth: 'Ile książek przeczytałem w roku',
   statsNoBooks: 'Brak książek w tym roku',
