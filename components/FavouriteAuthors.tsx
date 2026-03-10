@@ -4,7 +4,7 @@ import { useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 interface Props {
-  books: Book[]  // all read books
+  books: Book[]
 }
 
 const MAX_AUTHORS = 5
@@ -31,51 +31,53 @@ export default function FavouriteAuthors({ books }: Props) {
 
   const maxCount = sorted[0][1]
 
-  // Only show component if top author has read > 1 book, or there are at least 2 authors
+  // Only show if we have at least 2 authors or the top author has > 1 book
   if (maxCount === 1 && sorted.length < 2) return null
 
   return (
     <div
-      className="mx-4 mb-6 rounded-[20px] px-4 pt-4 pb-5"
+      className="mx-4 mb-4 rounded-[16px] p-[16px]"
       style={{ backgroundColor: 'var(--bg-elevated)' }}
     >
-      {/* Header */}
-      <div className="mb-3">
-        <p className="text-[13px] font-semibold tracking-[-0.1px]" style={{ color: 'var(--label)' }}>
-          {t.statsFavouriteAuthors}
-        </p>
-        <p className="text-[11px]" style={{ color: 'var(--label-secondary)' }}>
-          {t.statsByBooksRead}
-        </p>
-      </div>
+      {/* Card title */}
+      <p
+        className="text-[17px] font-semibold tracking-[-0.43px]"
+        style={{ color: 'var(--label)' }}
+      >
+        {t.statsFavouriteAuthors}
+      </p>
+      <p
+        className="text-[12px] mt-[2px] mb-[24px]"
+        style={{ color: 'var(--label-secondary)' }}
+      >
+        {t.statsByBooksRead}
+      </p>
 
-      {/* Horizontal bar list */}
-      <div className="flex flex-col gap-[10px]">
+      {/* Author rows */}
+      <div className="flex flex-col gap-[12px]">
         {sorted.map(([author, count]) => {
-          const isMax = count === maxCount
-          const barW = Math.max(8, Math.round((count / maxCount) * 100))
+          const barW = Math.max(16, Math.round((count / maxCount) * 100))
           return (
-            <div key={author} className="flex items-center gap-2">
-              {/* Author name */}
+            <div key={author} className="flex items-center gap-[20px]">
+              {/* Author name — fixed width column */}
               <span
-                className="text-[12px] font-medium leading-none truncate"
-                style={{ color: 'var(--label)', minWidth: 0, flex: '1 1 0' }}
+                className="text-[12px] font-medium leading-[16px] shrink-0 w-[110px] truncate"
+                style={{ color: 'var(--label)' }}
               >
                 {author}
               </span>
               {/* Bar + count */}
-              <div className="flex items-center gap-[6px] shrink-0">
+              <div className="flex items-center gap-[8px]">
                 <div
-                  className="h-[8px] rounded-full transition-all duration-300"
+                  className="h-[16px] rounded-[4px] shrink-0 transition-all duration-300"
                   style={{
                     width: `${barW}px`,
-                    maxWidth: '100px',
-                    backgroundColor: isMax ? 'var(--primary)' : 'var(--primary-muted)',
+                    backgroundColor: 'var(--primary-muted)',
                   }}
                 />
                 <span
-                  className="text-[11px] font-semibold tabular-nums w-4 text-right"
-                  style={{ color: isMax ? 'var(--primary)' : 'var(--label-secondary)' }}
+                  className="text-[11px] font-semibold leading-[13px] tracking-[0.06px] shrink-0"
+                  style={{ color: 'var(--label)' }}
                 >
                   {count}
                 </span>

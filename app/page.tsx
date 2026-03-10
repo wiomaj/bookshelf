@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpenCheck, BarChart2, Settings, Loader2 } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpenCheck, BarChart2, Settings, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { getReadBooks, getToReadBooks, getWishlistBooks } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
@@ -38,6 +38,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [flashMessage, setFlashMessage] = useState<string | null>(null)
   const [scrolled, setScrolled] = useState(false)
+  const [dashboardYearIdx, setDashboardYearIdx] = useState(0)
 
   // Pull-to-refresh visual state
   const [pullY, setPullY] = useState(0)
@@ -172,6 +173,7 @@ export default function HomePage() {
     return acc
   }, {})
   const years = Object.keys(booksByYear).map(Number).sort((a, b) => b - a)
+  const dashboardYear = years[dashboardYearIdx] ?? new Date().getFullYear()
 
   if (loading) {
     return (
@@ -197,7 +199,7 @@ export default function HomePage() {
     (activeTab === 'books' && activeBookTab === 'wishlist' && wishlistBooks.length === 0)
 
   const title =
-    activeTab === 'dashboard' ? t.tabDashboard : t.myBookshelf
+    activeTab === 'dashboard' ? t.dashboardTitle : t.myBookshelf
 
   const pullProgress = Math.min(pullY / PULL_MAX, 1)
 
@@ -320,6 +322,33 @@ export default function HomePage() {
           </h1>
 
           <div className="flex items-center gap-2 pb-1">
+            {/* Year picker pill — dashboard only */}
+            {activeTab === 'dashboard' && years.length > 0 && (
+              <div className="flex items-center rounded-full"
+                   style={{ backgroundColor: 'var(--fill)' }}>
+                <button
+                  onClick={() => setDashboardYearIdx(i => Math.min(i + 1, years.length - 1))}
+                  disabled={dashboardYearIdx >= years.length - 1}
+                  className="px-[8px] py-[6px]"
+                  style={{ color: dashboardYearIdx >= years.length - 1 ? 'var(--label-quaternary)' : 'var(--label)' }}
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <span className="text-[13px] font-semibold"
+                      style={{ color: 'var(--label)' }}>
+                  {dashboardYear}
+                </span>
+                <button
+                  onClick={() => setDashboardYearIdx(i => Math.max(i - 1, 0))}
+                  disabled={dashboardYearIdx <= 0}
+                  className="px-[8px] py-[6px]"
+                  style={{ color: dashboardYearIdx <= 0 ? 'var(--label-quaternary)' : 'var(--label)' }}
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            )}
+
             {fabRoute && (
               <motion.button
                 whileTap={{ scale: 0.90 }}
@@ -514,7 +543,7 @@ export default function HomePage() {
       {/* ── Dashboard tab ────────────────────────────────────────────── */}
       {activeTab === 'dashboard' && (
         <div className="pb-4 pt-2">
-          <ReadingPaceChart books={books} />
+          <ReadingPaceChart books={books} year={dashboardYear} />
           <RatingDistributionChart books={books} />
           <FavouriteAuthors books={books} />
           <GenreBreakdown books={books} />
