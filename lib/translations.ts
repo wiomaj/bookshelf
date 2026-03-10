@@ -137,6 +137,7 @@ export type Translations = {
   statsFavouriteAuthors: string
   statsByBooksRead: string
   statsGenreBreakdown: string
+  allTime: string
   // Add to Home Screen
   athsTitle: string
   athsAndroid: string
@@ -264,6 +265,7 @@ const en: Translations = {
   statsFavouriteAuthors: 'Favorite authors',
   statsByBooksRead: 'My top 5 authors',
   statsGenreBreakdown: 'Genre Breakdown',
+  allTime: 'All time',
   athsTitle: 'Add to Home Screen',
   athsAndroid: 'Install for the full app experience',
   athsIosTap: 'Tap',
@@ -389,6 +391,7 @@ const de: Translations = {
   statsFavouriteAuthors: 'Lieblingsautoren',
   statsByBooksRead: 'Meine Top-5-Autoren',
   statsGenreBreakdown: 'Genre-Übersicht',
+  allTime: 'Alle Jahre',
   athsTitle: 'Zum Startbildschirm',
   athsAndroid: 'Installieren für das volle App-Erlebnis',
   athsIosTap: 'Tippe auf',
@@ -514,6 +517,7 @@ const fr: Translations = {
   statsFavouriteAuthors: 'Auteurs préférés',
   statsByBooksRead: 'Mes 5 auteurs préférés',
   statsGenreBreakdown: 'Répartition par genre',
+  allTime: 'Toute la période',
   athsTitle: 'Ajouter à l\'écran d\'accueil',
   athsAndroid: 'Installez pour une expérience complète',
   athsIosTap: 'Appuyez sur',
@@ -639,6 +643,7 @@ const es: Translations = {
   statsFavouriteAuthors: 'Autores favoritos',
   statsByBooksRead: 'Mis 5 autores favoritos',
   statsGenreBreakdown: 'Por género',
+  allTime: 'Todo el tiempo',
   athsTitle: 'Añadir a la pantalla de inicio',
   athsAndroid: 'Instala para una experiencia completa',
   athsIosTap: 'Pulsa',
@@ -764,6 +769,7 @@ const pl: Translations = {
   statsFavouriteAuthors: 'Ulubieni autorzy',
   statsByBooksRead: 'Moi 5 ulubionych autorów',
   statsGenreBreakdown: 'Podział gatunków',
+  allTime: 'Cały czas',
   athsTitle: 'Dodaj do ekranu głównego',
   athsAndroid: 'Zainstaluj dla pełnego doświadczenia',
   athsIosTap: 'Dotknij',
