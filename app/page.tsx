@@ -39,7 +39,7 @@ export default function HomePage() {
   const [flashMessage, setFlashMessage] = useState<string | null>(null)
   const [scrolled, setScrolled] = useState(false)
   const [dashboardYear, setDashboardYear] = useState<number | 'all' | null>(null)
-  const [yearPickerOpen, setYearPickerOpen] = useState(false)
+  const [yearPickerSource, setYearPickerSource] = useState<'large' | 'top' | null>(null)
 
   // Pull-to-refresh visual state
   const [pullY, setPullY] = useState(0)
@@ -82,16 +82,16 @@ export default function HomePage() {
 
   // ── Year picker click-outside ─────────────────────────────────────────────
   useEffect(() => {
-    if (!yearPickerOpen) return
+    if (!yearPickerSource) return
     function handler(e: MouseEvent) {
       const target = e.target as Node
       const insideLarge = yearPickerRef.current?.contains(target)
       const insideTop   = yearPickerTopRef.current?.contains(target)
-      if (!insideLarge && !insideTop) setYearPickerOpen(false)
+      if (!insideLarge && !insideTop) setYearPickerSource(null)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [yearPickerOpen])
+  }, [yearPickerSource])
 
   // ── Initial data load ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -273,7 +273,7 @@ export default function HomePage() {
               {activeTab === 'dashboard' && (
                 <div className="relative" ref={yearPickerTopRef}>
                   <button
-                    onClick={() => setYearPickerOpen(o => !o)}
+                    onClick={() => setYearPickerSource(s => s === 'top' ? null : 'top')}
                     className="flex items-center gap-[5px] rounded-full px-[12px] py-[6px]"
                     style={{ backgroundColor: 'var(--fill)' }}
                   >
@@ -284,7 +284,7 @@ export default function HomePage() {
                   </button>
 
                   <AnimatePresence>
-                    {yearPickerOpen && (
+                    {yearPickerSource === 'top' && (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: -4 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -300,7 +300,7 @@ export default function HomePage() {
                         {years.map(y => (
                           <button
                             key={y}
-                            onClick={() => { setDashboardYear(y); setYearPickerOpen(false) }}
+                            onClick={() => { setDashboardYear(y); setYearPickerSource(null) }}
                             className="w-full px-[16px] py-[10px] text-left text-[15px]"
                             style={{
                               color: effectiveYear === y ? 'var(--primary)' : 'var(--label)',
@@ -314,7 +314,7 @@ export default function HomePage() {
                           <div className="mx-[12px] h-px" style={{ backgroundColor: 'var(--separator)' }} />
                         )}
                         <button
-                          onClick={() => { setDashboardYear('all'); setYearPickerOpen(false) }}
+                          onClick={() => { setDashboardYear('all'); setYearPickerSource(null) }}
                           className="w-full px-[16px] py-[10px] text-left text-[15px]"
                           style={{
                             color: effectiveYear === 'all' ? 'var(--primary)' : 'var(--label)',
@@ -404,7 +404,7 @@ export default function HomePage() {
             {activeTab === 'dashboard' && (
               <div className="relative" ref={yearPickerRef}>
                 <button
-                  onClick={() => setYearPickerOpen(o => !o)}
+                  onClick={() => setYearPickerSource(s => s === 'large' ? null : 'large')}
                   className="flex items-center gap-[5px] rounded-full px-[12px] py-[7px]"
                   style={{ backgroundColor: 'var(--fill)' }}
                 >
@@ -415,7 +415,7 @@ export default function HomePage() {
                 </button>
 
                 <AnimatePresence>
-                  {yearPickerOpen && (
+                  {yearPickerSource === 'large' && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95, y: -4 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -431,7 +431,7 @@ export default function HomePage() {
                       {years.map(y => (
                         <button
                           key={y}
-                          onClick={() => { setDashboardYear(y); setYearPickerOpen(false) }}
+                          onClick={() => { setDashboardYear(y); setYearPickerSource(null) }}
                           className="w-full px-[16px] py-[10px] text-left text-[15px]"
                           style={{
                             color: effectiveYear === y ? 'var(--primary)' : 'var(--label)',
@@ -445,7 +445,7 @@ export default function HomePage() {
                         <div className="mx-[12px] h-px" style={{ backgroundColor: 'var(--separator)' }} />
                       )}
                       <button
-                        onClick={() => { setDashboardYear('all'); setYearPickerOpen(false) }}
+                        onClick={() => { setDashboardYear('all'); setYearPickerSource(null) }}
                         className="w-full px-[16px] py-[10px] text-left text-[15px]"
                         style={{
                           color: effectiveYear === 'all' ? 'var(--primary)' : 'var(--label)',
