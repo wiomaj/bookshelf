@@ -123,10 +123,15 @@ export type Translations = {
   moveToReadingList: string
   chipBought: string
   chipAdded: string
-  // Reading pace chart
+  // Stats
   statsReadingPace: string
   statsBooksPerMonth: string
   statsNoBooks: string
+  statsRatingDistribution: string
+  statsAllTime: string
+  statsFavouriteAuthors: string
+  statsByBooksRead: string
+  statsGenreBreakdown: string
   // Add to Home Screen
   athsTitle: string
   athsAndroid: string
@@ -244,6 +249,11 @@ const en: Translations = {
   statsReadingPace: 'Reading Pace',
   statsBooksPerMonth: 'Books per month',
   statsNoBooks: 'No books logged this year yet',
+  statsRatingDistribution: 'Rating Distribution',
+  statsAllTime: 'All time',
+  statsFavouriteAuthors: 'Favourite Authors',
+  statsByBooksRead: 'By books read',
+  statsGenreBreakdown: 'Genre Breakdown',
   athsTitle: 'Add to Home Screen',
   athsAndroid: 'Install for the full app experience',
   athsIosTap: 'Tap',
@@ -359,6 +369,11 @@ const de: Translations = {
   statsReadingPace: 'Lesetempo',
   statsBooksPerMonth: 'Bücher pro Monat',
   statsNoBooks: 'Noch keine Bücher in diesem Jahr',
+  statsRatingDistribution: 'Bewertungsverteilung',
+  statsAllTime: 'Gesamt',
+  statsFavouriteAuthors: 'Lieblingsautoren',
+  statsByBooksRead: 'Nach Büchern',
+  statsGenreBreakdown: 'Genre-Übersicht',
   athsTitle: 'Zum Startbildschirm',
   athsAndroid: 'Installieren für das volle App-Erlebnis',
   athsIosTap: 'Tippe auf',
@@ -474,6 +489,11 @@ const fr: Translations = {
   statsReadingPace: 'Rythme de lecture',
   statsBooksPerMonth: 'Livres par mois',
   statsNoBooks: 'Aucun livre enregistré cette année',
+  statsRatingDistribution: 'Répartition des notes',
+  statsAllTime: 'Tout temps',
+  statsFavouriteAuthors: 'Auteurs préférés',
+  statsByBooksRead: 'Par livres lus',
+  statsGenreBreakdown: 'Répartition par genre',
   athsTitle: 'Ajouter à l\'écran d\'accueil',
   athsAndroid: 'Installez pour une expérience complète',
   athsIosTap: 'Appuyez sur',
@@ -589,6 +609,11 @@ const es: Translations = {
   statsReadingPace: 'Ritmo de lectura',
   statsBooksPerMonth: 'Libros por mes',
   statsNoBooks: 'Aún no hay libros registrados este año',
+  statsRatingDistribution: 'Distribución de valoraciones',
+  statsAllTime: 'Todo el tiempo',
+  statsFavouriteAuthors: 'Autores favoritos',
+  statsByBooksRead: 'Por libros leídos',
+  statsGenreBreakdown: 'Por género',
   athsTitle: 'Añadir a la pantalla de inicio',
   athsAndroid: 'Instala para una experiencia completa',
   athsIosTap: 'Pulsa',
@@ -704,6 +729,11 @@ const pl: Translations = {
   statsReadingPace: 'Tempo czytania',
   statsBooksPerMonth: 'Książki na miesiąc',
   statsNoBooks: 'Brak książek w tym roku',
+  statsRatingDistribution: 'Rozkład ocen',
+  statsAllTime: 'Łącznie',
+  statsFavouriteAuthors: 'Ulubieni autorzy',
+  statsByBooksRead: 'Wg. książek',
+  statsGenreBreakdown: 'Podział gatunków',
   athsTitle: 'Dodaj do ekranu głównego',
   athsAndroid: 'Zainstaluj dla pełnego doświadczenia',
   athsIosTap: 'Dotknij',

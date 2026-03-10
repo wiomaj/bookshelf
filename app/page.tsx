@@ -12,6 +12,9 @@ import ToReadList from '@/components/ToReadList'
 import WishlistList from '@/components/WishlistList'
 import AddToHomeScreen from '@/components/AddToHomeScreen'
 import ReadingPaceChart from '@/components/ReadingPaceChart'
+import RatingDistributionChart from '@/components/RatingDistributionChart'
+import FavouriteAuthors from '@/components/FavouriteAuthors'
+import GenreBreakdown from '@/components/GenreBreakdown'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
@@ -389,6 +392,9 @@ export default function HomePage() {
         ) : (
           <div className="pb-4">
             <ReadingPaceChart books={books} />
+            <RatingDistributionChart books={books} />
+            <FavouriteAuthors books={books} />
+            <GenreBreakdown books={books} />
             {years.map((year) => (
               <YearSection key={year} year={year} books={booksByYear[year]} viewMode={viewMode} />
             ))}
