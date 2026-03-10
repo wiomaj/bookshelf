@@ -123,6 +123,10 @@ export type Translations = {
   moveToReadingList: string
   chipBought: string
   chipAdded: string
+  // Reading pace chart
+  statsReadingPace: string
+  statsBooksPerMonth: string
+  statsNoBooks: string
   // Add to Home Screen
   athsTitle: string
   athsAndroid: string
@@ -237,6 +241,9 @@ const en: Translations = {
   chipAdded: 'Added',
   toReadNotesPlaceholder: 'Why do you want to read this?',
   whenDidYouGetIt: 'When did you get it?',
+  statsReadingPace: 'Reading Pace',
+  statsBooksPerMonth: 'Books per month',
+  statsNoBooks: 'No books logged this year yet',
   athsTitle: 'Add to Home Screen',
   athsAndroid: 'Install for the full app experience',
   athsIosTap: 'Tap',
@@ -349,6 +356,9 @@ const de: Translations = {
   chipAdded: 'Hinzugefügt',
   whenDidYouGetIt: 'Wann hast du es bekommen?',
   toReadNotesPlaceholder: 'Warum möchtest du das lesen?',
+  statsReadingPace: 'Lesetempo',
+  statsBooksPerMonth: 'Bücher pro Monat',
+  statsNoBooks: 'Noch keine Bücher in diesem Jahr',
   athsTitle: 'Zum Startbildschirm',
   athsAndroid: 'Installieren für das volle App-Erlebnis',
   athsIosTap: 'Tippe auf',
@@ -461,6 +471,9 @@ const fr: Translations = {
   chipAdded: 'Ajouté',
   whenDidYouGetIt: 'Quand l\'avez-vous reçu ?',
   toReadNotesPlaceholder: 'Pourquoi voulez-vous le lire ?',
+  statsReadingPace: 'Rythme de lecture',
+  statsBooksPerMonth: 'Livres par mois',
+  statsNoBooks: 'Aucun livre enregistré cette année',
   athsTitle: 'Ajouter à l\'écran d\'accueil',
   athsAndroid: 'Installez pour une expérience complète',
   athsIosTap: 'Appuyez sur',
@@ -573,6 +586,9 @@ const es: Translations = {
   chipAdded: 'Añadido',
   whenDidYouGetIt: '¿Cuándo lo conseguiste?',
   toReadNotesPlaceholder: '¿Por qué quieres leerlo?',
+  statsReadingPace: 'Ritmo de lectura',
+  statsBooksPerMonth: 'Libros por mes',
+  statsNoBooks: 'Aún no hay libros registrados este año',
   athsTitle: 'Añadir a la pantalla de inicio',
   athsAndroid: 'Instala para una experiencia completa',
   athsIosTap: 'Pulsa',
@@ -685,6 +701,9 @@ const pl: Translations = {
   chipAdded: 'Dodano',
   whenDidYouGetIt: 'Kiedy ją dostałeś?',
   toReadNotesPlaceholder: 'Dlaczego chcesz to przeczytać?',
+  statsReadingPace: 'Tempo czytania',
+  statsBooksPerMonth: 'Książki na miesiąc',
+  statsNoBooks: 'Brak książek w tym roku',
   athsTitle: 'Dodaj do ekranu głównego',
   athsAndroid: 'Zainstaluj dla pełnego doświadczenia',
   athsIosTap: 'Dotknij',

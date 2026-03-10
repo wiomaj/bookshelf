@@ -11,6 +11,7 @@ import YearSection from '@/components/YearSection'
 import ToReadList from '@/components/ToReadList'
 import WishlistList from '@/components/WishlistList'
 import AddToHomeScreen from '@/components/AddToHomeScreen'
+import ReadingPaceChart from '@/components/ReadingPaceChart'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
@@ -387,6 +388,7 @@ export default function HomePage() {
           </motion.div>
         ) : (
           <div className="pb-4">
+            <ReadingPaceChart books={books} />
             {years.map((year) => (
               <YearSection key={year} year={year} books={booksByYear[year]} viewMode={viewMode} />
             ))}
