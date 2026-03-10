@@ -109,6 +109,8 @@ export type Translations = {
   tabRead: string
   tabToRead: string
   tabWishlist: string
+  tabBooks: string
+  tabDashboard: string
   toReadEmptyTitle: string
   toReadEmptyCopy: string
   addToReadingList: string
@@ -232,6 +234,8 @@ const en: Translations = {
   tabRead: 'Read',
   tabToRead: 'To Read',
   tabWishlist: 'Wishlist',
+  tabBooks: 'Books',
+  tabDashboard: 'Dashboard',
   toReadEmptyTitle: 'Unread books',
   toReadEmptyCopy: 'Add the books you already own, but haven\'t read so far... So many books, so little time.',
   addToReadingList: 'Add a book to be read',
@@ -352,6 +356,8 @@ const de: Translations = {
   tabRead: 'Gelesen',
   tabToRead: 'Leseliste',
   tabWishlist: 'Wunschliste',
+  tabBooks: 'Bücher',
+  tabDashboard: 'Dashboard',
   toReadEmptyTitle: 'Ungelesene Bücher',
   toReadEmptyCopy: 'Füge Bücher hinzu, die du schon besitzt, aber noch nicht gelesen hast… So viele Bücher, so wenig Zeit.',
   addToReadingList: 'Buch hinzufügen',
@@ -472,6 +478,8 @@ const fr: Translations = {
   tabRead: 'Lus',
   tabToRead: 'À lire',
   tabWishlist: 'Souhaits',
+  tabBooks: 'Livres',
+  tabDashboard: 'Dashboard',
   toReadEmptyTitle: 'Livres non lus',
   toReadEmptyCopy: 'Ajoute les livres que tu possèdes déjà mais que tu n\'as pas encore lus… Tant de livres, si peu de temps.',
   addToReadingList: 'Ajouter un livre à lire',
@@ -592,6 +600,8 @@ const es: Translations = {
   tabRead: 'Leídos',
   tabToRead: 'Por leer',
   tabWishlist: 'Deseos',
+  tabBooks: 'Libros',
+  tabDashboard: 'Dashboard',
   toReadEmptyTitle: 'Libros sin leer',
   toReadEmptyCopy: 'Añade los libros que ya tienes pero aún no has leído… Tantos libros, tan poco tiempo.',
   addToReadingList: 'Añadir un libro por leer',
@@ -712,6 +722,8 @@ const pl: Translations = {
   tabRead: 'Przeczytane',
   tabToRead: 'Do przeczytania',
   tabWishlist: 'Lista życzeń',
+  tabBooks: 'Książki',
+  tabDashboard: 'Dashboard',
   toReadEmptyTitle: 'Nieprzeczytane książki',
   toReadEmptyCopy: 'Dodaj książki, które już masz, ale jeszcze nie przeczytałeś… Tyle książek, tak mało czasu.',
   addToReadingList: 'Dodaj książkę do przeczytania',

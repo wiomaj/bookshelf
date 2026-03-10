@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpenCheck, Library, Settings, Loader2, Heart } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpenCheck, BarChart2, Settings, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { getReadBooks, getToReadBooks, getWishlistBooks } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
@@ -18,7 +18,8 @@ import GenreBreakdown from '@/components/GenreBreakdown'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
-type Tab = 'read' | 'to_read' | 'wishlist'
+type Tab = 'books' | 'dashboard'
+type BookTab = 'read' | 'to_read' | 'wishlist'
 
 /** Raw touch travel (px) needed to trigger a refresh */
 const PULL_THRESHOLD = 72
@@ -29,7 +30,8 @@ export default function HomePage() {
   const router = useRouter()
   const { viewMode, setViewMode, user, setToReadCount, setWishlistCount } = useApp()
   const t = useT()
-  const [activeTab, setActiveTab] = useState<Tab>('read')
+  const [activeTab, setActiveTab] = useState<Tab>('books')
+  const [activeBookTab, setActiveBookTab] = useState<BookTab>('read')
   const [books, setBooks] = useState<Book[]>([])
   const [toReadBooks, setToReadBooks] = useState<Book[]>([])
   const [wishlistBooks, setWishlistBooks] = useState<Book[]>([])
@@ -82,12 +84,10 @@ export default function HomePage() {
   // ── Session-storage flash / tab restore ───────────────────────────────────
   useEffect(() => {
     const returnTab = sessionStorage.getItem('bookshelf_returnTab')
-    if (returnTab === 'to_read') {
+    if (returnTab === 'read' || returnTab === 'to_read' || returnTab === 'wishlist') {
       sessionStorage.removeItem('bookshelf_returnTab')
-      setActiveTab('to_read')
-    } else if (returnTab === 'wishlist') {
-      sessionStorage.removeItem('bookshelf_returnTab')
-      setActiveTab('wishlist')
+      setActiveTab('books')
+      setActiveBookTab(returnTab as BookTab)
     }
     const flash = sessionStorage.getItem('bookshelf_flash')
     if (flash) {
@@ -186,19 +186,18 @@ export default function HomePage() {
   }
 
   const fabRoute =
-    activeTab === 'read'     ? '/add?tab=read' :
-    activeTab === 'to_read'  ? '/add?tab=to_read' :
-    '/add?tab=wishlist'
+    activeTab === 'books' && activeBookTab === 'read'     ? '/add?tab=read' :
+    activeTab === 'books' && activeBookTab === 'to_read'  ? '/add?tab=to_read' :
+    activeTab === 'books'                                 ? '/add?tab=wishlist' :
+    null  // no FAB on Dashboard
 
   const isEmptyState =
-    (activeTab === 'read'     && books.length === 0) ||
-    (activeTab === 'to_read'  && toReadBooks.length === 0) ||
-    (activeTab === 'wishlist' && wishlistBooks.length === 0)
+    (activeTab === 'books' && activeBookTab === 'read'     && books.length === 0) ||
+    (activeTab === 'books' && activeBookTab === 'to_read'  && toReadBooks.length === 0) ||
+    (activeTab === 'books' && activeBookTab === 'wishlist' && wishlistBooks.length === 0)
 
   const title =
-    activeTab === 'read'    ? t.tabRead :
-    activeTab === 'to_read' ? t.tabToRead :
-    t.wishlistTitle
+    activeTab === 'dashboard' ? t.tabDashboard : t.myBookshelf
 
   const pullProgress = Math.min(pullY / PULL_MAX, 1)
 
@@ -250,16 +249,18 @@ export default function HomePage() {
                 {title}
               </span>
 
-              <motion.button
-                whileTap={{ scale: 0.90 }}
-                onClick={() => router.push(fabRoute)}
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: 'var(--primary)' }}
-              >
-                <Plus size={18} className="text-white" strokeWidth={2.5} />
-              </motion.button>
+              {fabRoute && (
+                <motion.button
+                  whileTap={{ scale: 0.90 }}
+                  onClick={() => router.push(fabRoute)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'var(--primary)' }}
+                >
+                  <Plus size={18} className="text-white" strokeWidth={2.5} />
+                </motion.button>
+              )}
 
-              {activeTab === 'read' && books.length > 0 && (
+              {activeTab === 'books' && activeBookTab === 'read' && books.length > 0 && (
                 <div className="flex items-center gap-0.5 rounded-[8px] p-0.5"
                      style={{ backgroundColor: 'var(--fill)' }}>
                   <button
@@ -315,16 +316,18 @@ export default function HomePage() {
           </h1>
 
           <div className="flex items-center gap-2 pb-1">
-            <motion.button
-              whileTap={{ scale: 0.90 }}
-              onClick={() => router.push(fabRoute)}
-              className="w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
-            >
-              <Plus size={20} className="text-white" strokeWidth={2.5} />
-            </motion.button>
+            {fabRoute && (
+              <motion.button
+                whileTap={{ scale: 0.90 }}
+                onClick={() => router.push(fabRoute)}
+                className="w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+              >
+                <Plus size={20} className="text-white" strokeWidth={2.5} />
+              </motion.button>
+            )}
 
-            {activeTab === 'read' && books.length > 0 && (
+            {activeTab === 'books' && activeBookTab === 'read' && books.length > 0 && (
               <div className="flex items-center gap-0.5 rounded-[10px] p-0.5"
                    style={{ backgroundColor: 'var(--fill)' }}>
                 <button
@@ -355,8 +358,34 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── Read tab content ──────────────────────────────────────────── */}
-      {activeTab === 'read' && (
+      {/* ── Books tab: segmented control ─────────────────────────────── */}
+      {activeTab === 'books' && !isEmptyState && (
+        <div className="px-4 pb-3">
+          <div className="flex p-[3px] rounded-[10px]" style={{ backgroundColor: 'var(--fill)' }}>
+            {([
+              { key: 'read',     label: t.tabRead },
+              { key: 'to_read',  label: toReadBooks.length > 0 ? `${t.tabToRead} (${toReadBooks.length})` : t.tabToRead },
+              { key: 'wishlist', label: wishlistBooks.length > 0 ? `${t.tabWishlist} (${wishlistBooks.length})` : t.tabWishlist },
+            ] as { key: BookTab; label: string }[]).map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveBookTab(key)}
+                className="flex-1 py-[6px] rounded-[8px] text-[13px] font-medium transition-all"
+                style={activeBookTab === key
+                  ? { backgroundColor: 'var(--bg-elevated)', color: 'var(--label)', fontWeight: 600, boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }
+                  : { color: 'var(--label-secondary)' }
+                }
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Books tab → Read sub-tab ──────────────────────────────────── */}
+      {activeTab === 'books' && activeBookTab === 'read' && (
         books.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -391,10 +420,6 @@ export default function HomePage() {
           </motion.div>
         ) : (
           <div className="pb-4">
-            <ReadingPaceChart books={books} />
-            <RatingDistributionChart books={books} />
-            <FavouriteAuthors books={books} />
-            <GenreBreakdown books={books} />
             {years.map((year) => (
               <YearSection key={year} year={year} books={booksByYear[year]} viewMode={viewMode} />
             ))}
@@ -402,8 +427,8 @@ export default function HomePage() {
         )
       )}
 
-      {/* ── To Read tab content ───────────────────────────────────────── */}
-      {activeTab === 'to_read' && (
+      {/* ── Books tab → To Read sub-tab ───────────────────────────────── */}
+      {activeTab === 'books' && activeBookTab === 'to_read' && (
         toReadBooks.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -441,8 +466,8 @@ export default function HomePage() {
         )
       )}
 
-      {/* ── Wishlist tab content ──────────────────────────────────────── */}
-      {activeTab === 'wishlist' && (
+      {/* ── Books tab → Wishlist sub-tab ──────────────────────────────── */}
+      {activeTab === 'books' && activeBookTab === 'wishlist' && (
         wishlistBooks.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -478,6 +503,16 @@ export default function HomePage() {
         )
       )}
 
+      {/* ── Dashboard tab ────────────────────────────────────────────── */}
+      {activeTab === 'dashboard' && (
+        <div className="pb-4 pt-2">
+          <ReadingPaceChart books={books} />
+          <RatingDistributionChart books={books} />
+          <FavouriteAuthors books={books} />
+          <GenreBreakdown books={books} />
+        </div>
+      )}
+
       {/* ── Add to Home Screen prompt ────────────────────────────────── */}
       <AddToHomeScreen />
 
@@ -486,12 +521,12 @@ export default function HomePage() {
         <div className="glass flex items-center rounded-[28px] px-2 py-2"
              style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)' }}>
 
-          {/* Read tab */}
+          {/* Books tab */}
           <button
-            onClick={() => setActiveTab('read')}
+            onClick={() => setActiveTab('books')}
             className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px] transition-colors relative"
           >
-            {activeTab === 'read' && (
+            {activeTab === 'books' && (
               <motion.div
                 layoutId="tab-pill"
                 className="absolute inset-0 rounded-[22px]"
@@ -501,22 +536,22 @@ export default function HomePage() {
             )}
             <BookOpenCheck
               size={22}
-              strokeWidth={activeTab === 'read' ? 2 : 1.5}
+              strokeWidth={activeTab === 'books' ? 2 : 1.5}
               className="relative"
-              style={{ color: activeTab === 'read' ? 'var(--primary)' : 'var(--label-secondary)' }}
+              style={{ color: activeTab === 'books' ? 'var(--primary)' : 'var(--label-secondary)' }}
             />
             <span className="text-[10px] font-medium relative tracking-[-0.1px]"
-                  style={{ color: activeTab === 'read' ? 'var(--primary)' : 'var(--label-secondary)' }}>
-              {t.tabRead}
+                  style={{ color: activeTab === 'books' ? 'var(--primary)' : 'var(--label-secondary)' }}>
+              {t.tabBooks}
             </span>
           </button>
 
-          {/* To-Read tab */}
+          {/* Dashboard tab */}
           <button
-            onClick={() => setActiveTab('to_read')}
+            onClick={() => setActiveTab('dashboard')}
             className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px] transition-colors relative"
           >
-            {activeTab === 'to_read' && (
+            {activeTab === 'dashboard' && (
               <motion.div
                 layoutId="tab-pill"
                 className="absolute inset-0 rounded-[22px]"
@@ -524,40 +559,15 @@ export default function HomePage() {
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
               />
             )}
-            <Library
+            <BarChart2
               size={22}
-              strokeWidth={activeTab === 'to_read' ? 2 : 1.5}
+              strokeWidth={activeTab === 'dashboard' ? 2 : 1.5}
               className="relative"
-              style={{ color: activeTab === 'to_read' ? 'var(--primary)' : 'var(--label-secondary)' }}
+              style={{ color: activeTab === 'dashboard' ? 'var(--primary)' : 'var(--label-secondary)' }}
             />
             <span className="text-[10px] font-medium relative tracking-[-0.1px]"
-                  style={{ color: activeTab === 'to_read' ? 'var(--primary)' : 'var(--label-secondary)' }}>
-              {toReadBooks.length > 0 ? `${t.tabToRead} (${toReadBooks.length})` : t.tabToRead}
-            </span>
-          </button>
-
-          {/* Wishlist tab */}
-          <button
-            onClick={() => setActiveTab('wishlist')}
-            className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px] transition-colors relative"
-          >
-            {activeTab === 'wishlist' && (
-              <motion.div
-                layoutId="tab-pill"
-                className="absolute inset-0 rounded-[22px]"
-                style={{ backgroundColor: 'var(--primary-muted)' }}
-                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-              />
-            )}
-            <Heart
-              size={22}
-              strokeWidth={activeTab === 'wishlist' ? 2 : 1.5}
-              className="relative"
-              style={{ color: activeTab === 'wishlist' ? 'var(--primary)' : 'var(--label-secondary)' }}
-            />
-            <span className="text-[10px] font-medium relative tracking-[-0.1px]"
-                  style={{ color: activeTab === 'wishlist' ? 'var(--primary)' : 'var(--label-secondary)' }}>
-              {wishlistBooks.length > 0 ? `${t.tabWishlist} (${wishlistBooks.length})` : t.tabWishlist}
+                  style={{ color: activeTab === 'dashboard' ? 'var(--primary)' : 'var(--label-secondary)' }}>
+              {t.tabDashboard}
             </span>
           </button>
 
