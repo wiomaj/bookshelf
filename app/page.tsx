@@ -260,7 +260,11 @@ export default function HomePage() {
                 </motion.button>
               )}
 
-              {activeTab === 'books' && activeBookTab === 'read' && books.length > 0 && (
+              {activeTab === 'books' && (
+                (activeBookTab === 'read' && books.length > 0) ||
+                (activeBookTab === 'to_read' && toReadBooks.length > 0) ||
+                (activeBookTab === 'wishlist' && wishlistBooks.length > 0)
+              ) && (
                 <div className="flex items-center gap-0.5 rounded-[8px] p-0.5"
                      style={{ backgroundColor: 'var(--fill)' }}>
                   <button
@@ -327,7 +331,11 @@ export default function HomePage() {
               </motion.button>
             )}
 
-            {activeTab === 'books' && activeBookTab === 'read' && books.length > 0 && (
+            {activeTab === 'books' && (
+              (activeBookTab === 'read' && books.length > 0) ||
+              (activeBookTab === 'to_read' && toReadBooks.length > 0) ||
+              (activeBookTab === 'wishlist' && wishlistBooks.length > 0)
+            ) && (
               <div className="flex items-center gap-0.5 rounded-[10px] p-0.5"
                    style={{ backgroundColor: 'var(--fill)' }}>
                 <button
@@ -462,7 +470,7 @@ export default function HomePage() {
             </div>
           </motion.div>
         ) : (
-          <ToReadList books={toReadBooks} />
+          <ToReadList books={toReadBooks} viewMode={viewMode} />
         )
       )}
 
@@ -499,7 +507,7 @@ export default function HomePage() {
             </div>
           </motion.div>
         ) : (
-          <WishlistList books={wishlistBooks} />
+          <WishlistList books={wishlistBooks} viewMode={viewMode} />
         )
       )}
 
