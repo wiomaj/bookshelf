@@ -25,7 +25,10 @@ export default function ReadingPaceChart({ books }: Props) {
   })
 
   const maxCount = Math.max(...counts, 1)
-  const totalThisYear = counts.reduce((s, c) => s + c, 0)
+  // Use ALL books for the year (including seasonal/unknown months) for the total
+  const totalThisYear = books.filter((b) => b.year === selectedYear).length
+  // Books without a specific calendar month (seasonal or unknown)
+  const uncategorised = totalThisYear - counts.reduce((s, c) => s + c, 0)
 
   if (years.length === 0) return null
 
@@ -125,6 +128,13 @@ export default function ReadingPaceChart({ books }: Props) {
             )
           })}
         </div>
+      )}
+
+      {/* Note for seasonal/unknown-month books */}
+      {uncategorised > 0 && totalThisYear > 0 && (
+        <p className="text-[10px] mt-2 text-right" style={{ color: 'var(--label-tertiary)' }}>
+          +{uncategorised} without specific month
+        </p>
       )}
     </div>
   )
