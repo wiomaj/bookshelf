@@ -8,7 +8,6 @@ import { coverUrl } from '@/lib/coverUrl'
 import BookCard from '@/components/BookCard'
 import type { Book } from '@/types/book'
 import type { ViewMode } from '@/contexts/AppContext'
-import { useT } from '@/contexts/AppContext'
 
 const bookPatternUrl =
   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-4 -4 32 32' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20'/%3E%3C/svg%3E")`
@@ -16,40 +15,6 @@ const bookPatternUrl =
 interface WishlistListProps {
   books: Book[]
   viewMode?: ViewMode
-}
-
-// ─── Date formatting ──────────────────────────────────────────────────────────
-
-const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-type RelativeStrings = { justNow: string; month: string; months: string; year: string; years: string }
-
-function formatCreatedAt(createdAt: string, r: RelativeStrings): string {
-  const added = new Date(createdAt)
-  const now = new Date()
-
-  const month = SHORT_MONTHS[added.getMonth()]
-  const year = added.getFullYear()
-
-  const nowYear = now.getFullYear()
-  const nowMonth = now.getMonth() + 1
-  const addedMonth = added.getMonth() + 1
-
-  const monthsDiff = (nowYear * 12 + nowMonth) - (year * 12 + addedMonth)
-  const minutesDiff = (now.getTime() - added.getTime()) / 60000
-
-  let relative: string
-  if (minutesDiff < 30) {
-    relative = r.justNow
-  } else if (monthsDiff < 12) {
-    relative = `${monthsDiff} ${monthsDiff !== 1 ? r.months : r.month}`
-  } else {
-    const years = Math.floor(monthsDiff / 12)
-    relative = `${years} ${years !== 1 ? r.years : r.year}`
-  }
-
-  return `${month} ${year} (${relative})`
 }
 
 // ─── Year section (accordion) ─────────────────────────────────────────────────
@@ -64,7 +29,6 @@ function WishlistYearSection({ year, books, viewMode }: YearSectionProps) {
   const [isOpen, setIsOpen] = useState(true)
   const [expanded, setExpanded] = useState(true)
   const router = useRouter()
-  const t = useT()
 
   function toggle() {
     if (isOpen) setExpanded(false)
@@ -117,7 +81,6 @@ function WishlistYearSection({ year, books, viewMode }: YearSectionProps) {
             ) : (
               <div className="flex flex-col px-5 pb-2">
                 {books.map((book, i) => {
-                  const dateLabel = formatCreatedAt(book.created_at, { justNow: t.relativeJustNow, month: t.relativeMonth, months: t.relativeMonths, year: t.relativeYear, years: t.relativeYears })
                   return (
                     <div key={book.id}>
                       <motion.button
@@ -146,11 +109,6 @@ function WishlistYearSection({ year, books, viewMode }: YearSectionProps) {
 
                         {/* Text */}
                         <div className="flex-1 min-w-0 flex flex-col gap-1">
-                          {dateLabel && (
-                            <p className="text-[12px] font-medium leading-4" style={{ color: 'var(--label-tertiary)' }}>
-                              {dateLabel}
-                            </p>
-                          )}
                           <p className="font-semibold text-[16px] leading-5 line-clamp-2" style={{ color: 'var(--label)' }}>
                             {book.title}
                           </p>
