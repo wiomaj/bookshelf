@@ -155,7 +155,7 @@ export default function SettingsPage() {
   // ── Change Password sub-view ──────────────────────────────────────────────
   if (view === 'changePassword') {
     return (
-      <div className="min-h-screen pb-[16px]">
+      <div className="pb-[16px]">
         {/* Back nav */}
         <div className="flex items-center px-2 pt-3 h-[50px]">
           <button
@@ -219,7 +219,7 @@ export default function SettingsPage() {
 
   // ── Main Settings view ────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen pb-[16px]">
+    <div className="pb-[16px]">
 
       {/* Large title */}
       <div className="px-5 pt-4 pb-6">
