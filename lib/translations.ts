@@ -150,6 +150,12 @@ export type Translations = {
   statsFavouriteAuthorsSub: string
   statsGenreBreakdown: string
   allTime: string
+  // Relative time
+  relativeJustNow: string
+  relativeMonth: string
+  relativeMonths: string
+  relativeYear: string
+  relativeYears: string
   // Add to Home Screen
   athsTitle: string
   athsAndroid: string
@@ -288,6 +294,11 @@ const en: Translations = {
   statsFavouriteAuthorsSub: 'My favourite authors',
   statsGenreBreakdown: 'Genre Breakdown',
   allTime: 'All time',
+  relativeJustNow: 'just now',
+  relativeMonth: 'month',
+  relativeMonths: 'months',
+  relativeYear: 'year',
+  relativeYears: 'years',
   athsTitle: 'Add to Home Screen',
   athsAndroid: 'Install for the full app experience',
   athsIosTap: 'Tap',
@@ -424,6 +435,11 @@ const de: Translations = {
   statsFavouriteAuthorsSub: 'Meine Lieblingsautoren',
   statsGenreBreakdown: 'Genre-Übersicht',
   allTime: 'Alle Jahre',
+  relativeJustNow: 'gerade eben',
+  relativeMonth: 'Monat',
+  relativeMonths: 'Monate',
+  relativeYear: 'Jahr',
+  relativeYears: 'Jahre',
   athsTitle: 'Zum Startbildschirm',
   athsAndroid: 'Installieren für das volle App-Erlebnis',
   athsIosTap: 'Tippe auf',
@@ -560,6 +576,11 @@ const fr: Translations = {
   statsFavouriteAuthorsSub: 'Mes auteurs préférés',
   statsGenreBreakdown: 'Répartition par genre',
   allTime: 'Toute la période',
+  relativeJustNow: 'à l\'instant',
+  relativeMonth: 'mois',
+  relativeMonths: 'mois',
+  relativeYear: 'an',
+  relativeYears: 'ans',
   athsTitle: 'Ajouter à l\'écran d\'accueil',
   athsAndroid: 'Installez pour une expérience complète',
   athsIosTap: 'Appuyez sur',
@@ -696,6 +717,11 @@ const es: Translations = {
   statsFavouriteAuthorsSub: 'Mis autores favoritos',
   statsGenreBreakdown: 'Por género',
   allTime: 'Todo el tiempo',
+  relativeJustNow: 'ahora mismo',
+  relativeMonth: 'mes',
+  relativeMonths: 'meses',
+  relativeYear: 'año',
+  relativeYears: 'años',
   athsTitle: 'Añadir a la pantalla de inicio',
   athsAndroid: 'Instala para una experiencia completa',
   athsIosTap: 'Pulsa',
@@ -832,6 +858,11 @@ const pl: Translations = {
   statsFavouriteAuthorsSub: 'Moi ulubieni autorzy',
   statsGenreBreakdown: 'Podział gatunków',
   allTime: 'Cały czas',
+  relativeJustNow: 'przed chwilą',
+  relativeMonth: 'miesiąc',
+  relativeMonths: 'miesiące',
+  relativeYear: 'rok',
+  relativeYears: 'lata',
   athsTitle: 'Dodaj do ekranu głównego',
   athsAndroid: 'Zainstaluj dla pełnego doświadczenia',
   athsIosTap: 'Dotknij',
