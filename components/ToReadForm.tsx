@@ -112,7 +112,7 @@ export default function ToReadForm({
       const url = await uploadCoverPhoto(supabase, user.id, file)
       setCoverUrl(url)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Photo upload failed')
+      setError(err instanceof Error ? err.message : t.errorPhotoUploadFailed)
     } finally {
       setPhotoLoading(false)
       e.target.value = ''
@@ -122,7 +122,7 @@ export default function ToReadForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (!title.trim()) { setError('Title is required'); return }
+    if (!title.trim()) { setError(t.validationTitleRequired); return }
     if (process.env.NODE_ENV === 'development') {
       console.debug('[ToReadForm] submitting book:', {
         title: title.trim(),
@@ -133,7 +133,7 @@ export default function ToReadForm({
     try {
       await onSubmit({ title: title.trim(), author: author.trim(), month, year, cover_url: coverUrl.trim() || undefined })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setError(err instanceof Error ? err.message : t.errorSomethingWentWrong)
     }
   }
 
