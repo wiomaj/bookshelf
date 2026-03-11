@@ -40,7 +40,7 @@ export default function CozyBody({ children }: { children: React.ReactNode }) {
       <div
         id="scroll-container"
         className="antialiased h-screen overflow-y-auto relative max-w-[600px] mx-auto w-full"
-        style={{ zIndex: 2, paddingBottom: cozyMode ? 120 : 0 }}
+        style={{ zIndex: 2, paddingBottom: cozyMode ? 280 : 0 }}
       >
         {children}
       </div>

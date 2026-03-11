@@ -18,7 +18,7 @@ const EMBERS = [
 
 export default function CozyOverlay() {
   return (
-    // z-[1] keeps fire behind page content (CozyBody wraps content at z-index: 2)
+    // z-[1] keeps everything behind page content (CozyBody wraps content at z-index: 2)
     <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
 
       {/* Full-screen warm ambient glow */}
@@ -39,16 +39,16 @@ export default function CozyOverlay() {
         }}
       />
 
-      {/* Fire at bottom-center */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
+      {/* Fire — raised to sit at the cat's feet level */}
+      <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: 168 }}>
 
         {/* Glow pool behind flames */}
         <div
-          className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[140px] h-[40px] rounded-full"
+          className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[160px] h-[48px] rounded-full"
           style={{
             background:
-              'radial-gradient(ellipse, rgba(255,160,0,0.65), rgba(255,80,0,0.35) 50%, transparent 75%)',
-            filter: 'blur(10px)',
+              'radial-gradient(ellipse, rgba(255,160,0,0.70), rgba(255,80,0,0.38) 50%, transparent 75%)',
+            filter: 'blur(12px)',
             animation: 'cozy-glow 2s ease-in-out infinite',
           }}
         />
@@ -84,6 +84,15 @@ export default function CozyOverlay() {
           />
         ))}
       </div>
+
+      {/* Cozy cat — sits above the fire, visible below content */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/cozy-cat.png"
+        alt=""
+        className="absolute left-1/2 -translate-x-1/2"
+        style={{ bottom: 72, width: 180, height: 180, objectFit: 'contain' }}
+      />
     </div>
   )
 }
