@@ -2,6 +2,7 @@
 
 import { useApp } from '@/contexts/AppContext'
 import CozyOverlay from './CozyOverlay'
+import CozyCatScene from './CozyCatScene'
 import NewVersionBanner from './NewVersionBanner'
 
 export default function CozyBody({ children }: { children: React.ReactNode }) {
@@ -40,9 +41,10 @@ export default function CozyBody({ children }: { children: React.ReactNode }) {
       <div
         id="scroll-container"
         className="antialiased h-screen overflow-y-auto relative max-w-[600px] mx-auto w-full"
-        style={{ zIndex: 2, paddingBottom: cozyMode ? 280 : 0 }}
+        style={{ zIndex: 2 }}
       >
         {children}
+        {cozyMode && <CozyCatScene />}
       </div>
     </div>
   )
