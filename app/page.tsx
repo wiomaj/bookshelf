@@ -272,7 +272,7 @@ export default function HomePage() {
   const pullProgress = Math.min(pullY / PULL_MAX, 1)
 
   return (
-    <div className="relative min-h-screen pb-[100px]" style={{ backgroundColor: 'var(--bg)' }}>
+    <div className="relative min-h-screen pb-[100px]">
 
       {/* ── Pull-to-refresh indicator ─────────────────────────────────── */}
       <div
