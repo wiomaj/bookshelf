@@ -19,7 +19,7 @@ const EMBERS = [
 // Rendered inside the scroll container — only visible when the user scrolls to the bottom.
 export default function CozyCatScene() {
   return (
-    <div className="relative w-full" style={{ height: 210 }}>
+    <div className="relative w-full" style={{ height: 210, paddingBottom: 30 }}>
 
       {/* Cat — behind the fire */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
