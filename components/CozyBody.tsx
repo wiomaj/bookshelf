@@ -8,14 +8,16 @@ import NewVersionBanner from './NewVersionBanner'
 export default function CozyBody({ children }: { children: React.ReactNode }) {
   const { cozyMode, isDark } = useApp()
 
-  // Cozy mode takes precedence; dark mode applies when cozy is off
-  const bg        = cozyMode ? '#FDF0E4' : isDark ? '#000000' : '#F2F2F7'
-  const bgElevated = cozyMode ? '#FFF8F0' : isDark ? '#1C1C1E' : '#FFFFFF'
-  const label     = cozyMode ? '#2D1A0A' : isDark ? '#FFFFFF'  : '#000000'
-  const labelSec  = cozyMode ? 'rgba(45,26,10,0.6)'  : isDark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)'
-  const separator = cozyMode ? 'rgba(45,26,10,0.12)' : isDark ? 'rgba(84,84,88,0.65)'   : 'rgba(60,60,67,0.13)'
-  const glassBg   = cozyMode ? 'rgba(253,240,228,0.80)' : isDark ? 'rgba(30,30,30,0.80)' : 'rgba(255,255,255,0.72)'
-  const glassBorder = cozyMode ? 'rgba(255,220,180,0.55)' : isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.55)'
+  const cozyDark = cozyMode && isDark
+
+  // cozyDark = both on → dark warm room; cozy only → light warm; dark only → standard dark; neither → standard light
+  const bg        = cozyDark ? '#1C0E06' : cozyMode ? '#FDF0E4' : isDark ? '#000000' : '#F2F2F7'
+  const bgElevated = cozyDark ? '#2C1A0E' : cozyMode ? '#FFF8F0' : isDark ? '#1C1C1E' : '#FFFFFF'
+  const label     = cozyDark ? '#F5E6D3' : cozyMode ? '#2D1A0A' : isDark ? '#FFFFFF'  : '#000000'
+  const labelSec  = cozyDark ? 'rgba(245,230,211,0.6)' : cozyMode ? 'rgba(45,26,10,0.6)'  : isDark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)'
+  const separator = cozyDark ? 'rgba(255,180,100,0.15)' : cozyMode ? 'rgba(45,26,10,0.12)' : isDark ? 'rgba(84,84,88,0.65)'   : 'rgba(60,60,67,0.13)'
+  const glassBg   = cozyDark ? 'rgba(28,14,6,0.85)'   : cozyMode ? 'rgba(253,240,228,0.80)' : isDark ? 'rgba(30,30,30,0.80)' : 'rgba(255,255,255,0.72)'
+  const glassBorder = cozyDark ? 'rgba(255,160,80,0.20)' : cozyMode ? 'rgba(255,220,180,0.55)' : isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.55)'
 
   return (
     <div
