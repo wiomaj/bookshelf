@@ -89,7 +89,7 @@ function WishlistYearSection({ year, books, viewMode }: YearSectionProps) {
                         className="w-full flex items-center gap-3 py-3 pr-4 text-left"
                       >
                         {/* Cover */}
-                        <div className="w-[56px] h-[76px] rounded-[10px] overflow-hidden flex-shrink-0 shadow-sm">
+                        <div className="w-[56px] h-[84px] rounded-[10px] overflow-hidden flex-shrink-0 shadow-sm">
                           {book.cover_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img

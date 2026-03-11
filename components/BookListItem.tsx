@@ -24,7 +24,7 @@ export default function BookListItem({ book }: { book: Book }) {
     >
       {/* Cover thumbnail */}
       <div
-        className="w-[56px] h-[76px] rounded-[10px] overflow-hidden shrink-0 shadow-sm"
+        className="w-[56px] h-[84px] rounded-[10px] overflow-hidden shrink-0 shadow-sm"
       >
         {book.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
