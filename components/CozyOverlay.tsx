@@ -39,8 +39,17 @@ export default function CozyOverlay() {
         }}
       />
 
-      {/* Fire — raised to sit at the cat's feet level */}
-      <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: 168 }}>
+      {/* Cozy cat — behind the fire */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/cozy-cat.png"
+        alt=""
+        className="absolute left-1/2 -translate-x-1/2"
+        style={{ bottom: 72, width: 180, height: 180, objectFit: 'contain' }}
+      />
+
+      {/* Fire — low, in front of the cat */}
+      <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: 72 }}>
 
         {/* Glow pool behind flames */}
         <div
@@ -84,15 +93,6 @@ export default function CozyOverlay() {
           />
         ))}
       </div>
-
-      {/* Cozy cat — sits above the fire, visible below content */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/cozy-cat.png"
-        alt=""
-        className="absolute left-1/2 -translate-x-1/2"
-        style={{ bottom: 72, width: 180, height: 180, objectFit: 'contain' }}
-      />
     </div>
   )
 }
