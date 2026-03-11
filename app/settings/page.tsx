@@ -155,7 +155,7 @@ export default function SettingsPage() {
   // ── Change Password sub-view ──────────────────────────────────────────────
   if (view === 'changePassword') {
     return (
-      <div className="min-h-screen pb-[100px]" style={{ backgroundColor: 'var(--bg)' }}>
+      <div className="min-h-screen pb-[16px]" style={{ backgroundColor: 'var(--bg)' }}>
         {/* Back nav */}
         <div className="flex items-center px-2 pt-3 h-[50px]">
           <button
