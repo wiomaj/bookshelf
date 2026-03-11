@@ -19,7 +19,7 @@ const EMBERS = [
 // Rendered inside the scroll container — only visible when the user scrolls to the bottom.
 export default function CozyCatScene() {
   return (
-    <div className="relative w-full" style={{ height: 210, paddingBottom: 30 }}>
+    <div className="relative w-full" style={{ height: 210 }}>
 
       {/* Cat — behind the fire */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -28,7 +28,7 @@ export default function CozyCatScene() {
         alt=""
         style={{
           position: 'absolute',
-          bottom: 16,
+          bottom: 46,
           left: '50%',
           transform: 'translateX(-50%)',
           width: 180,
@@ -38,7 +38,7 @@ export default function CozyCatScene() {
       />
 
       {/* Fire — in front of the cat */}
-      <div style={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)' }}>
+      <div style={{ position: 'absolute', bottom: 46, left: '50%', transform: 'translateX(-50%)' }}>
 
         {/* Glow pool */}
         <div
