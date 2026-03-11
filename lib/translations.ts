@@ -156,6 +156,20 @@ export type Translations = {
   relativeMonths: string
   relativeYear: string
   relativeYears: string
+  // Book count (year section headers)
+  singularBook: string
+  pluralBooks: string
+  unknownYear: string
+  // Seasons (to-read acquisition date)
+  seasonSpring: string
+  seasonSummer: string
+  seasonAutumn: string
+  seasonWinter: string
+  // Validation & errors
+  validationTitleRequired: string
+  validationRatingRequired: string
+  errorSomethingWentWrong: string
+  errorPhotoUploadFailed: string
   // Add to Home Screen
   athsTitle: string
   athsAndroid: string
@@ -299,6 +313,17 @@ const en: Translations = {
   relativeMonths: 'months',
   relativeYear: 'year',
   relativeYears: 'years',
+  singularBook: 'book',
+  pluralBooks: 'books',
+  unknownYear: 'Unknown Year',
+  seasonSpring: 'Spring',
+  seasonSummer: 'Summer',
+  seasonAutumn: 'Autumn',
+  seasonWinter: 'Winter',
+  validationTitleRequired: 'Title is required',
+  validationRatingRequired: 'Please add a star rating',
+  errorSomethingWentWrong: 'Something went wrong',
+  errorPhotoUploadFailed: 'Photo upload failed',
   athsTitle: 'Add to Home Screen',
   athsAndroid: 'Install for the full app experience',
   athsIosTap: 'Tap',
@@ -440,6 +465,17 @@ const de: Translations = {
   relativeMonths: 'Monate',
   relativeYear: 'Jahr',
   relativeYears: 'Jahre',
+  singularBook: 'Buch',
+  pluralBooks: 'Bücher',
+  unknownYear: 'Unbekanntes Jahr',
+  seasonSpring: 'Frühling',
+  seasonSummer: 'Sommer',
+  seasonAutumn: 'Herbst',
+  seasonWinter: 'Winter',
+  validationTitleRequired: 'Titel ist erforderlich',
+  validationRatingRequired: 'Bitte füge eine Sternebewertung hinzu',
+  errorSomethingWentWrong: 'Etwas ist schiefgelaufen',
+  errorPhotoUploadFailed: 'Foto-Upload fehlgeschlagen',
   athsTitle: 'Zum Startbildschirm',
   athsAndroid: 'Installieren für das volle App-Erlebnis',
   athsIosTap: 'Tippe auf',
@@ -581,6 +617,17 @@ const fr: Translations = {
   relativeMonths: 'mois',
   relativeYear: 'an',
   relativeYears: 'ans',
+  singularBook: 'livre',
+  pluralBooks: 'livres',
+  unknownYear: 'Année inconnue',
+  seasonSpring: 'Printemps',
+  seasonSummer: 'Été',
+  seasonAutumn: 'Automne',
+  seasonWinter: 'Hiver',
+  validationTitleRequired: 'Le titre est requis',
+  validationRatingRequired: 'Veuillez ajouter une note',
+  errorSomethingWentWrong: 'Quelque chose s\'est mal passé',
+  errorPhotoUploadFailed: 'Échec du chargement de la photo',
   athsTitle: 'Ajouter à l\'écran d\'accueil',
   athsAndroid: 'Installez pour une expérience complète',
   athsIosTap: 'Appuyez sur',
@@ -722,6 +769,17 @@ const es: Translations = {
   relativeMonths: 'meses',
   relativeYear: 'año',
   relativeYears: 'años',
+  singularBook: 'libro',
+  pluralBooks: 'libros',
+  unknownYear: 'Año desconocido',
+  seasonSpring: 'Primavera',
+  seasonSummer: 'Verano',
+  seasonAutumn: 'Otoño',
+  seasonWinter: 'Invierno',
+  validationTitleRequired: 'El título es obligatorio',
+  validationRatingRequired: 'Por favor añade una valoración',
+  errorSomethingWentWrong: 'Algo salió mal',
+  errorPhotoUploadFailed: 'Error al subir la foto',
   athsTitle: 'Añadir a la pantalla de inicio',
   athsAndroid: 'Instala para una experiencia completa',
   athsIosTap: 'Pulsa',
@@ -863,6 +921,17 @@ const pl: Translations = {
   relativeMonths: 'miesiące',
   relativeYear: 'rok',
   relativeYears: 'lata',
+  singularBook: 'książka',
+  pluralBooks: 'książki',
+  unknownYear: 'Nieznany rok',
+  seasonSpring: 'Wiosna',
+  seasonSummer: 'Lato',
+  seasonAutumn: 'Jesień',
+  seasonWinter: 'Zima',
+  validationTitleRequired: 'Tytuł jest wymagany',
+  validationRatingRequired: 'Proszę dodaj ocenę gwiazdkową',
+  errorSomethingWentWrong: 'Coś poszło nie tak',
+  errorPhotoUploadFailed: 'Nie udało się przesłać zdjęcia',
   athsTitle: 'Dodaj do ekranu głównego',
   athsAndroid: 'Zainstaluj dla pełnego doświadczenia',
   athsIosTap: 'Dotknij',

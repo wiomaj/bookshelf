@@ -51,7 +51,7 @@ export default function GenreBreakdown({ books }: Props) {
       <p className="text-[28px] font-bold tracking-[-0.5px] mb-3" style={{ color: 'var(--label)' }}>
         {total}
         <span className="text-[13px] font-normal ml-1" style={{ color: 'var(--label-secondary)' }}>
-          {total === 1 ? 'book' : 'books'}
+          {total === 1 ? t.singularBook : t.pluralBooks}
         </span>
       </p>
 

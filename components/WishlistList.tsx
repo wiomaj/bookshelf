@@ -8,6 +8,7 @@ import { coverUrl } from '@/lib/coverUrl'
 import BookCard from '@/components/BookCard'
 import type { Book } from '@/types/book'
 import type { ViewMode } from '@/contexts/AppContext'
+import { useT } from '@/contexts/AppContext'
 
 const bookPatternUrl =
   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-4 -4 32 32' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20'/%3E%3C/svg%3E")`
@@ -29,6 +30,7 @@ function WishlistYearSection({ year, books, viewMode }: YearSectionProps) {
   const [isOpen, setIsOpen] = useState(true)
   const [expanded, setExpanded] = useState(true)
   const router = useRouter()
+  const t = useT()
 
   function toggle() {
     if (isOpen) setExpanded(false)
@@ -48,7 +50,7 @@ function WishlistYearSection({ year, books, viewMode }: YearSectionProps) {
         <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>
           {yearLabel}
           <span className="font-medium ml-2" style={{ color: 'var(--label-tertiary)' }}>
-            · {count} {count === 1 ? 'book' : 'books'}
+            · {count} {count === 1 ? t.singularBook : t.pluralBooks}
           </span>
         </span>
         <motion.div
@@ -89,7 +91,7 @@ function WishlistYearSection({ year, books, viewMode }: YearSectionProps) {
                         className="w-full flex items-center gap-3 py-3 pr-4 text-left"
                       >
                         {/* Cover */}
-                        <div className="w-[56px] h-[76px] rounded-[10px] overflow-hidden flex-shrink-0 shadow-sm">
+                        <div className="w-[56px] h-[84px] rounded-[10px] overflow-hidden flex-shrink-0 shadow-sm">
                           {book.cover_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img

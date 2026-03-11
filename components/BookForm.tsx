@@ -181,7 +181,7 @@ export default function BookForm({
       const url = await uploadCoverPhoto(supabase, user.id, file)
       setCoverUrl(url)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Photo upload failed')
+      setError(err instanceof Error ? err.message : t.errorPhotoUploadFailed)
     } finally {
       setPhotoLoading(false)
       e.target.value = ''   // allow re-selecting the same file
@@ -191,8 +191,8 @@ export default function BookForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (!title.trim()) { setError('Title is required'); return }
-    if (rating === 0)  { setError('Please add a star rating'); return }
+    if (!title.trim()) { setError(t.validationTitleRequired); return }
+    if (rating === 0)  { setError(t.validationRatingRequired); return }
 
     if (process.env.NODE_ENV === 'development') {
       console.debug('[BookForm] submitting book:', {
@@ -213,7 +213,7 @@ export default function BookForm({
         cover_url: coverUrl.trim() || undefined,
       })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setError(err instanceof Error ? err.message : t.errorSomethingWentWrong)
     }
   }
 

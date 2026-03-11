@@ -23,8 +23,9 @@ interface ToReadListProps {
 const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-const SEASON_LABELS: Record<number, string> = {
-  13: 'Spring', 14: 'Summer', 15: 'Autumn', 16: 'Winter',
+type SeasonLabels = Record<number, string>
+function getSeasonLabels(t: ReturnType<typeof useT>): SeasonLabels {
+  return { 13: t.seasonSpring, 14: t.seasonSummer, 15: t.seasonAutumn, 16: t.seasonWinter }
 }
 
 const SEASON_MIDPOINT: Record<number, number> = {
@@ -33,7 +34,7 @@ const SEASON_MIDPOINT: Record<number, number> = {
 
 type RelativeStrings = { justNow: string; month: string; months: string; year: string; years: string }
 
-function formatAcquiredDate(year: number, month: number | null, r: RelativeStrings, createdAt: string): string | null {
+function formatAcquiredDate(year: number, month: number | null, r: RelativeStrings, createdAt: string, seasonLabels: SeasonLabels): string | null {
   if (!year || year === 0) return null
 
   const now = new Date()
@@ -47,8 +48,8 @@ function formatAcquiredDate(year: number, month: number | null, r: RelativeStrin
     if (month >= 1 && month <= 12) {
       prefix = SHORT_MONTHS[month - 1] + ' '
       midpoint = month
-    } else if (SEASON_LABELS[month]) {
-      prefix = SEASON_LABELS[month] + ' '
+    } else if (seasonLabels[month]) {
+      prefix = seasonLabels[month] + ' '
       midpoint = SEASON_MIDPOINT[month]
     }
   }
@@ -93,7 +94,8 @@ function ToReadYearSection({ year, books, viewMode }: YearSectionProps) {
     return bM - aM
   })
 
-  const yearLabel = year === 0 ? 'Unknown Year' : String(year)
+  const seasonLabels = getSeasonLabels(t)
+  const yearLabel = year === 0 ? t.unknownYear : String(year)
   const count = books.length
 
   return (
@@ -106,7 +108,7 @@ function ToReadYearSection({ year, books, viewMode }: YearSectionProps) {
         <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>
           {yearLabel}
           <span className="font-medium ml-2" style={{ color: 'var(--label-tertiary)' }}>
-            · {count} {count === 1 ? 'book' : 'books'}
+            · {count} {count === 1 ? t.singularBook : t.pluralBooks}
           </span>
         </span>
         <motion.div
@@ -139,7 +141,7 @@ function ToReadYearSection({ year, books, viewMode }: YearSectionProps) {
             ) : (
               <div className="flex flex-col px-5 pb-2">
                 {sortedBooks.map((book, i) => {
-                  const dateLabel = formatAcquiredDate(book.year, book.month ?? null, { justNow: t.relativeJustNow, month: t.relativeMonth, months: t.relativeMonths, year: t.relativeYear, years: t.relativeYears }, book.created_at)
+                  const dateLabel = formatAcquiredDate(book.year, book.month ?? null, { justNow: t.relativeJustNow, month: t.relativeMonth, months: t.relativeMonths, year: t.relativeYear, years: t.relativeYears }, book.created_at, seasonLabels)
                   return (
                     <div key={book.id}>
                       <motion.button
@@ -148,7 +150,7 @@ function ToReadYearSection({ year, books, viewMode }: YearSectionProps) {
                         className="w-full flex items-center gap-3 py-3 pr-4 text-left"
                       >
                         {/* Cover */}
-                        <div className="w-[56px] h-[76px] rounded-[10px] overflow-hidden flex-shrink-0 shadow-sm">
+                        <div className="w-[56px] h-[84px] rounded-[10px] overflow-hidden flex-shrink-0 shadow-sm">
                           {book.cover_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img

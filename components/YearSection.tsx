@@ -7,6 +7,7 @@ import BookCard from './BookCard'
 import BookListItem from './BookListItem'
 import type { Book } from '@/types/book'
 import type { ViewMode } from '@/contexts/AppContext'
+import { useT } from '@/contexts/AppContext'
 
 interface YearSectionProps {
   year: number
@@ -34,6 +35,7 @@ export default function YearSection({
   })
 
   const [expanded, setExpanded] = useState(isOpen)
+  const t = useT()
 
   function toggle() {
     const next = !isOpen
@@ -59,7 +61,7 @@ export default function YearSection({
               style={{ color: 'var(--label-secondary)' }}>
           {year}
           <span className="font-medium ml-2" style={{ color: 'var(--label-tertiary)' }}>
-            · {books.length} {books.length === 1 ? 'book' : 'books'}
+            · {books.length} {books.length === 1 ? t.singularBook : t.pluralBooks}
           </span>
         </span>
 
