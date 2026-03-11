@@ -24,8 +24,7 @@ export default function BookListItem({ book }: { book: Book }) {
     >
       {/* Cover thumbnail */}
       <div
-        className="w-[80px] h-[100px] rounded-[12px] overflow-hidden shrink-0
-                   shadow-[0_16px_32px_-4px_rgba(12,12,13,0.10),0_4px_4px_-4px_rgba(12,12,13,0.05)]"
+        className="w-[56px] h-[76px] rounded-[10px] overflow-hidden shrink-0 shadow-sm"
       >
         {book.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -40,12 +39,12 @@ export default function BookListItem({ book }: { book: Book }) {
               className="absolute inset-0 opacity-[0.08]"
               style={{
                 backgroundImage: bookPatternUrl,
-                backgroundSize: '22px 22px',
+                backgroundSize: '18px 18px',
                 backgroundRepeat: 'repeat',
               }}
             />
             {/* Single centered full-opacity book icon */}
-            <BookIcon size={24} color="white" className="relative z-10" />
+            <BookIcon size={16} color="white" className="relative z-10" />
           </div>
         )}
       </div>
