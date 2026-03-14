@@ -3,13 +3,18 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { X, BookOpen, Book as BookIcon, Pencil, Rocket, LibraryBig, type LucideIcon } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
+import { LONG_MONTHS } from '@/lib/month'
 import { useApp, useT } from '@/contexts/AppContext'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import StarRating from '@/components/StarRating'
+import StatusPicker, { type BookStatus } from '@/components/StatusPicker'
+import BookForm from '@/components/BookForm'
 import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
 import { heroCoverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
@@ -61,9 +66,16 @@ export default function ToReadDetailPage() {
   const [book, setBook] = useState<Book | null>(null)
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
+  const [editStatus, setEditStatus] = useState<BookStatus>('to_read')
   const [updateLoading, setUpdateLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [showMoveModal, setShowMoveModal] = useState(false)
+  const [moveLoading, setMoveLoading] = useState(false)
+  const [moveMonth, setMoveMonth] = useState<number>(new Date().getMonth() + 1)
+  const [moveYear, setMoveYear] = useState<number>(new Date().getFullYear())
+  const [moveRating, setMoveRating] = useState(0)
+  const [moveNotes, setMoveNotes] = useState('')
 
   const [description, setDescription] = useState<string | undefined>(undefined)
   const [apiGenre, setApiGenre] = useState<string | undefined>(undefined)
@@ -96,15 +108,44 @@ export default function ToReadDetailPage() {
       .finally(() => setLoading(false))
   }, [user, id])
 
-  async function handleUpdate(data: ToReadFormData) {
+  async function handleUpdate(data: ToReadFormData | Omit<Book, 'id' | 'user_id' | 'created_at'>) {
     if (!book || !user) return
     setUpdateLoading(true)
     try {
-      await updateBook(supabase, user.id, book.id, { ...data, status: 'to_read' })
+      await updateBook(supabase, user.id, book.id, { ...data, status: editStatus })
+      if (editStatus !== 'to_read') {
+        sessionStorage.setItem('bookshelf_returnTab', editStatus)
+        sessionStorage.setItem('bookshelf_flash', 'changesSaved')
+        router.replace('/')
+        return
+      }
       setBook(prev => prev ? { ...prev, ...data } : prev)
       setIsEditing(false)
     } finally {
       setUpdateLoading(false)
+    }
+  }
+
+  async function handleConfirmMarkAsRead() {
+    if (!user || !book || moveRating === 0) return
+    setMoveLoading(true)
+    setShowMoveModal(false)
+    try {
+      const prevMonth = book.month ?? moveMonth
+      const prevYear = book.year ?? moveYear
+      await updateBook(supabase, user.id, book.id, {
+        status: 'read',
+        month: moveMonth,
+        year: moveYear,
+        rating: moveRating,
+        notes: moveNotes.trim() || undefined,
+      })
+      sessionStorage.setItem('bookshelf_returnTab', 'read')
+      sessionStorage.setItem('bookshelf_flash', 'markedAsRead')
+      sessionStorage.setItem('bookshelf_flash_undo', JSON.stringify({ bookId: book.id, month: prevMonth, year: prevYear }))
+      router.replace('/')
+    } finally {
+      setMoveLoading(false)
     }
   }
 
@@ -162,18 +203,30 @@ export default function ToReadDetailPage() {
         >
           <X size={24} />
         </button>
-        <div className="px-4 pt-14 pb-4">
+        <div className="px-4 pt-14 pb-4 flex flex-col gap-4">
           <h1 className="text-[28px] font-bold tracking-[-0.4px]" style={{ color: 'var(--label)' }}>
             {t.editBook}
           </h1>
+          <StatusPicker value={editStatus} onChange={setEditStatus} />
         </div>
-        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
-          <ToReadForm
-            initialData={book}
-            onSubmit={handleUpdate}
-            submitLabel={t.saveChanges}
-            loading={updateLoading}
-          />
+        <motion.div key={editStatus} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
+          {editStatus === 'read' ? (
+            <BookForm
+              initialData={book}
+              onSubmit={handleUpdate}
+              submitLabel={t.saveChanges}
+              loading={updateLoading}
+              status="read"
+            />
+          ) : (
+            <ToReadForm
+              initialData={book}
+              onSubmit={handleUpdate}
+              submitLabel={t.saveChanges}
+              loading={updateLoading}
+              hideDateField={editStatus === 'wishlist'}
+            />
+          )}
         </motion.div>
       </div>
     )
@@ -199,8 +252,8 @@ export default function ToReadDetailPage() {
           </div>
         ) : (
           <div
-            className="absolute inset-0 z-0"
-            style={{ background: 'linear-gradient(to bottom, #0088ff, #065ba6)' }}
+            className="absolute top-0 left-0 right-0 h-[360px] z-0"
+            style={{ background: 'linear-gradient(to bottom, var(--primary), color-mix(in srgb, var(--primary) 66%, black))' }}
           />
         )}
 
@@ -208,7 +261,7 @@ export default function ToReadDetailPage() {
         <div className="relative z-30 flex justify-end gap-2 pt-4 pr-4">
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => setIsEditing(true)}
+            onClick={() => { setEditStatus('to_read'); setIsEditing(true) }}
             className="glass w-11 h-11 rounded-full flex items-center justify-center"
             aria-label="Edit"
             style={{ color: 'var(--label)' }}
@@ -301,11 +354,12 @@ export default function ToReadDetailPage() {
           {/* Mark as read CTA */}
           <motion.button
             whileTap={{ scale: 0.97 }}
-            onClick={() => router.push(`/book/${book.id}`)}
+            onClick={() => setShowMoveModal(true)}
+            disabled={moveLoading}
             className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center"
             style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
           >
-            {t.markAsRead}
+            {moveLoading ? t.loading : t.markAsRead}
           </motion.button>
 
           {/* My notes */}
@@ -357,6 +411,119 @@ export default function ToReadDetailPage() {
           </motion.button>
         </motion.div>
       </div>
+
+      {/* ── Mark as read modal ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showMoveModal && (
+          <>
+            <motion.div
+              key="move-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMoveModal(false)}
+              className="fixed inset-0 z-40"
+              style={{ backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+            />
+            <motion.div
+              key="move-sheet"
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+              className="fixed bottom-0 left-0 right-0 z-50 max-w-[600px] mx-auto rounded-t-[28px] p-6 pb-10"
+              style={{ backgroundColor: 'var(--bg-elevated)' }}
+            >
+              <div className="w-10 h-1 rounded-full mx-auto mb-5"
+                   style={{ backgroundColor: 'var(--separator-opaque)' }} />
+
+              <h3 className="text-[22px] font-bold tracking-[-0.3px] mb-5" style={{ color: 'var(--label)' }}>
+                {t.whenDidYouRead}
+              </h3>
+
+              {/* Month + Year pickers */}
+              <div className="rounded-[14px] overflow-hidden mb-5" style={{ backgroundColor: 'var(--fill)' }}>
+                <div className="grid grid-cols-3">
+                  <div className="col-span-2" style={{ borderRight: '1px solid var(--separator)' }}>
+                    <select
+                      value={moveMonth}
+                      onChange={e => setMoveMonth(Number(e.target.value))}
+                      className="w-full px-4 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
+                      style={{ color: 'var(--label)' }}
+                    >
+                      {LONG_MONTHS.map((m, i) => (
+                        <option key={i + 1} value={i + 1}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <select
+                      value={moveYear}
+                      onChange={e => setMoveYear(Number(e.target.value))}
+                      className="w-full px-4 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
+                      style={{ color: 'var(--label)' }}
+                    >
+                      {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rating */}
+              <div className="mb-5">
+                <label className="block text-[13px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--label-secondary)' }}>
+                  {t.ratingLabel}<span style={{ color: 'var(--primary)' }}> *</span>
+                </label>
+                <StarRating rating={moveRating} onRate={setMoveRating} size={36} />
+                {moveRating > 0 && (
+                  <p className="text-[14px] mt-2" style={{ color: 'var(--label-secondary)' }}>
+                    {(['', ...t.ratingLabels] as string[])[moveRating]}
+                  </p>
+                )}
+              </div>
+
+              {/* Notes (optional) */}
+              <div className="mb-6">
+                <label className="block text-[13px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--label-secondary)' }}>
+                  {t.myNotesLabel}
+                </label>
+                <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--fill)' }}>
+                  <textarea
+                    value={moveNotes}
+                    onChange={e => setMoveNotes(e.target.value)}
+                    placeholder={t.notesPlaceholder}
+                    rows={3}
+                    className="w-full px-4 py-3 bg-transparent focus:outline-none text-[17px] resize-none"
+                    style={{ color: 'var(--label)' }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleConfirmMarkAsRead}
+                  disabled={moveRating === 0}
+                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white disabled:opacity-40"
+                  style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+                >
+                  {t.markAsRead}
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setShowMoveModal(false)}
+                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold"
+                  style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+                >
+                  {t.cancel}
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <ConfirmDialog
         open={showDeleteConfirm}

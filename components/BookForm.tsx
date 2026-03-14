@@ -8,6 +8,7 @@ import ISBNScanner from './ISBNScanner'
 import { LONG_MONTHS, SEASONS } from '@/lib/month'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
+import type { BookStatus } from './StatusPicker'
 import { googleCoverFromResponse } from '@/lib/bookMetadata'
 import { uploadCoverPhoto } from '@/lib/coverUpload'
 import { supabase } from '@/lib/supabase'
@@ -26,6 +27,7 @@ interface BookFormProps {
   onSubmit: (data: Omit<Book, 'id' | 'user_id' | 'created_at'>) => Promise<void>
   submitLabel?: string
   loading?: boolean
+  status?: BookStatus
 }
 
 // ─── Cover fallback ───────────────────────────────────────────────────────────
@@ -91,6 +93,7 @@ export default function BookForm({
   onSubmit,
   submitLabel = 'Save',
   loading = false,
+  status = 'read',
 }: BookFormProps) {
   const t = useT()
   const { user } = useApp()
@@ -192,7 +195,7 @@ export default function BookForm({
     e.preventDefault()
     setError('')
     if (!title.trim()) { setError(t.validationTitleRequired); return }
-    if (rating === 0)  { setError(t.validationRatingRequired); return }
+    if (status === 'read' && rating === 0) { setError(t.validationRatingRequired); return }
 
     if (process.env.NODE_ENV === 'development') {
       console.debug('[BookForm] submitting book:', {
@@ -206,10 +209,10 @@ export default function BookForm({
         title:     title.trim(),
         author:    author.trim(),
         genre:     genreRef.current || undefined,
-        year,
-        month,
-        rating,
-        notes:     notes.trim() || undefined,
+        year:      status === 'wishlist' ? 0 : year,
+        month:     status === 'wishlist' ? null : month,
+        rating:    status === 'read' ? rating : 0,
+        notes:     status === 'read' ? (notes.trim() || undefined) : undefined,
         cover_url: coverUrl.trim() || undefined,
       })
     } catch (err: unknown) {
@@ -305,73 +308,79 @@ export default function BookForm({
       </div>
 
       {/* ── When did you read it? (Month 2/3 + Year 1/3) ─────────────────── */}
-      <div>
-        <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>{t.whenDidYouRead}</label>
-        <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
-          <div className="grid grid-cols-3">
-            <div className="col-span-2" style={{ borderRight: '1px solid var(--separator)' }}>
-              <select
-                value={month ?? ''}
-                onChange={(e) => setMonth(e.target.value === '' ? null : Number(e.target.value))}
-                className={inputBase + ' appearance-none cursor-pointer'}
-                style={{ color: 'var(--label)' }}
-              >
-                <option value="">{t.unknownMonth}</option>
-                <optgroup label="Month">
-                  {LONG_MONTHS.map((m, i) => (
-                    <option key={i + 1} value={i + 1}>{m}</option>
+      {status !== 'wishlist' && (
+        <div>
+          <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>{t.whenDidYouRead}</label>
+          <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            <div className="grid grid-cols-3">
+              <div className="col-span-2" style={{ borderRight: '1px solid var(--separator)' }}>
+                <select
+                  value={month ?? ''}
+                  onChange={(e) => setMonth(e.target.value === '' ? null : Number(e.target.value))}
+                  className={inputBase + ' appearance-none cursor-pointer'}
+                  style={{ color: 'var(--label)' }}
+                >
+                  <option value="">{t.unknownMonth}</option>
+                  <optgroup label="Month">
+                    {LONG_MONTHS.map((m, i) => (
+                      <option key={i + 1} value={i + 1}>{m}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Season">
+                    {Object.entries(SEASONS).map(([code, label]) => (
+                      <option key={code} value={code}>{label}</option>
+                    ))}
+                  </optgroup>
+                </select>
+              </div>
+              <div>
+                <select
+                  value={year}
+                  onChange={(e) => setYear(Number(e.target.value))}
+                  className={inputBase + ' appearance-none cursor-pointer'}
+                  style={{ color: 'var(--label)' }}
+                >
+                  {Array.from({ length: 30 }, (_, i) => currentYear - i).map((y) => (
+                    <option key={y} value={y}>{y}</option>
                   ))}
-                </optgroup>
-                <optgroup label="Season">
-                  {Object.entries(SEASONS).map(([code, label]) => (
-                    <option key={code} value={code}>{label}</option>
-                  ))}
-                </optgroup>
-              </select>
-            </div>
-            <div>
-              <select
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-                className={inputBase + ' appearance-none cursor-pointer'}
-                style={{ color: 'var(--label)' }}
-              >
-                {Array.from({ length: 30 }, (_, i) => currentYear - i).map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
+                </select>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ── Rating ─────────────────────────────────────────────────────────── */}
-      <div>
-        <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>
-          {t.ratingLabel}<span style={{ color: 'var(--primary)' }}> *</span>
-        </label>
-        <StarRating rating={rating} onRate={setRating} size={36} />
-        {rating > 0 && (
-          <p className="text-[14px] mt-2 px-1" style={{ color: 'var(--label-secondary)' }}>
-            {(['', ...t.ratingLabels] as string[])[rating]}
-          </p>
-        )}
-      </div>
+      {status === 'read' && (
+        <div>
+          <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>
+            {t.ratingLabel}<span style={{ color: 'var(--primary)' }}> *</span>
+          </label>
+          <StarRating rating={rating} onRate={setRating} size={36} />
+          {rating > 0 && (
+            <p className="text-[14px] mt-2 px-1" style={{ color: 'var(--label-secondary)' }}>
+              {(['', ...t.ratingLabels] as string[])[rating]}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* ── My Notes ───────────────────────────────────────────────────────── */}
-      <div>
-        <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>{t.myNotesLabel}</label>
-        <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder={t.notesPlaceholder}
-            rows={5}
-            className="w-full px-4 py-3 bg-transparent focus:outline-none text-[17px] resize-none"
-            style={{ color: 'var(--label)' }}
-          />
+      {status === 'read' && (
+        <div>
+          <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>{t.myNotesLabel}</label>
+          <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder={t.notesPlaceholder}
+              rows={5}
+              className="w-full px-4 py-3 bg-transparent focus:outline-none text-[17px] resize-none"
+              style={{ color: 'var(--label)' }}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Cover ──────────────────────────────────────────────────────────── */}
       <div>

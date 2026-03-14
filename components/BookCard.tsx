@@ -58,7 +58,7 @@ export default function BookCard({ book, href }: { book: Book; href?: string }) 
         ) : (
           <div
             className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, rgba(0,136,255,0), #0088ff)' }}
+            style={{ background: 'linear-gradient(to bottom, color-mix(in srgb, var(--primary), transparent), var(--primary))' }}
           />
         )}
 
