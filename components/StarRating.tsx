@@ -44,15 +44,19 @@ export default function StarRating({
             <Star
               size={size}
               strokeWidth={0}
-              className={
-                isActive
-                  ? 'fill-[#FFD60A] text-[#FFD60A] transition-colors'
-                  : cozyMode && !darkBg
-                  ? 'text-[#171717] transition-colors'
+              className="transition-colors"
+              style={{
+                fill: isActive
+                  ? '#FFD60A'
                   : darkBg
-                  ? 'fill-white/40 text-white/40 transition-colors'
-                  : 'fill-[hsla(240,6%,25%,0.3)] text-[hsla(240,6%,25%,0.3)] transition-colors'
-              }
+                  ? 'rgba(255,255,255,0.4)'
+                  : 'var(--fill)',
+                color: isActive
+                  ? '#FFD60A'
+                  : darkBg
+                  ? 'rgba(255,255,255,0.4)'
+                  : 'var(--fill)',
+              }}
             />
           </motion.button>
         )

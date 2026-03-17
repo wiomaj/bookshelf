@@ -32,6 +32,10 @@ export type Translations = {
   authorPlaceholder: string
   whenDidYouRead: string
   unknownMonth: string
+  monthNames: [string, string, string, string, string, string, string, string, string, string, string, string]
+  seasonNames: [string, string, string, string]
+  optgroupMonth: string
+  optgroupSeason: string
   ratingLabel: string
   ratingLabels: [string, string, string, string, string]
   myNotesLabel: string
@@ -201,6 +205,10 @@ const en: Translations = {
   authorPlaceholder: 'Enter author name...',
   whenDidYouRead: 'When did you read it?',
   unknownMonth: '— Unknown month —',
+  monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  seasonNames: ['Spring', 'Summer', 'Fall', 'Winter'],
+  optgroupMonth: 'Month',
+  optgroupSeason: 'Season',
   ratingLabel: 'Rating',
   ratingLabels: ["Didn't like it", "It was okay", "Liked it", "Really liked it", "Loved it"],
   myNotesLabel: 'My Notes',
@@ -353,6 +361,10 @@ const de: Translations = {
   authorPlaceholder: 'Autorenname eingeben...',
   whenDidYouRead: 'Wann hast du es gelesen?',
   unknownMonth: '— Unbekannter Monat —',
+  monthNames: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+  seasonNames: ['Frühling', 'Sommer', 'Herbst', 'Winter'],
+  optgroupMonth: 'Monat',
+  optgroupSeason: 'Jahreszeit',
   ratingLabel: 'Bewertung',
   ratingLabels: ['Hat mir nicht gefallen', 'War okay', 'Hat mir gefallen', 'Hat mir sehr gefallen', 'Geliebt'],
   myNotesLabel: 'Meine Notizen',
@@ -505,6 +517,10 @@ const fr: Translations = {
   authorPlaceholder: "Entrez le nom de l'auteur...",
   whenDidYouRead: "Quand l'avez-vous lu ?",
   unknownMonth: '— Mois inconnu —',
+  monthNames: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+  seasonNames: ['Printemps', 'Été', 'Automne', 'Hiver'],
+  optgroupMonth: 'Mois',
+  optgroupSeason: 'Saison',
   ratingLabel: 'Note',
   ratingLabels: ['Pas aimé', 'Passable', 'Aimé', 'Vraiment aimé', 'Adoré'],
   myNotesLabel: 'Mes notes',
@@ -657,6 +673,10 @@ const es: Translations = {
   authorPlaceholder: 'Introduce el nombre del autor...',
   whenDidYouRead: '¿Cuándo lo leíste?',
   unknownMonth: '— Mes desconocido —',
+  monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+  seasonNames: ['Primavera', 'Verano', 'Otoño', 'Invierno'],
+  optgroupMonth: 'Mes',
+  optgroupSeason: 'Estación',
   ratingLabel: 'Valoración',
   ratingLabels: ['No me gustó', 'Estuvo bien', 'Me gustó', 'Me gustó mucho', 'Lo amé'],
   myNotesLabel: 'Mis notas',
@@ -809,6 +829,10 @@ const pl: Translations = {
   authorPlaceholder: 'Wpisz imię autora...',
   whenDidYouRead: 'Kiedy to czytałeś?',
   unknownMonth: '— Nieznany miesiąc —',
+  monthNames: ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],
+  seasonNames: ['Wiosna', 'Lato', 'Jesień', 'Zima'],
+  optgroupMonth: 'Miesiąc',
+  optgroupSeason: 'Pora roku',
   ratingLabel: 'Ocena',
   ratingLabels: ['Nie podobało mi się', 'Było okej', 'Podobało mi się', 'Bardzo mi się podobało', 'Kochałem to'],
   myNotesLabel: 'Moje notatki',

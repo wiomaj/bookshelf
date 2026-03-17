@@ -11,7 +11,6 @@ import { supabase } from '@/lib/supabase'
 import { useApp, useT } from '@/contexts/AppContext'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { uploadCoverPhoto } from '@/lib/coverUpload'
-import { LONG_MONTHS, SEASONS } from '@/lib/month'
 import { searchBooks } from '@/lib/bookSearch'
 import type { BookSuggestion } from '@/lib/bookSearch'
 import { googleCoverFromResponse } from '@/lib/bookMetadata'
@@ -374,14 +373,14 @@ function AddBookContent() {
                     style={{ color: 'var(--label)' }}
                   >
                     <option value="">{t.unknownMonth}</option>
-                    <optgroup label="Month">
-                      {LONG_MONTHS.map((m, i) => (
+                    <optgroup label={t.optgroupMonth}>
+                      {t.monthNames.map((m, i) => (
                         <option key={i + 1} value={i + 1}>{m}</option>
                       ))}
                     </optgroup>
-                    <optgroup label="Season">
-                      {Object.entries(SEASONS).map(([code, label]) => (
-                        <option key={code} value={code}>{label}</option>
+                    <optgroup label={t.optgroupSeason}>
+                      {t.seasonNames.map((s, i) => (
+                        <option key={13 + i} value={13 + i}>{s}</option>
                       ))}
                     </optgroup>
                   </select>
@@ -417,14 +416,14 @@ function AddBookContent() {
                     style={{ color: 'var(--label)' }}
                   >
                     <option value="">{t.unknownMonth}</option>
-                    <optgroup label="Month">
-                      {LONG_MONTHS.map((m, i) => (
+                    <optgroup label={t.optgroupMonth}>
+                      {t.monthNames.map((m, i) => (
                         <option key={i + 1} value={i + 1}>{m}</option>
                       ))}
                     </optgroup>
-                    <optgroup label="Season">
-                      {Object.entries(SEASONS).map(([code, label]) => (
-                        <option key={code} value={code}>{label}</option>
+                    <optgroup label={t.optgroupSeason}>
+                      {t.seasonNames.map((s, i) => (
+                        <option key={13 + i} value={13 + i}>{s}</option>
                       ))}
                     </optgroup>
                   </select>

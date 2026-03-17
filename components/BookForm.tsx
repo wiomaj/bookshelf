@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import { Camera, Loader2, Search, ScanBarcode } from 'lucide-react'
 import StarRating from './StarRating'
 import ISBNScanner from './ISBNScanner'
-import { LONG_MONTHS, SEASONS } from '@/lib/month'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 import { googleCoverFromResponse } from '@/lib/bookMetadata'
@@ -317,14 +316,14 @@ export default function BookForm({
                 style={{ color: 'var(--label)' }}
               >
                 <option value="">{t.unknownMonth}</option>
-                <optgroup label="Month">
-                  {LONG_MONTHS.map((m, i) => (
+                <optgroup label={t.optgroupMonth}>
+                  {t.monthNames.map((m, i) => (
                     <option key={i + 1} value={i + 1}>{m}</option>
                   ))}
                 </optgroup>
-                <optgroup label="Season">
-                  {Object.entries(SEASONS).map(([code, label]) => (
-                    <option key={code} value={code}>{label}</option>
+                <optgroup label={t.optgroupSeason}>
+                  {t.seasonNames.map((s, i) => (
+                    <option key={13 + i} value={13 + i}>{s}</option>
                   ))}
                 </optgroup>
               </select>

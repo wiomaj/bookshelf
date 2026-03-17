@@ -11,7 +11,6 @@ import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { useApp, useT } from '@/contexts/AppContext'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
-import { LONG_MONTHS } from '@/lib/month'
 import { heroCoverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
 
@@ -432,7 +431,7 @@ export default function WishlistDetailPage() {
                       className="w-full px-4 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
                       style={{ color: 'var(--label)' }}
                     >
-                      {LONG_MONTHS.map((m, i) => (
+                      {t.monthNames.map((m, i) => (
                         <option key={i + 1} value={i + 1}>{m}</option>
                       ))}
                     </select>
