@@ -38,7 +38,7 @@ const PULL_MAX = 64
 
 export default function HomePage() {
   const router = useRouter()
-  const { viewMode, setViewMode, user, setToReadCount, setWishlistCount, displayName, updateDisplayName } = useApp()
+  const { viewMode, setViewMode, user, setToReadCount, setWishlistCount, displayName, updateDisplayName, cozyMode } = useApp()
   const t = useT()
   const [activeTab, setActiveTab] = useState<Tab>('books')
   const [activeBookTab, setActiveBookTab] = useState<BookTab>('read')
@@ -299,7 +299,7 @@ export default function HomePage() {
   const pullProgress = Math.min(pullY / PULL_MAX, 1)
 
   return (
-    <div className="relative min-h-screen pb-[16px]">
+    <div className="relative min-h-screen" style={{ paddingBottom: cozyMode ? 16 : 100 }}>
 
       {/* ── Pull-to-refresh indicator ─────────────────────────────────── */}
       <div
@@ -341,10 +341,37 @@ export default function HomePage() {
             style={{ borderBottom: '1px solid var(--separator)', borderLeft: 'none', borderRight: 'none', borderTop: 'none' }}
           >
             <div className="flex items-center h-12 px-5 gap-3">
-              <span className="flex-1 text-[17px] font-semibold tracking-[-0.3px]"
-                    style={{ color: 'var(--label)' }}>
-                {title}
-              </span>
+              {activeTab === 'books' && hasAnyBooks ? (
+                <div className="flex items-center flex-1 shrink-0">
+                  {([
+                    { key: 'read' as BookTab, label: t.tabRead },
+                    { key: 'to_read' as BookTab, label: t.tabToRead },
+                    { key: 'wishlist' as BookTab, label: t.tabWishlist },
+                  ]).map(({ key, label }, i) => (
+                    <div key={key} className="flex items-center shrink-0">
+                      {i > 0 && (
+                        <div className="w-px h-[18px] mx-[16px]" style={{ backgroundColor: 'var(--separator)' }} />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setActiveBookTab(key)}
+                        className="text-[12px] leading-[16px] whitespace-nowrap"
+                        style={{
+                          fontWeight: activeBookTab === key ? 510 : 400,
+                          color: activeBookTab === key ? 'var(--label)' : 'var(--label-secondary)',
+                        }}
+                      >
+                        {label}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <span className="flex-1 text-[17px] font-semibold tracking-[-0.3px]"
+                      style={{ color: 'var(--label)' }}>
+                  {title}
+                </span>
+              )}
 
               {/* Year picker — dashboard, scrolled top bar */}
               {activeTab === 'dashboard' && (
