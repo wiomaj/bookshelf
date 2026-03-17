@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useApp } from '@/contexts/AppContext'
 import CozyOverlay from './CozyOverlay'
 import CozyCatScene from './CozyCatScene'
@@ -7,8 +8,10 @@ import NewVersionBanner from './NewVersionBanner'
 
 export default function CozyBody({ children }: { children: React.ReactNode }) {
   const { cozyMode, isDark } = useApp()
+  const pathname = usePathname()
 
   const cozyDark = cozyMode && isDark
+  const showCozyCat = cozyMode && pathname === '/'
 
   // cozyDark = both on → dark warm room; cozy only → light warm; dark only → standard dark; neither → standard light
   const bg        = cozyDark ? '#1C0E06' : cozyMode ? '#FDF0E4' : isDark ? '#000000' : '#F2F2F7'
@@ -46,7 +49,7 @@ export default function CozyBody({ children }: { children: React.ReactNode }) {
         style={{ zIndex: 2 }}
       >
         {children}
-        {cozyMode && <CozyCatScene />}
+        {showCozyCat && <CozyCatScene />}
       </div>
     </div>
   )

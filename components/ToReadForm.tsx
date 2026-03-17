@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import { Camera, Loader2, Search, ScanBarcode } from 'lucide-react'
 import ISBNScanner from './ISBNScanner'
 import { useApp, useT } from '@/contexts/AppContext'
-import { LONG_MONTHS, SEASONS } from '@/lib/month'
 import { uploadCoverPhoto } from '@/lib/coverUpload'
 import { supabase } from '@/lib/supabase'
 import { searchBooks } from '@/lib/bookSearch'
@@ -230,14 +229,14 @@ export default function ToReadForm({
                 style={{ color: 'var(--label)' }}
               >
                 <option value="">{t.unknownMonth}</option>
-                <optgroup label="Month">
-                  {LONG_MONTHS.map((m, i) => (
+                <optgroup label={t.optgroupMonth}>
+                  {t.monthNames.map((m, i) => (
                     <option key={i + 1} value={i + 1}>{m}</option>
                   ))}
                 </optgroup>
-                <optgroup label="Season">
-                  {Object.entries(SEASONS).map(([code, label]) => (
-                    <option key={code} value={code}>{label}</option>
+                <optgroup label={t.optgroupSeason}>
+                  {t.seasonNames.map((s, i) => (
+                    <option key={13 + i} value={13 + i}>{s}</option>
                   ))}
                 </optgroup>
               </select>
