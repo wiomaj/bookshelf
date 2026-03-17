@@ -10,6 +10,8 @@ import { fetchBookData } from '@/lib/bookDescription'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { useApp, useT } from '@/contexts/AppContext'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import StatusPicker, { type BookStatus } from '@/components/StatusPicker'
+import BookForm from '@/components/BookForm'
 import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
 import { heroCoverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
@@ -63,6 +65,7 @@ export default function WishlistDetailPage() {
   const [book, setBook] = useState<Book | null>(null)
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
+  const [editStatus, setEditStatus] = useState<BookStatus>('wishlist')
   const [updateLoading, setUpdateLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -102,11 +105,17 @@ export default function WishlistDetailPage() {
       .finally(() => setLoading(false))
   }, [user, id])
 
-  async function handleUpdate(data: ToReadFormData) {
+  async function handleUpdate(data: ToReadFormData | Omit<Book, 'id' | 'user_id' | 'created_at'>) {
     if (!book || !user) return
     setUpdateLoading(true)
     try {
-      await updateBook(supabase, user.id, book.id, { ...data, status: 'wishlist' })
+      await updateBook(supabase, user.id, book.id, { ...data, status: editStatus })
+      if (editStatus !== 'wishlist') {
+        sessionStorage.setItem('bookshelf_returnTab', editStatus)
+        sessionStorage.setItem('bookshelf_flash', 'changesSaved')
+        router.replace('/')
+        return
+      }
       setBook(prev => prev ? { ...prev, ...data } : prev)
       setIsEditing(false)
     } finally {
@@ -182,19 +191,30 @@ export default function WishlistDetailPage() {
         >
           <X size={24} />
         </button>
-        <div className="px-4 pt-14 pb-4">
+        <div className="px-4 pt-14 pb-4 flex flex-col gap-4">
           <h1 className="text-[28px] font-bold tracking-[-0.4px]" style={{ color: 'var(--label)' }}>
             {t.editBook}
           </h1>
+          <StatusPicker value={editStatus} onChange={setEditStatus} />
         </div>
-        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
-          <ToReadForm
-            initialData={book}
-            onSubmit={handleUpdate}
-            submitLabel={t.saveChanges}
-            loading={updateLoading}
-            hideDateField
-          />
+        <motion.div key={editStatus} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
+          {editStatus === 'read' ? (
+            <BookForm
+              initialData={book}
+              onSubmit={handleUpdate}
+              submitLabel={t.saveChanges}
+              loading={updateLoading}
+              status="read"
+            />
+          ) : (
+            <ToReadForm
+              initialData={book}
+              onSubmit={handleUpdate}
+              submitLabel={t.saveChanges}
+              loading={updateLoading}
+              hideDateField={editStatus === 'wishlist'}
+            />
+          )}
         </motion.div>
       </div>
     )
@@ -220,8 +240,8 @@ export default function WishlistDetailPage() {
           </div>
         ) : (
           <div
-            className="absolute inset-0 z-0"
-            style={{ background: 'linear-gradient(to bottom, #0088ff, #065ba6)' }}
+            className="absolute top-0 left-0 right-0 h-[360px] z-0"
+            style={{ background: 'linear-gradient(to bottom, var(--primary), color-mix(in srgb, var(--primary) 66%, black))' }}
           />
         )}
 
@@ -229,7 +249,7 @@ export default function WishlistDetailPage() {
         <div className="relative z-30 flex justify-end gap-2 pt-4 pr-4">
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => setIsEditing(true)}
+            onClick={() => { setEditStatus('wishlist'); setIsEditing(true) }}
             className="glass w-11 h-11 rounded-full flex items-center justify-center"
             aria-label="Edit"
             style={{ color: 'var(--label)' }}

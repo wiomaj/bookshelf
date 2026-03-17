@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, LayoutGrid, List, BookOpenCheck, User, Settings, Loader2, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
-import { getReadBooks, getToReadBooks, getWishlistBooks } from '@/lib/bookApi'
+import { getReadBooks, getToReadBooks, getWishlistBooks, updateBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import YearSection from '@/components/YearSection'
 import ToReadList from '@/components/ToReadList'
@@ -47,6 +47,8 @@ export default function HomePage() {
   const [wishlistBooks, setWishlistBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
   const [flashMessage, setFlashMessage] = useState<string | null>(null)
+  const [flashUndo, setFlashUndo] = useState<{ bookId: string; month: number; year: number } | null>(null)
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [scrolled, setScrolled] = useState(false)
   const [dashboardYear, setDashboardYear] = useState<number | 'all' | null>(null)
   const [yearPickerSource, setYearPickerSource] = useState<'large' | 'top' | null>(null)
@@ -139,13 +141,38 @@ export default function HomePage() {
         flash === 'changesSaved'      ? t.changesSaved :
         flash === 'bookAddedToRead'   ? t.bookAddedToRead :
         flash === 'bookAddedToWishlist' ? t.bookAddedToWishlist :
+        flash === 'markedAsRead'      ? t.markedAsRead :
         null
       if (message) {
         setFlashMessage(message)
-        setTimeout(() => setFlashMessage(null), 3000)
+        if (flash === 'markedAsRead') {
+          try {
+            const raw = sessionStorage.getItem('bookshelf_flash_undo')
+            sessionStorage.removeItem('bookshelf_flash_undo')
+            if (raw) setFlashUndo(JSON.parse(raw))
+          } catch { /* ignore */ }
+        } else {
+          setFlashUndo(null)
+        }
+        if (flashTimerRef.current) clearTimeout(flashTimerRef.current)
+        flashTimerRef.current = setTimeout(() => { setFlashMessage(null); setFlashUndo(null) }, 5000)
       }
     }
   }, [])
+
+  async function handleUndo() {
+    if (!user || !flashUndo) return
+    if (flashTimerRef.current) clearTimeout(flashTimerRef.current)
+    setFlashMessage(null)
+    setFlashUndo(null)
+    await updateBook(supabase, user.id, flashUndo.bookId, {
+      status: 'to_read',
+      month: flashUndo.month,
+      year: flashUndo.year,
+    })
+    setActiveBookTab('to_read')
+    loadBooks()
+  }
 
   // ── Name prompt on first login ────────────────────────────────────────────
   useEffect(() => {
@@ -456,10 +483,19 @@ export default function HomePage() {
             initial={{ opacity: 0, y: -12, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.96 }}
-            className="mx-4 mt-4 px-4 py-3 rounded-2xl text-white text-[14px] font-semibold text-center"
+            className="mx-4 mt-4 px-4 py-3 rounded-2xl text-white text-[14px] font-semibold flex items-center justify-between"
             style={{ backgroundColor: 'var(--label)' }}
           >
-            {flashMessage}
+            <span className={flashUndo ? '' : 'w-full text-center'}>{flashMessage}</span>
+            {flashUndo && (
+              <button
+                onClick={handleUndo}
+                className="ml-3 shrink-0 px-3 py-1 rounded-lg text-[13px] font-bold"
+                style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+              >
+                {t.undo}
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

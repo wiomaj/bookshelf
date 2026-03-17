@@ -25,6 +25,8 @@ export type Translations = {
   editBook: string
   changesSaved: string
   bookAddedToRead: string
+  markedAsRead: string
+  undo: string
   // Book form
   titleLabel: string
   titlePlaceholder: string
@@ -199,6 +201,8 @@ const en: Translations = {
   editBook: 'Edit book',
   changesSaved: 'Changes saved!',
   bookAddedToRead: 'Added to reading list!',
+  markedAsRead: 'Marked as read!',
+  undo: 'Undo',
   titleLabel: 'Title',
   titlePlaceholder: 'Start typing to search…',
   authorLabel: 'Author',
@@ -355,6 +359,8 @@ const de: Translations = {
   editBook: 'Buch bearbeiten',
   changesSaved: 'Änderungen gespeichert!',
   bookAddedToRead: 'Zur Leseliste hinzugefügt!',
+  markedAsRead: 'Als gelesen markiert!',
+  undo: 'Rückgängig',
   titleLabel: 'Titel',
   titlePlaceholder: 'Tippe, um zu suchen…',
   authorLabel: 'Autor',
@@ -511,6 +517,8 @@ const fr: Translations = {
   editBook: 'Modifier le livre',
   changesSaved: 'Modifications enregistrées !',
   bookAddedToRead: 'Ajouté à la liste de lecture !',
+  markedAsRead: 'Marqué comme lu !',
+  undo: 'Annuler',
   titleLabel: 'Titre',
   titlePlaceholder: 'Commencez à taper pour rechercher…',
   authorLabel: 'Auteur',
@@ -667,6 +675,8 @@ const es: Translations = {
   editBook: 'Editar libro',
   changesSaved: '¡Cambios guardados!',
   bookAddedToRead: '¡Añadido a la lista de lectura!',
+  markedAsRead: '¡Marcado como leído!',
+  undo: 'Deshacer',
   titleLabel: 'Título',
   titlePlaceholder: 'Empieza a escribir para buscar…',
   authorLabel: 'Autor',
@@ -823,6 +833,8 @@ const pl: Translations = {
   editBook: 'Edytuj książkę',
   changesSaved: 'Zmiany zapisane!',
   bookAddedToRead: 'Dodano do listy lektur!',
+  markedAsRead: 'Oznaczono jako przeczytane!',
+  undo: 'Cofnij',
   titleLabel: 'Tytuł',
   titlePlaceholder: 'Zacznij pisać, aby wyszukać…',
   authorLabel: 'Autor',
