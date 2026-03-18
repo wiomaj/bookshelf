@@ -97,6 +97,20 @@ export type Translations = {
   signUpPageTitle: string
   signUpPageSubtitle: string
   logIn: string
+  // Login promo content
+  promoRememberTitle: string
+  promoRememberSubtitle: string
+  promoInsightsTitle: string
+  promoInsightsSubtitle: string
+  promoReadingSpeed: string
+  promoReadingSpeedSub: string
+  promoBooks: string
+  promoWithoutMonth: string
+  promoMyRatings: string
+  promoMyRatingsSub: string
+  promoAverageRating: string
+  promoCtaButton: string
+  promoFooter: string
   // My Account
   myAccount: string
   changePassword: string
@@ -265,6 +279,19 @@ const en: Translations = {
   signUpPageTitle: 'Create your account!',
   signUpPageSubtitle: 'Start tracking your books today!',
   logIn: 'Log In',
+  promoRememberTitle: 'Remember your favourite books',
+  promoRememberSubtitle: 'Track books you\'ve read, organize your library, and never forget what to read next.',
+  promoInsightsTitle: 'See personal insights',
+  promoInsightsSubtitle: 'Get statistics on your reading habits',
+  promoReadingSpeed: 'Reading speed',
+  promoReadingSpeedSub: 'How many books I\'ve read over the year',
+  promoBooks: 'Books',
+  promoWithoutMonth: '+ 2 without a specific month',
+  promoMyRatings: 'My ratings',
+  promoMyRatingsSub: 'What I thought about the books I\'ve read',
+  promoAverageRating: 'Average rating',
+  promoCtaButton: 'Log In or sign up!',
+  promoFooter: 'Made with love in Berlin, Germany.',
   myAccount: 'My Account',
   changePassword: 'Change password',
   newPassword: 'New password',
@@ -423,6 +450,19 @@ const de: Translations = {
   signUpPageTitle: 'Erstelle dein Konto!',
   signUpPageSubtitle: 'Fang noch heute an, deine Bücher zu verfolgen!',
   logIn: 'Anmelden',
+  promoRememberTitle: 'Erinnere dich an deine Lieblingsbücher',
+  promoRememberSubtitle: 'Verfolge gelesene Bücher, organisiere deine Bibliothek und vergiss nie, was du als nächstes lesen willst.',
+  promoInsightsTitle: 'Persönliche Einblicke',
+  promoInsightsSubtitle: 'Statistiken zu deinen Lesegewohnheiten',
+  promoReadingSpeed: 'Lesegeschwindigkeit',
+  promoReadingSpeedSub: 'Wie viele Bücher ich im Jahr gelesen habe',
+  promoBooks: 'Bücher',
+  promoWithoutMonth: '+ 2 ohne bestimmten Monat',
+  promoMyRatings: 'Meine Bewertungen',
+  promoMyRatingsSub: 'Was ich über die gelesenen Bücher denke',
+  promoAverageRating: 'Durchschnitt',
+  promoCtaButton: 'Anmelden oder registrieren!',
+  promoFooter: 'Mit Liebe gemacht in Berlin.',
   myAccount: 'Mein Konto',
   changePassword: 'Passwort ändern',
   newPassword: 'Neues Passwort',
@@ -581,6 +621,19 @@ const fr: Translations = {
   signUpPageTitle: 'Créez votre compte !',
   signUpPageSubtitle: 'Commencez à suivre vos lectures dès aujourd\'hui !',
   logIn: 'Se connecter',
+  promoRememberTitle: 'Souvenez-vous de vos livres préférés',
+  promoRememberSubtitle: 'Suivez les livres que vous avez lus, organisez votre bibliothèque et n\'oubliez jamais quoi lire ensuite.',
+  promoInsightsTitle: 'Découvrez vos statistiques',
+  promoInsightsSubtitle: 'Obtenez des statistiques sur vos habitudes de lecture',
+  promoReadingSpeed: 'Vitesse de lecture',
+  promoReadingSpeedSub: 'Combien de livres j\'ai lus au cours de l\'année',
+  promoBooks: 'Livres',
+  promoWithoutMonth: '+ 2 sans mois précis',
+  promoMyRatings: 'Mes notes',
+  promoMyRatingsSub: 'Ce que je pense des livres que j\'ai lus',
+  promoAverageRating: 'Note moyenne',
+  promoCtaButton: 'Se connecter ou s\'inscrire !',
+  promoFooter: 'Fait avec amour à Berlin, Allemagne.',
   myAccount: 'Mon compte',
   changePassword: 'Changer le mot de passe',
   newPassword: 'Nouveau mot de passe',
@@ -739,6 +792,19 @@ const es: Translations = {
   signUpPageTitle: '¡Crea tu cuenta!',
   signUpPageSubtitle: '¡Empieza a registrar tus lecturas hoy!',
   logIn: 'Iniciar sesión',
+  promoRememberTitle: 'Recuerda tus libros favoritos',
+  promoRememberSubtitle: 'Registra los libros que has leído, organiza tu biblioteca y nunca olvides qué leer después.',
+  promoInsightsTitle: 'Mira tus estadísticas',
+  promoInsightsSubtitle: 'Obtén estadísticas sobre tus hábitos de lectura',
+  promoReadingSpeed: 'Velocidad de lectura',
+  promoReadingSpeedSub: 'Cuántos libros he leído durante el año',
+  promoBooks: 'Libros',
+  promoWithoutMonth: '+ 2 sin mes específico',
+  promoMyRatings: 'Mis valoraciones',
+  promoMyRatingsSub: 'Lo que pienso de los libros que he leído',
+  promoAverageRating: 'Valoración media',
+  promoCtaButton: '¡Inicia sesión o regístrate!',
+  promoFooter: 'Hecho con amor en Berlín, Alemania.',
   myAccount: 'Mi cuenta',
   changePassword: 'Cambiar contraseña',
   newPassword: 'Nueva contraseña',
@@ -897,6 +963,19 @@ const pl: Translations = {
   signUpPageTitle: 'Utwórz swoje konto!',
   signUpPageSubtitle: 'Zacznij śledzić swoje lektury już dziś!',
   logIn: 'Zaloguj się',
+  promoRememberTitle: 'Zapamiętaj swoje ulubione książki',
+  promoRememberSubtitle: 'Śledź przeczytane książki, organizuj swoją bibliotekę i nigdy nie zapomnij, co czytać dalej.',
+  promoInsightsTitle: 'Zobacz swoje statystyki',
+  promoInsightsSubtitle: 'Uzyskaj statystyki swoich nawyków czytelniczych',
+  promoReadingSpeed: 'Tempo czytania',
+  promoReadingSpeedSub: 'Ile książek przeczytałem w ciągu roku',
+  promoBooks: 'Książki',
+  promoWithoutMonth: '+ 2 bez konkretnego miesiąca',
+  promoMyRatings: 'Moje oceny',
+  promoMyRatingsSub: 'Co myślę o przeczytanych książkach',
+  promoAverageRating: 'Średnia ocena',
+  promoCtaButton: 'Zaloguj się lub zarejestruj!',
+  promoFooter: 'Zrobione z miłością w Berlinie.',
   myAccount: 'Moje konto',
   changePassword: 'Zmień hasło',
   newPassword: 'Nowe hasło',
