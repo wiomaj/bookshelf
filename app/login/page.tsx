@@ -506,29 +506,31 @@ function LoginPromoContent({ onCtaClick }: { onCtaClick: () => void }) {
           </div>
 
           {/* Staggered cards */}
-          <div className="relative" style={{ minHeight: 520 }}>
-            <motion.div
-              className="absolute"
-              style={{ left: -7, top: 0, zIndex: 1 }}
-              variants={slideFromLeft}
-              initial="hidden"
-              whileInView="visible"
-              viewport={viewportOnce}
-              transition={{ ...soft, delay: 0.1 }}
-            >
-              <ReadingSpeedChart t={t} />
-            </motion.div>
-            <motion.div
-              className="absolute"
-              style={{ left: 157, top: 179, zIndex: 2 }}
-              variants={slideFromRight}
-              initial="hidden"
-              whileInView="visible"
-              viewport={viewportOnce}
-              transition={{ ...soft, delay: 0.35 }}
-            >
-              <RatingsCard t={t} />
-            </motion.div>
+          <div className="flex justify-center">
+            <div className="relative" style={{ width: 497, minHeight: 520 }}>
+              <motion.div
+                className="absolute"
+                style={{ left: 0, top: 0, zIndex: 1 }}
+                variants={slideFromLeft}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewportOnce}
+                transition={{ ...soft, delay: 0.1 }}
+              >
+                <ReadingSpeedChart t={t} />
+              </motion.div>
+              <motion.div
+                className="absolute"
+                style={{ left: 157, top: 179, zIndex: 2 }}
+                variants={slideFromRight}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewportOnce}
+                transition={{ ...soft, delay: 0.35 }}
+              >
+                <RatingsCard t={t} />
+              </motion.div>
+            </div>
           </div>
 
           {/* Bottom CTA */}
