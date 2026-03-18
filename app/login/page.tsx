@@ -402,7 +402,7 @@ const viewportOnce = { once: true, margin: '-60px' as const }
 function LoginPromoContent({ onCtaClick }: { onCtaClick: () => void }) {
   const t = useT()
   return (
-    <div className="flex flex-col items-center pt-32" style={{ width: '100vw', marginLeft: '-24px', marginRight: '-24px' }}>
+    <div className="flex flex-col items-center pt-16" style={{ width: '100vw', marginLeft: '-24px', marginRight: '-24px' }}>
       {/* Section 1: Remember your favourite books */}
       <div
         className="w-full relative border-t overflow-hidden"
