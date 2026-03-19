@@ -5,7 +5,11 @@
 /* ── Box model + scroll ────────────────────────────────────────────────────── */
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { -webkit-text-size-adjust: 100%; }
+body {
+  -webkit-text-size-adjust: 100%;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
 
 /* ── iOS 26 Design Tokens ──────────────────────────────────────────────────── */
 :root {
