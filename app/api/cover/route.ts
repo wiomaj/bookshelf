@@ -18,9 +18,17 @@ export async function GET(request: NextRequest) {
   try {
     // `next: { revalidate }` caches the upstream response in Next.js's
     // server-side data cache for 7 days (works on Vercel + local dev).
-    const upstream = await fetch(url, {
+    let upstream = await fetch(url, {
       next: { revalidate: 604800 }, // 7 days
     })
+
+    // Open Library -L (large) images sometimes 404; fall back to -M (medium)
+    if (!upstream.ok && url.includes('covers.openlibrary.org') && url.includes('-L.jpg')) {
+      const fallbackUrl = url.replace('-L.jpg', '-M.jpg')
+      upstream = await fetch(fallbackUrl, {
+        next: { revalidate: 604800 },
+      })
+    }
 
     if (!upstream.ok) {
       return new NextResponse('Upstream error', { status: upstream.status })
