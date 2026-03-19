@@ -12,7 +12,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'My Bookshelf',
   description: 'Track every book you read',
-  themeColor: '#d3f0fb',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -28,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="theme-color" content="#F2F2F7" />
         {/* Capture beforeinstallprompt as early as possible — before React hydrates */}
         <script dangerouslySetInnerHTML={{ __html: `
           window.addEventListener('beforeinstallprompt', function(e) {
