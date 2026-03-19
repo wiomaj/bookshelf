@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Heart, Pencil, BookmarkPlus, Rocket, LibraryBig, type LucideIcon } from 'lucide-react'
@@ -96,6 +96,25 @@ export default function WishlistDetailPage() {
   const [apiGenre, setApiGenre] = useState<string | undefined>(undefined)
   const [publishedYear, setPublishedYear] = useState<string | undefined>(undefined)
   const [bookDataLoading, setBookDataLoading] = useState(false)
+  const [coverFailed, setCoverFailed] = useState(false)
+  const coverRetryRef = useRef(false)
+
+  function handleCoverError() {
+    setCoverFailed(true)
+    if (coverRetryRef.current || !user || !book) return
+    coverRetryRef.current = true
+    fetchCoverByTitleAuthor(book.title, book.author ?? '').then((newCover) => {
+      if (!newCover || newCover === book.cover_url) return
+      updateBook(supabase, user.id, book.id, { cover_url: newCover }).catch(() => {})
+      setBook(prev => prev ? { ...prev, cover_url: newCover } : prev)
+      setCoverFailed(false)
+    }).catch(() => {})
+  }
+
+  function handleCoverLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    const img = e.currentTarget
+    if (img.naturalWidth <= 1 || img.naturalHeight <= 1) handleCoverError()
+  }
 
   useEffect(() => {
     if (!user || !id) return
@@ -290,6 +309,7 @@ export default function WishlistDetailPage() {
     )
   }
 
+  const showCover = book.cover_url && !coverFailed
   const displayGenre = book.genre || apiGenre
   const addedDate = formatAddedDate(book.created_at)
 
@@ -299,12 +319,14 @@ export default function WishlistDetailPage() {
       <div className="relative" style={{ minHeight: '100vh' }}>
 
         {/* ── Blurred background ──────────────────────────────────────────── */}
-        {book.cover_url ? (
+        {showCover ? (
           <div className="absolute top-0 left-0 right-0 h-[360px] overflow-hidden z-0">
             <img
               src={heroCoverUrl(book.cover_url)}
               alt=""
               className="absolute inset-0 w-full h-full object-cover scale-[1.4] blur-[40px] opacity-90"
+              onError={handleCoverError}
+              onLoad={handleCoverLoad}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60" />
           </div>
@@ -348,12 +370,14 @@ export default function WishlistDetailPage() {
             className="w-[148px] h-[220px] rounded-[10px] overflow-hidden"
             style={{ boxShadow: '0 20px 48px rgba(0,0,0,0.30), 0 4px 8px rgba(0,0,0,0.12)' }}
           >
-            {book.cover_url ? (
+            {showCover ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={heroCoverUrl(book.cover_url)}
                 alt={book.title}
                 className="w-full h-full object-cover"
+                onError={handleCoverError}
+                onLoad={handleCoverLoad}
               />
             ) : (
               <div className="relative w-full h-full" style={{ backgroundColor: 'var(--primary)' }}>
