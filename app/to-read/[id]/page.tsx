@@ -77,6 +77,15 @@ export default function ToReadDetailPage() {
   const [moveRating, setMoveRating] = useState(0)
   const [moveNotes, setMoveNotes] = useState('')
 
+  // Pre-fill dates from stored per-status columns when book loads
+  useEffect(() => {
+    if (!book) return
+    if (book.read_month) setMoveMonth(book.read_month)
+    if (book.read_year) setMoveYear(book.read_year)
+    if (book.rating) setMoveRating(book.rating)
+    if (book.notes) setMoveNotes(book.notes)
+  }, [book?.id])
+
   const [description, setDescription] = useState<string | undefined>(undefined)
   const [apiGenre, setApiGenre] = useState<string | undefined>(undefined)
   const [publishedYear, setPublishedYear] = useState<string | undefined>(undefined)
@@ -112,7 +121,15 @@ export default function ToReadDetailPage() {
     if (!book || !user) return
     setUpdateLoading(true)
     try {
-      await updateBook(supabase, user.id, book.id, { ...data, status: editStatus })
+      const dateColumns: Record<string, unknown> = {}
+      if (editStatus === 'read') {
+        dateColumns.read_month = data.month
+        dateColumns.read_year = data.year
+      } else if (editStatus === 'to_read') {
+        dateColumns.acquired_month = data.month
+        dateColumns.acquired_year = data.year
+      }
+      await updateBook(supabase, user.id, book.id, { ...data, status: editStatus, ...dateColumns })
       if (editStatus !== 'to_read') {
         sessionStorage.setItem('bookshelf_returnTab', editStatus)
         sessionStorage.setItem('bookshelf_flash', 'changesSaved')
@@ -139,6 +156,8 @@ export default function ToReadDetailPage() {
         year: moveYear,
         rating: moveRating,
         notes: moveNotes.trim() || undefined,
+        read_month: moveMonth,
+        read_year: moveYear,
       })
       sessionStorage.setItem('bookshelf_returnTab', 'read')
       sessionStorage.setItem('bookshelf_flash', 'markedAsRead')
@@ -212,7 +231,11 @@ export default function ToReadDetailPage() {
         <motion.div key={editStatus} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
           {editStatus === 'read' ? (
             <BookForm
-              initialData={book}
+              initialData={{
+                ...book,
+                month: book.read_month ?? book.month,
+                year: book.read_year ?? book.year,
+              }}
               onSubmit={handleUpdate}
               submitLabel={t.saveChanges}
               loading={updateLoading}
@@ -220,7 +243,11 @@ export default function ToReadDetailPage() {
             />
           ) : (
             <ToReadForm
-              initialData={book}
+              initialData={{
+                ...book,
+                month: editStatus === 'to_read' ? (book.acquired_month ?? book.month) : book.month,
+                year: editStatus === 'to_read' ? (book.acquired_year ?? book.year) : book.year,
+              }}
               onSubmit={handleUpdate}
               submitLabel={t.saveChanges}
               loading={updateLoading}

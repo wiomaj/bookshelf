@@ -99,7 +99,15 @@ export default function BookDetailPage() {
     if (!book || !user) return
     setUpdateLoading(true)
     try {
-      await updateBook(supabase, user.id, book.id, { ...data, status: editStatus })
+      const dateColumns: Record<string, unknown> = {}
+      if (editStatus === 'read') {
+        dateColumns.read_month = data.month
+        dateColumns.read_year = data.year
+      } else if (editStatus === 'to_read') {
+        dateColumns.acquired_month = data.month
+        dateColumns.acquired_year = data.year
+      }
+      await updateBook(supabase, user.id, book.id, { ...data, status: editStatus, ...dateColumns })
       sessionStorage.setItem('bookshelf_returnTab', editStatus)
       sessionStorage.setItem('bookshelf_flash', 'changesSaved')
       router.replace('/')
@@ -173,7 +181,11 @@ export default function BookDetailPage() {
         <motion.div key={editStatus} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
           {editStatus === 'read' ? (
             <BookForm
-              initialData={book}
+              initialData={{
+                ...book,
+                month: book.read_month ?? book.month,
+                year: book.read_year ?? book.year,
+              }}
               onSubmit={handleUpdate}
               submitLabel={t.saveChanges}
               loading={updateLoading}
@@ -181,7 +193,11 @@ export default function BookDetailPage() {
             />
           ) : (
             <ToReadForm
-              initialData={book}
+              initialData={{
+                ...book,
+                month: editStatus === 'to_read' ? (book.acquired_month ?? book.month) : book.month,
+                year: editStatus === 'to_read' ? (book.acquired_year ?? book.year) : book.year,
+              }}
               onSubmit={handleUpdate}
               submitLabel={t.saveChanges}
               loading={updateLoading}

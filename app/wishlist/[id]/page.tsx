@@ -8,8 +8,10 @@ import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
+import { LONG_MONTHS } from '@/lib/month'
 import { useApp, useT } from '@/contexts/AppContext'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import StarRating from '@/components/StarRating'
 import StatusPicker, { type BookStatus } from '@/components/StatusPicker'
 import BookForm from '@/components/BookForm'
 import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
@@ -71,8 +73,24 @@ export default function WishlistDetailPage() {
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [moveLoading, setMoveLoading] = useState(false)
   const [showMoveModal, setShowMoveModal] = useState(false)
+  const [showMarkAsReadModal, setShowMarkAsReadModal] = useState(false)
   const [moveMonth, setMoveMonth] = useState<number>(currentDate.getMonth() + 1)
   const [moveYear, setMoveYear] = useState<number>(currentDate.getFullYear())
+  const [readMonth, setReadMonth] = useState<number>(currentDate.getMonth() + 1)
+  const [readYear, setReadYear] = useState<number>(currentDate.getFullYear())
+  const [readRating, setReadRating] = useState(0)
+  const [readNotes, setReadNotes] = useState('')
+
+  // Pre-fill dates from stored per-status columns when book loads
+  useEffect(() => {
+    if (!book) return
+    if (book.acquired_month) setMoveMonth(book.acquired_month)
+    if (book.acquired_year) setMoveYear(book.acquired_year)
+    if (book.read_month) setReadMonth(book.read_month)
+    if (book.read_year) setReadYear(book.read_year)
+    if (book.rating) setReadRating(book.rating)
+    if (book.notes) setReadNotes(book.notes)
+  }, [book?.id])
 
   const [description, setDescription] = useState<string | undefined>(undefined)
   const [apiGenre, setApiGenre] = useState<string | undefined>(undefined)
@@ -109,7 +127,15 @@ export default function WishlistDetailPage() {
     if (!book || !user) return
     setUpdateLoading(true)
     try {
-      await updateBook(supabase, user.id, book.id, { ...data, status: editStatus })
+      const dateColumns: Record<string, unknown> = {}
+      if (editStatus === 'read') {
+        dateColumns.read_month = data.month
+        dateColumns.read_year = data.year
+      } else if (editStatus === 'to_read') {
+        dateColumns.acquired_month = data.month
+        dateColumns.acquired_year = data.year
+      }
+      await updateBook(supabase, user.id, book.id, { ...data, status: editStatus, ...dateColumns })
       if (editStatus !== 'wishlist') {
         sessionStorage.setItem('bookshelf_returnTab', editStatus)
         sessionStorage.setItem('bookshelf_flash', 'changesSaved')
@@ -138,11 +164,47 @@ export default function WishlistDetailPage() {
 
   async function handleConfirmMove(status: 'to_read' | 'read') {
     if (!user || !book) return
+    if (status === 'read') {
+      // Close the move modal and open the mark-as-read modal
+      setShowMoveModal(false)
+      setShowMarkAsReadModal(true)
+      return
+    }
     setMoveLoading(true)
     setShowMoveModal(false)
     try {
-      await updateBook(supabase, user.id, book.id, { status, month: moveMonth, year: moveYear })
-      sessionStorage.setItem('bookshelf_returnTab', status === 'read' ? 'read' : 'to_read')
+      await updateBook(supabase, user.id, book.id, {
+        status,
+        month: moveMonth,
+        year: moveYear,
+        acquired_month: moveMonth,
+        acquired_year: moveYear,
+      })
+      sessionStorage.setItem('bookshelf_returnTab', 'to_read')
+      router.replace('/')
+    } finally {
+      setMoveLoading(false)
+    }
+  }
+
+  async function handleConfirmMarkAsRead() {
+    if (!user || !book || readRating === 0) return
+    setMoveLoading(true)
+    setShowMarkAsReadModal(false)
+    try {
+      await updateBook(supabase, user.id, book.id, {
+        status: 'read',
+        month: readMonth,
+        year: readYear,
+        rating: readRating,
+        notes: readNotes.trim() || undefined,
+        acquired_month: moveMonth,
+        acquired_year: moveYear,
+        read_month: readMonth,
+        read_year: readYear,
+      })
+      sessionStorage.setItem('bookshelf_returnTab', 'read')
+      sessionStorage.setItem('bookshelf_flash', 'markedAsRead')
       router.replace('/')
     } finally {
       setMoveLoading(false)
@@ -200,7 +262,11 @@ export default function WishlistDetailPage() {
         <motion.div key={editStatus} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
           {editStatus === 'read' ? (
             <BookForm
-              initialData={book}
+              initialData={{
+                ...book,
+                month: book.read_month ?? book.month,
+                year: book.read_year ?? book.year,
+              }}
               onSubmit={handleUpdate}
               submitLabel={t.saveChanges}
               loading={updateLoading}
@@ -208,7 +274,11 @@ export default function WishlistDetailPage() {
             />
           ) : (
             <ToReadForm
-              initialData={book}
+              initialData={{
+                ...book,
+                month: editStatus === 'to_read' ? (book.acquired_month ?? book.month) : book.month,
+                year: editStatus === 'to_read' ? (book.acquired_year ?? book.year) : book.year,
+              }}
               onSubmit={handleUpdate}
               submitLabel={t.saveChanges}
               loading={updateLoading}
@@ -491,6 +561,119 @@ export default function WishlistDetailPage() {
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setShowMoveModal(false)}
+                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold"
+                  style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+                >
+                  {t.cancel}
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Mark as read modal (second step) ──────────────────────────── */}
+      <AnimatePresence>
+        {showMarkAsReadModal && (
+          <>
+            <motion.div
+              key="read-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMarkAsReadModal(false)}
+              className="fixed inset-0 z-40"
+              style={{ backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+            />
+            <motion.div
+              key="read-sheet"
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+              className="fixed bottom-0 left-0 right-0 z-50 max-w-[600px] mx-auto rounded-t-[28px] p-6 pb-10"
+              style={{ backgroundColor: 'var(--bg-elevated)' }}
+            >
+              <div className="w-10 h-1 rounded-full mx-auto mb-5"
+                   style={{ backgroundColor: 'var(--separator-opaque)' }} />
+
+              <h3 className="text-[22px] font-bold tracking-[-0.3px] mb-5" style={{ color: 'var(--label)' }}>
+                {t.whenDidYouRead}
+              </h3>
+
+              {/* Month + Year pickers */}
+              <div className="rounded-[14px] overflow-hidden mb-5" style={{ backgroundColor: 'var(--fill)' }}>
+                <div className="grid grid-cols-3">
+                  <div className="col-span-2" style={{ borderRight: '1px solid var(--separator)' }}>
+                    <select
+                      value={readMonth}
+                      onChange={e => setReadMonth(Number(e.target.value))}
+                      className="w-full px-4 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
+                      style={{ color: 'var(--label)' }}
+                    >
+                      {LONG_MONTHS.map((m, i) => (
+                        <option key={i + 1} value={i + 1}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <select
+                      value={readYear}
+                      onChange={e => setReadYear(Number(e.target.value))}
+                      className="w-full px-4 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
+                      style={{ color: 'var(--label)' }}
+                    >
+                      {Array.from({ length: 30 }, (_, i) => currentDate.getFullYear() - i).map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rating */}
+              <div className="mb-5">
+                <label className="block text-[13px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--label-secondary)' }}>
+                  {t.ratingLabel}<span style={{ color: 'var(--primary)' }}> *</span>
+                </label>
+                <StarRating rating={readRating} onRate={setReadRating} size={36} />
+                {readRating > 0 && (
+                  <p className="text-[14px] mt-2" style={{ color: 'var(--label-secondary)' }}>
+                    {(['', ...t.ratingLabels] as string[])[readRating]}
+                  </p>
+                )}
+              </div>
+
+              {/* Notes (optional) */}
+              <div className="mb-6">
+                <label className="block text-[13px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--label-secondary)' }}>
+                  {t.myNotesLabel}
+                </label>
+                <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--fill)' }}>
+                  <textarea
+                    value={readNotes}
+                    onChange={e => setReadNotes(e.target.value)}
+                    placeholder={t.notesPlaceholder}
+                    rows={3}
+                    className="w-full px-4 py-3 bg-transparent focus:outline-none text-[17px] resize-none"
+                    style={{ color: 'var(--label)' }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleConfirmMarkAsRead}
+                  disabled={readRating === 0}
+                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white disabled:opacity-40"
+                  style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+                >
+                  {t.markAsRead}
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setShowMarkAsReadModal(false)}
                   className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold"
                   style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
                 >

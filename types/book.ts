@@ -13,4 +13,8 @@ export type Book = {
   cover_url?: string
   created_at: string // ISO timestamp, set by Supabase automatically
   status?: 'read' | 'to_read' | 'wishlist'  // defaults to 'read' in DB
+  acquired_month?: number | null  // month when user got the book (to_read date)
+  acquired_year?: number | null
+  read_month?: number | null      // month when user finished reading
+  read_year?: number | null
 }
