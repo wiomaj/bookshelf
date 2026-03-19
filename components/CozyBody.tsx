@@ -53,7 +53,7 @@ export default function CozyBody({ children }: { children: React.ReactNode }) {
       <NewVersionBanner />
       <div
         id="scroll-container"
-        className="antialiased h-screen overflow-y-auto relative max-w-[600px] mx-auto w-full"
+        className="antialiased h-screen overflow-y-auto relative max-w-[600px] mx-auto w-full safe-area-pad"
         style={{ zIndex: 2 }}
       >
         {children}
