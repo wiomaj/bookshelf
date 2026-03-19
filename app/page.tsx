@@ -87,12 +87,20 @@ export default function HomePage() {
     setWishlistCount(wishlist.length)
   }, [user, setToReadCount, setWishlistCount])
 
-  // ── Scroll shadow trigger ─────────────────────────────────────────────────
+  // ── Scroll shadow trigger + theme-color sync ─────────────────────────────
   useEffect(() => {
     const el = document.getElementById('scroll-container')
     if (!el) return
     const container: HTMLElement = el
-    function onScroll() { setScrolled(container.scrollTop > 60) }
+    function onScroll() {
+      const isScrolled = container.scrollTop > 60
+      setScrolled(isScrolled)
+      const meta = document.querySelector('meta[name="theme-color"]')
+      const colors = (window as Window & { __themeColors?: { bg: string; glass: string } }).__themeColors
+      if (meta && colors) {
+        meta.setAttribute('content', isScrolled ? colors.glass : colors.bg)
+      }
+    }
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => el.removeEventListener('scroll', onScroll)
   }, [])
