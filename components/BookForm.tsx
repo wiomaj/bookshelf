@@ -104,6 +104,16 @@ export default function BookForm({
   const [notes, setNotes]     = useState(initialData?.notes ?? '')
   const genreRef = useRef(initialData?.genre)
   const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
+
+  // Track whether any field has been edited
+  const isDirty =
+    title !== (initialData?.title ?? '') ||
+    author !== (initialData?.author ?? '') ||
+    year !== (initialData?.year ?? currentYear) ||
+    month !== (initialData?.month ?? null) ||
+    rating !== (initialData?.rating ?? 0) ||
+    notes !== (initialData?.notes ?? '') ||
+    coverUrl !== (initialData?.cover_url ?? '')
   const [photoLoading, setPhotoLoading] = useState(false)
   const photoInputRef = useRef<HTMLInputElement>(null)
 
@@ -446,15 +456,31 @@ export default function BookForm({
       )}
 
       {/* ── Submit ────────────────────────────────────────────────────────── */}
-      <motion.button
-        type="submit"
-        disabled={loading}
-        whileTap={{ scale: 0.97 }}
-        className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold disabled:opacity-50"
-        style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
-      >
-        {loading ? t.loading : submitLabel}
-      </motion.button>
+      {isDirty ? (
+        <div className="sticky bottom-4 z-10">
+          <motion.button
+            type="submit"
+            disabled={loading}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            whileTap={{ scale: 0.97 }}
+            className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold disabled:opacity-50"
+            style={{ backgroundColor: 'var(--primary)', boxShadow: '0 8px 32px rgba(0,0,0,0.18), var(--btn-shadow)' }}
+          >
+            {loading ? t.loading : submitLabel}
+          </motion.button>
+        </div>
+      ) : (
+        <motion.button
+          type="submit"
+          disabled={loading}
+          whileTap={{ scale: 0.97 }}
+          className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold disabled:opacity-50"
+          style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+        >
+          {loading ? t.loading : submitLabel}
+        </motion.button>
+      )}
     </form>
   )
 }
