@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { useApp } from '@/contexts/AppContext'
 import CozyOverlay from './CozyOverlay'
@@ -22,20 +21,6 @@ export default function CozyBody({ children }: { children: React.ReactNode }) {
   const separator = cozyDark ? 'rgba(255,180,100,0.15)' : cozyMode ? 'rgba(45,26,10,0.12)' : isDark ? 'rgba(84,84,88,0.65)'   : 'rgba(60,60,67,0.13)'
   const glassBg   = cozyDark ? 'rgba(28,14,6,0.85)'   : cozyMode ? 'rgba(253,240,228,0.80)' : isDark ? 'rgba(30,30,30,0.80)' : 'rgba(255,255,255,0.72)'
   const glassBorder = cozyDark ? 'rgba(255,160,80,0.20)' : cozyMode ? 'rgba(255,220,180,0.55)' : isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.55)'
-
-  // Approximate solid color of the glass header over the background
-  const glassColor = cozyDark ? '#1C0E06' : cozyMode ? '#FDF0E4' : isDark ? '#181818' : '#FBFBFD'
-
-  // Update theme-color meta tag (controls iOS Safari status bar color)
-  useEffect(() => {
-    const meta = document.querySelector('meta[name="theme-color"]')
-    if (!meta) return
-    meta.setAttribute('content', bg)
-
-    // Expose colors so pages can update theme-color on scroll
-    const w = window as Window & { __themeColors?: { bg: string; glass: string } }
-    w.__themeColors = { bg, glass: glassColor }
-  }, [bg, glassColor])
 
   return (
     <div
@@ -60,7 +45,7 @@ export default function CozyBody({ children }: { children: React.ReactNode }) {
       <NewVersionBanner />
       <div
         id="scroll-container"
-        className="antialiased h-screen overflow-y-auto relative max-w-[600px] mx-auto w-full safe-area-pad"
+        className="antialiased h-screen overflow-y-auto relative max-w-[600px] mx-auto w-full"
         style={{ zIndex: 2 }}
       >
         {children}
