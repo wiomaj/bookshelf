@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description: 'Track every book you read',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
     title: 'My Bookshelf',
   },
 }
