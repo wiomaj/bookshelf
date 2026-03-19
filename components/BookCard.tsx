@@ -1,10 +1,15 @@
 'use client'
 
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import StarRating from './StarRating'
 import { formatMonthShort } from '@/lib/month'
 import { coverUrl } from '@/lib/coverUrl'
+import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
+import { updateBook } from '@/lib/bookApi'
+import { supabase } from '@/lib/supabase'
+import { useApp } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 // Lucide Book icon (closed book) as a tiled SVG background pattern.
@@ -15,6 +20,27 @@ const bookPatternUrl =
 
 export default function BookCard({ book, href }: { book: Book; href?: string }) {
   const router = useRouter()
+  const { user } = useApp()
+  const [coverFailed, setCoverFailed] = useState(false)
+  const retryRef = useRef(false)
+
+  function handleCoverError() {
+    setCoverFailed(true)
+    if (retryRef.current || !user || !book.title) return
+    retryRef.current = true
+    fetchCoverByTitleAuthor(book.title, book.author ?? '').then((newCover) => {
+      if (!newCover || newCover === book.cover_url) return
+      updateBook(supabase, user.id, book.id, { cover_url: newCover }).catch(() => {})
+    }).catch(() => {})
+  }
+
+  // Open Library sometimes returns a tiny 1x1 placeholder instead of 404
+  function handleCoverLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    const img = e.currentTarget
+    if (img.naturalWidth <= 1 || img.naturalHeight <= 1) handleCoverError()
+  }
+
+  const showCover = book.cover_url && !coverFailed
 
   return (
     <motion.div
@@ -30,12 +56,14 @@ export default function BookCard({ book, href }: { book: Book; href?: string }) 
 
         {/* Cover image or no-cover placeholder */}
         <div className="absolute inset-0">
-          {book.cover_url ? (
+          {showCover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={coverUrl(book.cover_url)}
               alt={book.title}
               className="w-full h-full object-cover"
+              onError={handleCoverError}
+              onLoad={handleCoverLoad}
             />
           ) : (
             <div className="relative w-full h-full" style={{ backgroundColor: 'var(--primary)' }}>
@@ -53,7 +81,7 @@ export default function BookCard({ book, href }: { book: Book; href?: string }) 
         </div>
 
         {/* Gradient overlay — dark for photo covers, primary-to-transparent for pattern */}
-        {book.cover_url ? (
+        {showCover ? (
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70" />
         ) : (
           <div
@@ -74,7 +102,7 @@ export default function BookCard({ book, href }: { book: Book; href?: string }) 
           )}
 
           {/* Title — only shown when there is no cover */}
-          {!book.cover_url && (
+          {!showCover && (
             <p className="text-white text-[17px] font-semibold leading-[22px] tracking-[-0.43px] line-clamp-2">
               {book.title}
             </p>
