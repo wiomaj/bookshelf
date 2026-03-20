@@ -27,6 +27,7 @@ interface BookFormProps {
   submitLabel?: string
   loading?: boolean
   status?: BookStatus
+  onAudiobookChange?: (value: boolean) => void
 }
 
 // ─── Cover fallback ───────────────────────────────────────────────────────────
@@ -93,6 +94,7 @@ export default function BookForm({
   submitLabel = 'Save',
   loading = false,
   status = 'read',
+  onAudiobookChange,
 }: BookFormProps) {
   const t = useT()
   const { user } = useApp()
@@ -104,6 +106,7 @@ export default function BookForm({
   const [notes, setNotes]     = useState(initialData?.notes ?? '')
   const genreRef = useRef(initialData?.genre)
   const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
+  const [isAudiobook, setIsAudiobook] = useState(initialData?.is_audiobook ?? false)
 
   // Track whether any field has been edited
   const isDirty =
@@ -113,7 +116,8 @@ export default function BookForm({
     month !== (initialData?.month ?? null) ||
     rating !== (initialData?.rating ?? 0) ||
     notes !== (initialData?.notes ?? '') ||
-    coverUrl !== (initialData?.cover_url ?? '')
+    coverUrl !== (initialData?.cover_url ?? '') ||
+    isAudiobook !== (initialData?.is_audiobook ?? false)
   const [photoLoading, setPhotoLoading] = useState(false)
   const photoInputRef = useRef<HTMLInputElement>(null)
 
@@ -223,6 +227,7 @@ export default function BookForm({
         rating:    status === 'read' ? rating : 0,
         notes:     status === 'read' ? (notes.trim() || undefined) : undefined,
         cover_url: coverUrl.trim() || undefined,
+        is_audiobook: isAudiobook,
       })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t.errorSomethingWentWrong)
@@ -315,6 +320,17 @@ export default function BookForm({
           />
         </div>
       </div>
+
+      {/* ── Audiobook checkbox ──────────────────────────────────────────── */}
+      <label className="flex items-center gap-3 px-1 pb-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={isAudiobook}
+          onChange={(e) => { setIsAudiobook(e.target.checked); onAudiobookChange?.(e.target.checked) }}
+          className="w-5 h-5 rounded accent-[var(--primary)]"
+        />
+        <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.audiobook}</span>
+      </label>
 
       {/* ── When did you read it? (Month 2/3 + Year 1/3) ─────────────────── */}
       {status !== 'wishlist' && (

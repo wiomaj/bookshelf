@@ -68,6 +68,7 @@ export default function WishlistDetailPage() {
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [editStatus, setEditStatus] = useState<BookStatus>('wishlist')
+  const [editAudiobook, setEditAudiobook] = useState(false)
   const [updateLoading, setUpdateLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -283,6 +284,7 @@ export default function WishlistDetailPage() {
             <BookForm
               initialData={{
                 ...book,
+                is_audiobook: editAudiobook,
                 month: book.read_month ?? book.month,
                 year: book.read_year ?? book.year,
               }}
@@ -290,11 +292,13 @@ export default function WishlistDetailPage() {
               submitLabel={t.saveChanges}
               loading={updateLoading}
               status="read"
+              onAudiobookChange={setEditAudiobook}
             />
           ) : (
             <ToReadForm
               initialData={{
                 ...book,
+                is_audiobook: editAudiobook,
                 month: editStatus === 'to_read' ? (book.acquired_month ?? book.month) : book.month,
                 year: editStatus === 'to_read' ? (book.acquired_year ?? book.year) : book.year,
               }}
@@ -302,6 +306,7 @@ export default function WishlistDetailPage() {
               submitLabel={t.saveChanges}
               loading={updateLoading}
               hideDateField={editStatus === 'wishlist'}
+              onAudiobookChange={setEditAudiobook}
             />
           )}
         </motion.div>
@@ -341,7 +346,7 @@ export default function WishlistDetailPage() {
         <div className="relative z-30 flex justify-end gap-2 pt-4 pr-4">
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => { setEditStatus('wishlist'); setIsEditing(true) }}
+            onClick={() => { setEditStatus('wishlist'); setEditAudiobook(book?.is_audiobook ?? false); setIsEditing(true) }}
             className="glass w-11 h-11 rounded-full flex items-center justify-center"
             aria-label="Edit"
             style={{ color: 'var(--label)' }}
@@ -367,9 +372,16 @@ export default function WishlistDetailPage() {
           className="relative z-20 flex justify-center mt-3"
         >
           <div
-            className="w-[148px] h-[220px] rounded-[10px] overflow-hidden"
+            className="relative w-[148px] h-[220px] rounded-[10px] overflow-hidden"
             style={{ boxShadow: '0 20px 48px rgba(0,0,0,0.30), 0 4px 8px rgba(0,0,0,0.12)' }}
           >
+            {book.is_audiobook && (
+              <div className="absolute top-2 left-2 z-10 w-[26px] h-[26px] rounded-full backdrop-blur-sm flex items-center justify-center" style={{ backgroundColor: 'rgba(60, 60, 67, 0.60)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
+                </svg>
+              </div>
+            )}
             {showCover ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -409,9 +421,14 @@ export default function WishlistDetailPage() {
           {/* Title + Author */}
           <div className="flex flex-col gap-[6px]">
             <h1
-              className="text-[28px] font-bold leading-[34px] tracking-[0.38px]"
+              className="text-[28px] font-bold leading-[34px] tracking-[0.38px] flex items-center gap-2"
               style={{ color: 'var(--label)' }}
             >
+              {book.is_audiobook && (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-40">
+                  <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
+                </svg>
+              )}
               {book.title}
             </h1>
             {book.author && (
@@ -441,7 +458,7 @@ export default function WishlistDetailPage() {
             className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center disabled:opacity-50"
             style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
           >
-            {moveLoading ? t.loading : t.moveToReadingList}
+            {moveLoading ? t.loading : t.markAsReceived}
           </motion.button>
 
           {/* My notes */}
@@ -572,7 +589,7 @@ export default function WishlistDetailPage() {
                   className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white"
                   style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
                 >
-                  {t.moveToReadingList}
+                  {t.markAsReceived}
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.97 }}
@@ -580,7 +597,7 @@ export default function WishlistDetailPage() {
                   className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white"
                   style={{ backgroundColor: '#34C759' }}
                 >
-                  {t.markAsRead}
+                  {book.is_audiobook ? t.markAsListened : t.markAsRead}
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.97 }}
@@ -622,7 +639,7 @@ export default function WishlistDetailPage() {
                    style={{ backgroundColor: 'var(--separator-opaque)' }} />
 
               <h3 className="text-[22px] font-bold tracking-[-0.3px] mb-5" style={{ color: 'var(--label)' }}>
-                {t.whenDidYouRead}
+                {book.is_audiobook ? t.whenDidYouListen : t.whenDidYouRead}
               </h3>
 
               {/* Month + Year pickers */}
@@ -693,7 +710,7 @@ export default function WishlistDetailPage() {
                   className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white disabled:opacity-40"
                   style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
                 >
-                  {t.markAsRead}
+                  {book.is_audiobook ? t.markAsListened : t.markAsRead}
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.97 }}

@@ -60,9 +60,14 @@ export default function BookListItem({ book }: { book: Book }) {
           </p>
         )}
         <p
-          className="text-[17px] font-semibold leading-[22px] tracking-[-0.43px] line-clamp-2"
+          className="text-[17px] font-semibold leading-[22px] tracking-[-0.43px] line-clamp-2 flex items-center gap-1.5"
           style={{ color: 'var(--label)' }}
         >
+          {book.is_audiobook && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-50">
+              <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
+            </svg>
+          )}
           {book.title}
         </p>
         {book.author && (
