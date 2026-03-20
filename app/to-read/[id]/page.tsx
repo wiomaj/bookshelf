@@ -656,9 +656,6 @@ export default function ToReadDetailPage() {
                 <h3 className="text-[22px] font-bold tracking-[-0.3px]" style={{ color: 'var(--label)' }}>
                   {t.abandonDialogTitle}
                 </h3>
-                <p className="text-[15px] leading-5" style={{ color: 'var(--label-secondary)' }}>
-                  {t.abandonDialogMessage}
-                </p>
               </div>
 
               {/* Rating (optional) */}
