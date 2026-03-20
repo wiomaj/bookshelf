@@ -17,6 +17,7 @@ export type ToReadFormData = {
   author: string
   month: number | null
   year: number
+  notes?: string
   cover_url?: string
   is_audiobook?: boolean
 }
@@ -48,6 +49,7 @@ export default function ToReadForm({
   const [author, setAuthor] = useState(initialData?.author ?? '')
   const [month, setMonth] = useState<number | null>(initialData?.month ?? null)
   const [year, setYear] = useState<number>(initialData?.year ?? 0)
+  const [notes, setNotes] = useState(initialData?.notes ?? '')
   const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
   const [isAudiobook, setIsAudiobook] = useState(initialData?.is_audiobook ?? false)
   const [photoLoading, setPhotoLoading] = useState(false)
@@ -58,6 +60,7 @@ export default function ToReadForm({
     author !== (initialData?.author ?? '') ||
     month !== (initialData?.month ?? null) ||
     year !== (initialData?.year ?? 0) ||
+    notes !== (initialData?.notes ?? '') ||
     coverUrl !== (initialData?.cover_url ?? '') ||
     isAudiobook !== (initialData?.is_audiobook ?? false)
   const photoInputRef = useRef<HTMLInputElement>(null)
@@ -143,7 +146,7 @@ export default function ToReadForm({
     }
 
     try {
-      await onSubmit({ title: title.trim(), author: author.trim(), month, year, cover_url: coverUrl.trim() || undefined, is_audiobook: isAudiobook })
+      await onSubmit({ title: title.trim(), author: author.trim(), month, year, notes: notes.trim() || undefined, cover_url: coverUrl.trim() || undefined, is_audiobook: isAudiobook })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t.errorSomethingWentWrong)
     }
@@ -281,6 +284,21 @@ export default function ToReadForm({
           </div>
         </div>
       </div>}
+
+      {/* ── My Notes ───────────────────────────────────────────────────────── */}
+      <div>
+        <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>{t.myNotesLabel}</label>
+        <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder={t.notesPlaceholder}
+            rows={5}
+            className="w-full px-4 py-3 bg-transparent focus:outline-none text-[17px] resize-none"
+            style={{ color: 'var(--label)' }}
+          />
+        </div>
+      </div>
 
       {/* ── Cover ──────────────────────────────────────────────────────────── */}
       <div>

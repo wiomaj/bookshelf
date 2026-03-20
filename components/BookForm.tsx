@@ -224,7 +224,7 @@ export default function BookForm({
         year:      status === 'wishlist' ? 0 : year,
         month:     status === 'wishlist' ? null : month,
         rating:    status === 'read' ? rating : 0,
-        notes:     status === 'read' ? (notes.trim() || undefined) : undefined,
+        notes:     notes.trim() || undefined,
         cover_url: coverUrl.trim() || undefined,
         is_audiobook: isAudiobook,
       })
@@ -390,7 +390,7 @@ export default function BookForm({
       )}
 
       {/* ── My Notes ───────────────────────────────────────────────────────── */}
-      {status === 'read' && (
+      {(
         <div>
           <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>{t.myNotesLabel}</label>
           <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
