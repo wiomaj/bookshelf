@@ -77,7 +77,7 @@ function WishlistYearSection({ year, books, viewMode }: YearSectionProps) {
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-2 min-[500px]:grid-cols-3 gap-x-[12px] gap-y-3 px-4 pb-4">
                 {books.map((book) => (
-                  <BookCard key={book.id} book={book} href={`/wishlist/${book.id}`} />
+                  <BookCard key={book.id} book={book} href={`/wishlist/${book.id}`} hideRating />
                 ))}
               </div>
             ) : (

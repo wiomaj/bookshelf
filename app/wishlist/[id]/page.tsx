@@ -208,7 +208,7 @@ export default function WishlistDetailPage() {
   }
 
   async function handleConfirmMarkAsRead() {
-    if (!user || !book || readRating === 0) return
+    if (!user || !book) return
     setMoveLoading(true)
     setShowMarkAsReadModal(false)
     try {
@@ -675,7 +675,7 @@ export default function WishlistDetailPage() {
               {/* Rating */}
               <div className="mb-5">
                 <label className="block text-[13px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--label-secondary)' }}>
-                  {t.ratingLabel}<span style={{ color: 'var(--primary)' }}> *</span>
+                  {t.ratingLabel}
                 </label>
                 <StarRating rating={readRating} onRate={setReadRating} size={36} />
                 {readRating > 0 && (
@@ -706,8 +706,7 @@ export default function WishlistDetailPage() {
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={handleConfirmMarkAsRead}
-                  disabled={readRating === 0}
-                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white disabled:opacity-40"
+                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white"
                   style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
                 >
                   {book.is_audiobook ? t.markAsListened : t.markAsRead}

@@ -18,7 +18,7 @@ import type { Book } from '@/types/book'
 const bookPatternUrl =
   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-4 -4 32 32' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20'/%3E%3C/svg%3E")`
 
-export default function BookCard({ book, href }: { book: Book; href?: string }) {
+export default function BookCard({ book, href, hideRating }: { book: Book; href?: string; hideRating?: boolean }) {
   const router = useRouter()
   const { user } = useApp()
   const t = useT()
@@ -92,13 +92,8 @@ export default function BookCard({ book, href }: { book: Book; href?: string }) 
 
         {/* Abandoned badge */}
         {book.status === 'abandoned' && (
-          <div className="absolute top-2 right-2 z-20 flex items-center gap-1 rounded-full px-2 py-[3px] backdrop-blur-sm" style={{ backgroundColor: 'rgba(60, 60, 67, 0.60)' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
-              <path d="m14.5 7-5 5" />
-              <path d="m9.5 7 5 5" />
-            </svg>
-            <span className="text-white text-[11px] font-semibold leading-[13px]">{t.chipAbandoned}</span>
+          <div className="absolute top-[11px] z-20 rounded-full px-2 py-1 backdrop-blur-sm flex items-center justify-center" style={{ backgroundColor: 'rgba(60, 60, 67, 0.60)', left: book.is_audiobook ? '40px' : '8px' }}>
+            <span className="text-white text-[11px] leading-[13px] tracking-[0.06px]">{t.chipAbandoned}</span>
           </div>
         )}
 
@@ -136,7 +131,7 @@ export default function BookCard({ book, href }: { book: Book; href?: string }) 
             </p>
           )}
 
-          {book.rating >= 1 && <StarRating rating={book.rating} readonly size={16} darkBg />}
+          {!hideRating && book.rating >= 1 && <StarRating rating={book.rating} readonly size={16} darkBg />}
         </div>
       </div>
     </motion.div>
