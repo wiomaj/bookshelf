@@ -2,7 +2,7 @@
 
 import { useT } from '@/contexts/AppContext'
 
-export type BookStatus = 'read' | 'to_read' | 'wishlist'
+export type BookStatus = 'read' | 'to_read' | 'wishlist' | 'abandoned'
 
 export default function StatusPicker({
   value,
@@ -28,7 +28,7 @@ export default function StatusPicker({
           onClick={() => onChange(key)}
           className="flex-1 py-[6px] rounded-full text-[13px] font-medium transition-all"
           style={
-            value === key
+            (value === key || (value === 'abandoned' && key === 'read'))
               ? { backgroundColor: 'var(--bg-elevated)', color: 'var(--label)', fontWeight: 600, boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }
               : { color: 'var(--label-secondary)' }
           }

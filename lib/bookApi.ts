@@ -31,7 +31,7 @@ export async function getReadBooks(supabase: SupabaseClient, userId: string): Pr
     .from('books')
     .select(COLUMNS)
     .eq('user_id', userId)
-    .eq('status', 'read')
+    .in('status', ['read', 'abandoned'])
     .order('year', { ascending: false })
     .order('created_at', { ascending: false })
 

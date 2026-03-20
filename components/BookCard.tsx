@@ -9,7 +9,7 @@ import { coverUrl } from '@/lib/coverUrl'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { updateBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
-import { useApp } from '@/contexts/AppContext'
+import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 // Lucide Book icon (closed book) as a tiled SVG background pattern.
@@ -21,6 +21,7 @@ const bookPatternUrl =
 export default function BookCard({ book, href }: { book: Book; href?: string }) {
   const router = useRouter()
   const { user } = useApp()
+  const t = useT()
   const [coverFailed, setCoverFailed] = useState(false)
   const retryRef = useRef(false)
 
@@ -86,6 +87,18 @@ export default function BookCard({ book, href }: { book: Book; href?: string }) 
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
             </svg>
+          </div>
+        )}
+
+        {/* Abandoned badge */}
+        {book.status === 'abandoned' && (
+          <div className="absolute top-2 right-2 z-20 flex items-center gap-1 rounded-full px-2 py-[3px] backdrop-blur-sm" style={{ backgroundColor: 'rgba(60, 60, 67, 0.60)' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
+              <path d="m14.5 7-5 5" />
+              <path d="m9.5 7 5 5" />
+            </svg>
+            <span className="text-white text-[11px] font-semibold leading-[13px]">{t.chipAbandoned}</span>
           </div>
         )}
 

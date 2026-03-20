@@ -128,7 +128,7 @@ export default function BookDetailPage() {
     setUpdateLoading(true)
     try {
       const dateColumns: Record<string, unknown> = {}
-      if (editStatus === 'read') {
+      if (editStatus === 'read' || editStatus === 'abandoned') {
         dateColumns.read_month = data.month
         dateColumns.read_year = data.year
       } else if (editStatus === 'to_read') {
@@ -136,7 +136,7 @@ export default function BookDetailPage() {
         dateColumns.acquired_year = data.year
       }
       await updateBook(supabase, user.id, book.id, { ...data, status: editStatus, ...dateColumns })
-      sessionStorage.setItem('bookshelf_returnTab', editStatus)
+      sessionStorage.setItem('bookshelf_returnTab', editStatus === 'abandoned' ? 'read' : editStatus)
       sessionStorage.setItem('bookshelf_flash', 'changesSaved')
       router.replace('/')
     } finally {
@@ -207,7 +207,7 @@ export default function BookDetailPage() {
         </div>
 
         <motion.div key={editStatus} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
-          {editStatus === 'read' ? (
+          {(editStatus === 'read' || editStatus === 'abandoned') ? (
             <BookForm
               initialData={{
                 ...book,
@@ -276,7 +276,7 @@ export default function BookDetailPage() {
         <div className="relative z-30 flex justify-end gap-2 pt-4 pr-4">
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => { setEditStatus('read'); setEditAudiobook(book?.is_audiobook ?? false); setIsEditing(true) }}
+            onClick={() => { setEditStatus((book?.status as BookStatus) ?? 'read'); setEditAudiobook(book?.is_audiobook ?? false); setIsEditing(true) }}
             className="glass w-11 h-11 rounded-full flex items-center justify-center"
             aria-label="Edit"
             style={{ color: 'var(--label)' }}
@@ -374,11 +374,27 @@ export default function BookDetailPage() {
 
           {/* Info chips — horizontal scroll */}
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
-            <InfoChip
-              icon={book.is_audiobook ? HeadphonesCheck : BookOpenCheck}
-              label={book.is_audiobook ? t.chipListened : t.tabRead}
-              value={readDate}
-            />
+            {book.status === 'abandoned' ? (
+              <div
+                className="shrink-0 flex items-center gap-2 rounded-[16px] px-4 py-2"
+                style={{ backgroundColor: 'rgba(255, 56, 60, 0.12)' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF383C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
+                  <path d="m14.5 7-5 5" />
+                  <path d="m9.5 7 5 5" />
+                </svg>
+                <span className="text-[12px] leading-[16px] font-medium" style={{ color: '#FF383C' }}>
+                  {t.chipAbandoned}
+                </span>
+              </div>
+            ) : (
+              <InfoChip
+                icon={book.is_audiobook ? HeadphonesCheck : BookOpenCheck}
+                label={book.is_audiobook ? t.chipListened : t.tabRead}
+                value={readDate}
+              />
+            )}
             <InfoChip
               icon={Rocket}
               label={t.released}
@@ -430,6 +446,22 @@ export default function BookDetailPage() {
               </p>
             )}
           </div>
+
+          {/* Resume reading CTA for abandoned books */}
+          {book.status === 'abandoned' && (
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={async () => {
+                if (!user) return
+                await updateBook(supabase, user.id, book.id, { status: 'to_read' })
+                router.replace(`/to-read/${book.id}`)
+              }}
+              className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-center"
+              style={{ backgroundColor: 'var(--primary)', color: 'white', boxShadow: 'var(--btn-shadow)' }}
+            >
+              {t.resumeReading}
+            </motion.button>
+          )}
 
           {/* Delete CTA */}
           <motion.button
