@@ -6,6 +6,7 @@ import { Book as BookIcon } from 'lucide-react'
 import StarRating from './StarRating'
 import { formatMonthShort } from '@/lib/month'
 import { coverUrl } from '@/lib/coverUrl'
+import { useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
 // Same Book-icon SVG used for the tile pattern; at backgroundSize '22px 22px'
@@ -15,6 +16,7 @@ const bookPatternUrl =
 
 export default function BookListItem({ book }: { book: Book }) {
   const router = useRouter()
+  const t = useT()
 
   return (
     <motion.div
@@ -51,17 +53,23 @@ export default function BookListItem({ book }: { book: Book }) {
 
       {/* Content: month → title → author → stars */}
       <div className="flex-1 min-w-0 flex flex-col gap-[4px]">
-        {formatMonthShort(book.month) && (
+        {(formatMonthShort(book.month) || book.status === 'abandoned') && (
           <p
-            className="text-[11px] leading-[13px] tracking-[0.06px]"
+            className="text-[11px] leading-[13px] tracking-[0.06px] flex items-center gap-1"
             style={{ color: 'var(--label-secondary)' }}
           >
             {formatMonthShort(book.month)}
+            {book.status === 'abandoned' && (
+              <>
+                {formatMonthShort(book.month) && <span>·</span>}
+                <span style={{ color: '#FF383C' }}>{t.chipAbandoned}</span>
+              </>
+            )}
           </p>
         )}
         <p
           className="text-[17px] font-semibold leading-[22px] tracking-[-0.43px] line-clamp-2 flex items-center gap-1.5"
-          style={{ color: 'var(--label)' }}
+          style={{ color: book.status === 'abandoned' ? 'var(--label-tertiary)' : 'var(--label)' }}
         >
           {book.is_audiobook && (
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-50">

@@ -73,6 +73,8 @@ export default function ToReadDetailPage() {
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [showAbandonConfirm, setShowAbandonConfirm] = useState(false)
   const [abandonLoading, setAbandonLoading] = useState(false)
+  const [abandonRating, setAbandonRating] = useState(0)
+  const [abandonNotes, setAbandonNotes] = useState('')
   const [showMoveModal, setShowMoveModal] = useState(false)
   const [moveLoading, setMoveLoading] = useState(false)
   const [moveMonth, setMoveMonth] = useState<number>(new Date().getMonth() + 1)
@@ -205,8 +207,15 @@ export default function ToReadDetailPage() {
   async function handleAbandon() {
     if (!user || !book) return
     setAbandonLoading(true)
+    const now = new Date()
     try {
-      await updateBook(supabase, user.id, book.id, { status: 'abandoned' })
+      await updateBook(supabase, user.id, book.id, {
+        status: 'abandoned',
+        month: now.getMonth() + 1,
+        year: now.getFullYear(),
+        ...(abandonRating > 0 && { rating: abandonRating }),
+        ...(abandonNotes.trim() && { notes: abandonNotes.trim() }),
+      })
       router.replace('/')
     } finally {
       setAbandonLoading(false)
@@ -426,21 +435,6 @@ export default function ToReadDetailPage() {
 
           {/* Info chips — horizontal scroll */}
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
-            {book.status === 'abandoned' && (
-              <div
-                className="shrink-0 flex items-center gap-2 rounded-[16px] px-4 py-2"
-                style={{ backgroundColor: 'var(--fill)' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--label-secondary)' }}>
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="m15 9-6 6" />
-                  <path d="m9 9 6 6" />
-                </svg>
-                <span className="text-[12px] leading-[16px] font-medium" style={{ color: 'var(--label)' }}>
-                  {t.chipAbandoned}
-                </span>
-              </div>
-            )}
             <InfoChip icon={BookIcon} label={t.chipReceived} value={addedDate} />
             <InfoChip icon={Rocket} label={t.released} value={publishedYear} />
             {displayGenre && (
@@ -448,31 +442,30 @@ export default function ToReadDetailPage() {
             )}
           </div>
 
-          {/* Mark as read / Resume reading CTA */}
-          {book.status === 'abandoned' ? (
+          {/* Mark as read CTA with abandon button */}
+          <div className="flex gap-3">
             <motion.button
               whileTap={{ scale: 0.97 }}
-              onClick={async () => {
-                if (!user) return
-                await updateBook(supabase, user.id, book.id, { status: 'to_read' })
-                setBook({ ...book, status: 'to_read' })
-              }}
-              className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-center"
-              style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+              onClick={() => setShowAbandonConfirm(true)}
+              className="shrink-0 w-[52px] h-[52px] rounded-[14px] flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 56, 60, 0.12)' }}
             >
-              {t.resumeReading}
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF383C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
+                <path d="m14.5 7-5 5" />
+                <path d="m9.5 7 5 5" />
+              </svg>
             </motion.button>
-          ) : (
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={() => setShowMoveModal(true)}
               disabled={moveLoading}
-              className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center"
+              className="flex-1 py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center"
               style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
             >
               {moveLoading ? t.loading : (book.is_audiobook ? t.markAsListened : t.markAsRead)}
             </motion.button>
-          )}
+          </div>
 
           {/* My notes */}
           <div className="flex flex-col gap-[6px]">
@@ -512,18 +505,8 @@ export default function ToReadDetailPage() {
             )}
           </div>
 
-          {/* Abandon & Delete */}
+          {/* Delete */}
           <div className="flex gap-2">
-            {book.status !== 'abandoned' && (
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setShowAbandonConfirm(true)}
-                className="px-4 py-[6px] rounded-full text-[15px]"
-                style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
-              >
-                {t.abandonBook}
-              </motion.button>
-            )}
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={() => setShowDeleteConfirm(true)}
@@ -647,19 +630,91 @@ export default function ToReadDetailPage() {
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+        {showAbandonConfirm && (
+          <>
+            <motion.div
+              key="abandon-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAbandonConfirm(false)}
+              className="fixed inset-0 z-40"
+              style={{ backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+            />
+            <motion.div
+              key="abandon-sheet"
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+              className="fixed bottom-0 left-0 right-0 z-50 max-w-[600px] mx-auto rounded-t-[28px] p-6 pb-10"
+              style={{ backgroundColor: 'var(--bg-elevated)' }}
+            >
+              <div className="w-10 h-1 rounded-full mx-auto mb-5"
+                   style={{ backgroundColor: 'var(--separator-opaque)' }} />
 
-      <ConfirmDialog
-        open={showAbandonConfirm}
-        title={t.abandonDialogTitle}
-        description={t.abandonDialogMessage}
-        confirmLabel={t.abandonBook}
-        loadingLabel={t.loading}
-        cancelLabel={t.cancel}
-        loading={abandonLoading}
-        onConfirm={handleAbandon}
-        onCancel={() => setShowAbandonConfirm(false)}
-      />
+              <div className="flex flex-col gap-1.5 mb-5">
+                <h3 className="text-[22px] font-bold tracking-[-0.3px]" style={{ color: 'var(--label)' }}>
+                  {t.abandonDialogTitle}
+                </h3>
+                <p className="text-[15px] leading-5" style={{ color: 'var(--label-secondary)' }}>
+                  {t.abandonDialogMessage}
+                </p>
+              </div>
+
+              {/* Rating (optional) */}
+              <div className="mb-5">
+                <label className="block text-[13px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--label-secondary)' }}>
+                  {t.ratingLabel}
+                </label>
+                <StarRating rating={abandonRating} onRate={setAbandonRating} size={36} />
+                {abandonRating > 0 && (
+                  <p className="text-[14px] mt-2" style={{ color: 'var(--label-secondary)' }}>
+                    {(['', ...t.ratingLabels] as string[])[abandonRating]}
+                  </p>
+                )}
+              </div>
+
+              {/* Notes (optional) */}
+              <div className="mb-6">
+                <label className="block text-[13px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--label-secondary)' }}>
+                  {t.myNotesLabel}
+                </label>
+                <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--fill)' }}>
+                  <textarea
+                    value={abandonNotes}
+                    onChange={e => setAbandonNotes(e.target.value)}
+                    placeholder={t.notesPlaceholder}
+                    rows={3}
+                    className="w-full px-4 py-3 bg-transparent focus:outline-none text-[17px] resize-none"
+                    style={{ color: 'var(--label)' }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleAbandon}
+                  disabled={abandonLoading}
+                  className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold disabled:opacity-50"
+                  style={{ backgroundColor: 'rgb(255, 59, 48)' }}
+                >
+                  {abandonLoading ? t.loading : t.abandonBook}
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setShowAbandonConfirm(false)}
+                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold"
+                  style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+                >
+                  {t.cancel}
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <ConfirmDialog
         open={showDeleteConfirm}
