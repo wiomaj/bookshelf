@@ -56,6 +56,11 @@ export type Translations = {
   noDescriptionAvailable: string
   loading: string
   deleteBook: string
+  abandonBook: string
+  abandonDialogTitle: string
+  abandonDialogMessage: string
+  chipAbandoned: string
+  resumeReading: string
   bookNotFound: string
   backToBookshelf: string
   // Confirm dialog
@@ -249,6 +254,11 @@ const en: Translations = {
   noDescriptionAvailable: 'No description available.',
   loading: 'Loading…',
   deleteBook: 'Delete book',
+  abandonBook: 'Abandoned',
+  abandonDialogTitle: 'Mark as abandoned?',
+  abandonDialogMessage: 'This book will be moved to your abandoned list.',
+  chipAbandoned: 'Abandoned',
+  resumeReading: 'Resume reading',
   bookNotFound: 'Book not found',
   backToBookshelf: 'Back to bookshelf',
   deleteDialogTitle: 'Delete this book?',
@@ -425,6 +435,11 @@ const de: Translations = {
   noDescriptionAvailable: 'Keine Beschreibung verfügbar.',
   loading: 'Wird geladen…',
   deleteBook: 'Buch löschen',
+  abandonBook: 'Abgebrochen',
+  abandonDialogTitle: 'Als abgebrochen markieren?',
+  abandonDialogMessage: 'Das Buch wird in deine Abgebrochen-Liste verschoben.',
+  chipAbandoned: 'Abgebrochen',
+  resumeReading: 'Weiterlesen',
   bookNotFound: 'Buch nicht gefunden',
   backToBookshelf: 'Zurück zum Regal',
   deleteDialogTitle: 'Dieses Buch löschen?',
@@ -601,6 +616,11 @@ const fr: Translations = {
   noDescriptionAvailable: 'Aucune description disponible.',
   loading: 'Chargement…',
   deleteBook: 'Supprimer le livre',
+  abandonBook: 'Abandonné',
+  abandonDialogTitle: 'Marquer comme abandonné ?',
+  abandonDialogMessage: 'Ce livre sera déplacé vers votre liste des abandonnés.',
+  chipAbandoned: 'Abandonné',
+  resumeReading: 'Reprendre la lecture',
   bookNotFound: 'Livre introuvable',
   backToBookshelf: 'Retour à la bibliothèque',
   deleteDialogTitle: 'Supprimer ce livre ?',
@@ -777,6 +797,11 @@ const es: Translations = {
   noDescriptionAvailable: 'No hay descripción disponible.',
   loading: 'Cargando…',
   deleteBook: 'Eliminar libro',
+  abandonBook: 'Abandonado',
+  abandonDialogTitle: '¿Marcar como abandonado?',
+  abandonDialogMessage: 'Este libro se moverá a tu lista de abandonados.',
+  chipAbandoned: 'Abandonado',
+  resumeReading: 'Seguir leyendo',
   bookNotFound: 'Libro no encontrado',
   backToBookshelf: 'Volver a la estantería',
   deleteDialogTitle: '¿Eliminar este libro?',
@@ -953,6 +978,11 @@ const pl: Translations = {
   noDescriptionAvailable: 'Brak opisu.',
   loading: 'Ładowanie…',
   deleteBook: 'Usuń książkę',
+  abandonBook: 'Porzucona',
+  abandonDialogTitle: 'Oznaczyć jako porzuconą?',
+  abandonDialogMessage: 'Ta książka zostanie przeniesiona na listę porzuconych.',
+  chipAbandoned: 'Porzucona',
+  resumeReading: 'Wznów czytanie',
   bookNotFound: 'Nie znaleziono książki',
   backToBookshelf: 'Wróć do półki',
   deleteDialogTitle: 'Usunąć tę książkę?',

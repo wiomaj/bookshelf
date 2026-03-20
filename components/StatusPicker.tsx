@@ -2,7 +2,7 @@
 
 import { useT } from '@/contexts/AppContext'
 
-export type BookStatus = 'read' | 'to_read' | 'wishlist'
+export type BookStatus = 'read' | 'to_read' | 'wishlist' | 'abandoned'
 
 export default function StatusPicker({
   value,

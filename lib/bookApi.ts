@@ -51,7 +51,7 @@ export async function getToReadBooks(supabase: SupabaseClient, userId: string): 
     .from('books')
     .select(COLUMNS)
     .eq('user_id', userId)
-    .eq('status', 'to_read')
+    .in('status', ['to_read', 'abandoned'])
     .order('created_at', { ascending: false })
 
   if (error) throw new Error(error.message)

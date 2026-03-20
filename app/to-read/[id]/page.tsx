@@ -71,6 +71,8 @@ export default function ToReadDetailPage() {
   const [updateLoading, setUpdateLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [showAbandonConfirm, setShowAbandonConfirm] = useState(false)
+  const [abandonLoading, setAbandonLoading] = useState(false)
   const [showMoveModal, setShowMoveModal] = useState(false)
   const [moveLoading, setMoveLoading] = useState(false)
   const [moveMonth, setMoveMonth] = useState<number>(new Date().getMonth() + 1)
@@ -197,6 +199,18 @@ export default function ToReadDetailPage() {
     } finally {
       setDeleteLoading(false)
       setShowDeleteConfirm(false)
+    }
+  }
+
+  async function handleAbandon() {
+    if (!user || !book) return
+    setAbandonLoading(true)
+    try {
+      await updateBook(supabase, user.id, book.id, { status: 'abandoned' })
+      router.replace('/')
+    } finally {
+      setAbandonLoading(false)
+      setShowAbandonConfirm(false)
     }
   }
 
@@ -412,6 +426,21 @@ export default function ToReadDetailPage() {
 
           {/* Info chips — horizontal scroll */}
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
+            {book.status === 'abandoned' && (
+              <div
+                className="shrink-0 flex items-center gap-2 rounded-[16px] px-4 py-2"
+                style={{ backgroundColor: 'var(--fill)' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--label-secondary)' }}>
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="m15 9-6 6" />
+                  <path d="m9 9 6 6" />
+                </svg>
+                <span className="text-[12px] leading-[16px] font-medium" style={{ color: 'var(--label)' }}>
+                  {t.chipAbandoned}
+                </span>
+              </div>
+            )}
             <InfoChip icon={BookIcon} label={t.chipReceived} value={addedDate} />
             <InfoChip icon={Rocket} label={t.released} value={publishedYear} />
             {displayGenre && (
@@ -419,16 +448,31 @@ export default function ToReadDetailPage() {
             )}
           </div>
 
-          {/* Mark as read CTA */}
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setShowMoveModal(true)}
-            disabled={moveLoading}
-            className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center"
-            style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
-          >
-            {moveLoading ? t.loading : (book.is_audiobook ? t.markAsListened : t.markAsRead)}
-          </motion.button>
+          {/* Mark as read / Resume reading CTA */}
+          {book.status === 'abandoned' ? (
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={async () => {
+                if (!user) return
+                await updateBook(supabase, user.id, book.id, { status: 'to_read' })
+                setBook({ ...book, status: 'to_read' })
+              }}
+              className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-center"
+              style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+            >
+              {t.resumeReading}
+            </motion.button>
+          ) : (
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setShowMoveModal(true)}
+              disabled={moveLoading}
+              className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center"
+              style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+            >
+              {moveLoading ? t.loading : (book.is_audiobook ? t.markAsListened : t.markAsRead)}
+            </motion.button>
+          )}
 
           {/* My notes */}
           <div className="flex flex-col gap-[6px]">
@@ -468,15 +512,27 @@ export default function ToReadDetailPage() {
             )}
           </div>
 
-          {/* Delete CTA */}
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setShowDeleteConfirm(true)}
-            className="self-start px-4 py-[6px] rounded-full text-[15px]"
-            style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
-          >
-            {t.deleteBook}
-          </motion.button>
+          {/* Abandon & Delete */}
+          <div className="flex gap-2">
+            {book.status !== 'abandoned' && (
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setShowAbandonConfirm(true)}
+                className="px-4 py-[6px] rounded-full text-[15px]"
+                style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+              >
+                {t.abandonBook}
+              </motion.button>
+            )}
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setShowDeleteConfirm(true)}
+              className="px-4 py-[6px] rounded-full text-[15px]"
+              style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+            >
+              {t.deleteBook}
+            </motion.button>
+          </div>
         </motion.div>
       </div>
 
@@ -592,6 +648,18 @@ export default function ToReadDetailPage() {
           </>
         )}
       </AnimatePresence>
+
+      <ConfirmDialog
+        open={showAbandonConfirm}
+        title={t.abandonDialogTitle}
+        description={t.abandonDialogMessage}
+        confirmLabel={t.abandonBook}
+        loadingLabel={t.loading}
+        cancelLabel={t.cancel}
+        loading={abandonLoading}
+        onConfirm={handleAbandon}
+        onCancel={() => setShowAbandonConfirm(false)}
+      />
 
       <ConfirmDialog
         open={showDeleteConfirm}
