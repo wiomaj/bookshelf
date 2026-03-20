@@ -83,7 +83,7 @@ export default function BookListItem({ book }: { book: Book }) {
             {book.author}
           </p>
         )}
-        <StarRating rating={book.rating} readonly size={16} />
+        {book.rating >= 1 && <StarRating rating={book.rating} readonly size={16} />}
       </div>
     </motion.div>
   )
