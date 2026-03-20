@@ -208,7 +208,6 @@ export default function BookForm({
     e.preventDefault()
     setError('')
     if (!title.trim()) { setError(t.validationTitleRequired); return }
-    if (status === 'read' && rating === 0) { setError(t.validationRatingRequired); return }
 
     if (process.env.NODE_ENV === 'development') {
       console.debug('[BookForm] submitting book:', {
@@ -379,7 +378,7 @@ export default function BookForm({
       {status === 'read' && (
         <div>
           <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>
-            {t.ratingLabel}<span style={{ color: 'var(--primary)' }}> *</span>
+            {t.ratingLabel}
           </label>
           <StarRating rating={rating} onRate={setRating} size={36} />
           {rating > 0 && (

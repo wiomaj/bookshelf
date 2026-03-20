@@ -164,7 +164,6 @@ function AddBookContent() {
     e.preventDefault()
     setError('')
     if (!title.trim()) { setError('Title is required'); return }
-    if (tab === 'read' && rating === 0) { setError('Please add a star rating'); return }
     if (!user) return
 
     setLoading(true)
@@ -466,7 +465,7 @@ function AddBookContent() {
         {tab === 'read' && (
           <div>
             <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>
-              {t.ratingLabel}<span style={{ color: 'var(--primary)' }}> *</span>
+              {t.ratingLabel}
             </label>
             <StarRating rating={rating} onRate={setRating} size={36} />
             {rating > 0 && (
