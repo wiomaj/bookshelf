@@ -33,6 +33,7 @@ export type Translations = {
   authorLabel: string
   authorPlaceholder: string
   whenDidYouRead: string
+  whenDidYouListen: string
   unknownMonth: string
   monthNames: [string, string, string, string, string, string, string, string, string, string, string, string]
   seasonNames: [string, string, string, string]
@@ -42,6 +43,7 @@ export type Translations = {
   ratingLabels: [string, string, string, string, string]
   myNotesLabel: string
   notesPlaceholder: string
+  audiobook: string
   coverPreview: string
   removeCover: string
   takePhoto: string
@@ -144,6 +146,7 @@ export type Translations = {
   toReadEmptyCopy: string
   addToReadingList: string
   markAsRead: string
+  markAsListened: string
   toReadNotesPlaceholder: string
   whenDidYouGetIt: string
   wishlistTitle: string
@@ -152,7 +155,9 @@ export type Translations = {
   addToWishlist: string
   bookAddedToWishlist: string
   moveToReadingList: string
-  chipBought: string
+  markAsReceived: string
+  chipReceived: string
+  chipListened: string
   chipAdded: string
   // Stats
   dashboardTitle: string
@@ -222,6 +227,7 @@ const en: Translations = {
   authorLabel: 'Author',
   authorPlaceholder: 'Enter author name...',
   whenDidYouRead: 'When did you read it?',
+  whenDidYouListen: 'When did you listen to it?',
   unknownMonth: '— Unknown month —',
   monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
   seasonNames: ['Spring', 'Summer', 'Fall', 'Winter'],
@@ -231,6 +237,7 @@ const en: Translations = {
   ratingLabels: ["Didn't like it", "It was okay", "Liked it", "Really liked it", "Loved it"],
   myNotesLabel: 'My Notes',
   notesPlaceholder: 'What did you think about this book?',
+  audiobook: 'Audiobook',
   coverPreview: 'Cover preview',
   removeCover: 'Remove cover',
   takePhoto: 'Take photo',
@@ -322,13 +329,16 @@ const en: Translations = {
   toReadEmptyCopy: 'Add the books you already own, but haven\'t read so far... So many books, so little time.',
   addToReadingList: 'Add a book to be read',
   markAsRead: 'Mark as Read',
+  markAsListened: 'Mark as Listened',
   wishlistTitle: 'Wishlist',
   wishlistEmptyTitle: 'Your wishlist is empty',
   wishlistEmptyCopy: 'Save books you want to buy — so you always know what to grab at the bookshop.',
   addToWishlist: 'Add to Wishlist',
   bookAddedToWishlist: 'Added to wishlist!',
   moveToReadingList: 'Move to Reading List',
-  chipBought: 'Bought',
+  markAsReceived: 'Mark as Received',
+  chipReceived: 'Received',
+  chipListened: 'Listened',
   chipAdded: 'Added',
   toReadNotesPlaceholder: 'Why do you want to read this?',
   whenDidYouGetIt: 'When did you get it?',
@@ -393,6 +403,7 @@ const de: Translations = {
   authorLabel: 'Autor',
   authorPlaceholder: 'Autorenname eingeben...',
   whenDidYouRead: 'Wann hast du es gelesen?',
+  whenDidYouListen: 'Wann hast du es gehört?',
   unknownMonth: '— Unbekannter Monat —',
   monthNames: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
   seasonNames: ['Frühling', 'Sommer', 'Herbst', 'Winter'],
@@ -402,6 +413,7 @@ const de: Translations = {
   ratingLabels: ['Hat mir nicht gefallen', 'War okay', 'Hat mir gefallen', 'Hat mir sehr gefallen', 'Geliebt'],
   myNotesLabel: 'Meine Notizen',
   notesPlaceholder: 'Was hast du über dieses Buch gedacht?',
+  audiobook: 'Hörbuch',
   coverPreview: 'Cover-Vorschau',
   removeCover: 'Cover entfernen',
   takePhoto: 'Foto aufnehmen',
@@ -493,13 +505,16 @@ const de: Translations = {
   toReadEmptyCopy: 'Füge Bücher hinzu, die du schon besitzt, aber noch nicht gelesen hast… So viele Bücher, so wenig Zeit.',
   addToReadingList: 'Buch hinzufügen',
   markAsRead: 'Als gelesen markieren',
+  markAsListened: 'Als gehört markieren',
   wishlistTitle: 'Wunschliste',
   wishlistEmptyTitle: 'Deine Wunschliste ist leer',
   wishlistEmptyCopy: 'Speichere Bücher, die du kaufen möchtest — damit du beim nächsten Buchladen-Besuch weißt, was du willst.',
   addToWishlist: 'Zur Wunschliste',
   bookAddedToWishlist: 'Zur Wunschliste hinzugefügt!',
   moveToReadingList: 'In Leseliste verschieben',
-  chipBought: 'Gekauft',
+  markAsReceived: 'Als erhalten markieren',
+  chipReceived: 'Erhalten',
+  chipListened: 'Gehört',
   chipAdded: 'Hinzugefügt',
   whenDidYouGetIt: 'Wann hast du es bekommen?',
   toReadNotesPlaceholder: 'Warum möchtest du das lesen?',
@@ -564,6 +579,7 @@ const fr: Translations = {
   authorLabel: 'Auteur',
   authorPlaceholder: "Entrez le nom de l'auteur...",
   whenDidYouRead: "Quand l'avez-vous lu ?",
+  whenDidYouListen: "Quand l'avez-vous écouté ?",
   unknownMonth: '— Mois inconnu —',
   monthNames: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
   seasonNames: ['Printemps', 'Été', 'Automne', 'Hiver'],
@@ -573,6 +589,7 @@ const fr: Translations = {
   ratingLabels: ['Pas aimé', 'Passable', 'Aimé', 'Vraiment aimé', 'Adoré'],
   myNotesLabel: 'Mes notes',
   notesPlaceholder: "Qu'avez-vous pensé de ce livre ?",
+  audiobook: 'Livre audio',
   coverPreview: 'Aperçu de la couverture',
   removeCover: 'Supprimer la couverture',
   takePhoto: 'Prendre une photo',
@@ -664,13 +681,16 @@ const fr: Translations = {
   toReadEmptyCopy: 'Ajoute les livres que tu possèdes déjà mais que tu n\'as pas encore lus… Tant de livres, si peu de temps.',
   addToReadingList: 'Ajouter un livre à lire',
   markAsRead: 'Marquer comme lu',
+  markAsListened: 'Marquer comme écouté',
   wishlistTitle: 'Liste de souhaits',
   wishlistEmptyTitle: 'Ta liste de souhaits est vide',
   wishlistEmptyCopy: 'Sauvegarde les livres que tu veux acheter — pour ne pas oublier lors de ta prochaine visite en librairie.',
   addToWishlist: 'Ajouter à la liste',
   bookAddedToWishlist: 'Ajouté à la liste de souhaits !',
   moveToReadingList: 'Déplacer vers À lire',
-  chipBought: 'Acheté',
+  markAsReceived: 'Marquer comme reçu',
+  chipReceived: 'Reçu',
+  chipListened: 'Écouté',
   chipAdded: 'Ajouté',
   whenDidYouGetIt: 'Quand l\'avez-vous reçu ?',
   toReadNotesPlaceholder: 'Pourquoi voulez-vous le lire ?',
@@ -735,6 +755,7 @@ const es: Translations = {
   authorLabel: 'Autor',
   authorPlaceholder: 'Introduce el nombre del autor...',
   whenDidYouRead: '¿Cuándo lo leíste?',
+  whenDidYouListen: '¿Cuándo lo escuchaste?',
   unknownMonth: '— Mes desconocido —',
   monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
   seasonNames: ['Primavera', 'Verano', 'Otoño', 'Invierno'],
@@ -744,6 +765,7 @@ const es: Translations = {
   ratingLabels: ['No me gustó', 'Estuvo bien', 'Me gustó', 'Me gustó mucho', 'Lo amé'],
   myNotesLabel: 'Mis notas',
   notesPlaceholder: '¿Qué te pareció este libro?',
+  audiobook: 'Audiolibro',
   coverPreview: 'Vista previa de portada',
   removeCover: 'Eliminar portada',
   takePhoto: 'Tomar foto',
@@ -835,13 +857,16 @@ const es: Translations = {
   toReadEmptyCopy: 'Añade los libros que ya tienes pero aún no has leído… Tantos libros, tan poco tiempo.',
   addToReadingList: 'Añadir un libro por leer',
   markAsRead: 'Marcar como leído',
+  markAsListened: 'Marcar como escuchado',
   wishlistTitle: 'Lista de deseos',
   wishlistEmptyTitle: 'Tu lista de deseos está vacía',
   wishlistEmptyCopy: 'Guarda los libros que quieres comprar — para no olvidarlos en tu próxima visita a la librería.',
   addToWishlist: 'Añadir a la lista',
   bookAddedToWishlist: '¡Añadido a la lista de deseos!',
   moveToReadingList: 'Mover a Por leer',
-  chipBought: 'Comprado',
+  markAsReceived: 'Marcar como recibido',
+  chipReceived: 'Recibido',
+  chipListened: 'Escuchado',
   chipAdded: 'Añadido',
   whenDidYouGetIt: '¿Cuándo lo conseguiste?',
   toReadNotesPlaceholder: '¿Por qué quieres leerlo?',
@@ -906,6 +931,7 @@ const pl: Translations = {
   authorLabel: 'Autor',
   authorPlaceholder: 'Wpisz imię autora...',
   whenDidYouRead: 'Kiedy to czytałeś?',
+  whenDidYouListen: 'Kiedy tego słuchałeś?',
   unknownMonth: '— Nieznany miesiąc —',
   monthNames: ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],
   seasonNames: ['Wiosna', 'Lato', 'Jesień', 'Zima'],
@@ -915,6 +941,7 @@ const pl: Translations = {
   ratingLabels: ['Nie podobało mi się', 'Było okej', 'Podobało mi się', 'Bardzo mi się podobało', 'Kochałem to'],
   myNotesLabel: 'Moje notatki',
   notesPlaceholder: 'Co myślisz o tej książce?',
+  audiobook: 'Audiobook',
   coverPreview: 'Podgląd okładki',
   removeCover: 'Usuń okładkę',
   takePhoto: 'Zrób zdjęcie',
@@ -1006,13 +1033,16 @@ const pl: Translations = {
   toReadEmptyCopy: 'Dodaj książki, które już masz, ale jeszcze nie przeczytałeś… Tyle książek, tak mało czasu.',
   addToReadingList: 'Dodaj książkę do przeczytania',
   markAsRead: 'Oznacz jako przeczytane',
+  markAsListened: 'Oznacz jako wysłuchane',
   wishlistTitle: 'Lista życzeń',
   wishlistEmptyTitle: 'Twoja lista życzeń jest pusta',
   wishlistEmptyCopy: 'Zapisuj książki, które chcesz kupić — żeby nie zapomnieć przy kolejnej wizycie w księgarni.',
   addToWishlist: 'Dodaj do listy życzeń',
   bookAddedToWishlist: 'Dodano do listy życzeń!',
   moveToReadingList: 'Przenieś do listy lektur',
-  chipBought: 'Kupiono',
+  markAsReceived: 'Oznacz jako otrzymane',
+  chipReceived: 'Otrzymano',
+  chipListened: 'Wysłuchano',
   chipAdded: 'Dodano',
   whenDidYouGetIt: 'Kiedy ją dostałeś?',
   toReadNotesPlaceholder: 'Dlaczego chcesz to przeczytać?',

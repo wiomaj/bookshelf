@@ -18,6 +18,7 @@ export type ToReadFormData = {
   month: number | null
   year: number
   cover_url?: string
+  is_audiobook?: boolean
 }
 
 interface ToReadFormProps {
@@ -26,6 +27,7 @@ interface ToReadFormProps {
   submitLabel?: string
   loading?: boolean
   hideDateField?: boolean
+  onAudiobookChange?: (value: boolean) => void
 }
 
 // searchBooks is imported from @/lib/bookSearch — supports title, author, ISBN
@@ -38,6 +40,7 @@ export default function ToReadForm({
   submitLabel,
   loading = false,
   hideDateField = false,
+  onAudiobookChange,
 }: ToReadFormProps) {
   const t = useT()
   const { user } = useApp()
@@ -46,6 +49,7 @@ export default function ToReadForm({
   const [month, setMonth] = useState<number | null>(initialData?.month ?? null)
   const [year, setYear] = useState<number>(initialData?.year ?? 0)
   const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
+  const [isAudiobook, setIsAudiobook] = useState(initialData?.is_audiobook ?? false)
   const [photoLoading, setPhotoLoading] = useState(false)
 
   // Track whether any field has been edited
@@ -54,7 +58,8 @@ export default function ToReadForm({
     author !== (initialData?.author ?? '') ||
     month !== (initialData?.month ?? null) ||
     year !== (initialData?.year ?? 0) ||
-    coverUrl !== (initialData?.cover_url ?? '')
+    coverUrl !== (initialData?.cover_url ?? '') ||
+    isAudiobook !== (initialData?.is_audiobook ?? false)
   const photoInputRef = useRef<HTMLInputElement>(null)
 
   const [suggestions, setSuggestions] = useState<BookSuggestion[]>([])
@@ -138,7 +143,7 @@ export default function ToReadForm({
     }
 
     try {
-      await onSubmit({ title: title.trim(), author: author.trim(), month, year, cover_url: coverUrl.trim() || undefined })
+      await onSubmit({ title: title.trim(), author: author.trim(), month, year, cover_url: coverUrl.trim() || undefined, is_audiobook: isAudiobook })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t.errorSomethingWentWrong)
     }
@@ -223,6 +228,17 @@ export default function ToReadForm({
           />
         </div>
       </div>
+
+      {/* ── Audiobook checkbox ──────────────────────────────────────────── */}
+      <label className="flex items-center gap-3 px-1 pb-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={isAudiobook}
+          onChange={(e) => { setIsAudiobook(e.target.checked); onAudiobookChange?.(e.target.checked) }}
+          className="w-5 h-5 rounded accent-[var(--primary)]"
+        />
+        <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.audiobook}</span>
+      </label>
 
       {/* ── When did you get it? (Month 2/3 + Year 1/3) ────────────────────── */}
       {!hideDateField && <div>

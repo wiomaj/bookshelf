@@ -80,6 +80,15 @@ export default function BookCard({ book, href }: { book: Book; href?: string }) 
           )}
         </div>
 
+        {/* Audiobook badge */}
+        {book.is_audiobook && (
+          <div className="absolute top-2 left-2 z-20 w-[26px] h-[26px] rounded-full backdrop-blur-sm flex items-center justify-center" style={{ backgroundColor: 'rgba(60, 60, 67, 0.60)' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
+            </svg>
+          </div>
+        )}
+
         {/* Gradient overlay — dark for photo covers, primary-to-transparent for pattern */}
         {showCover ? (
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70" />

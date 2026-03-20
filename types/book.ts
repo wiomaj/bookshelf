@@ -17,4 +17,5 @@ export type Book = {
   acquired_year?: number | null
   read_month?: number | null      // month when user finished reading
   read_year?: number | null
+  is_audiobook?: boolean
 }

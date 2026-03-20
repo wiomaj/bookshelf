@@ -82,6 +82,8 @@ function AddBookContent() {
   const [error, setError] = useState('')
   const photoInputRef = useRef<HTMLInputElement>(null)
 
+  const [isAudiobook, setIsAudiobook] = useState(false)
+
   // Read-specific state
   const [year, setYear] = useState(currentYear)
   const [month, setMonth] = useState<number | null>(new Date().getMonth() + 1)
@@ -172,6 +174,7 @@ function AddBookContent() {
           title: title.trim(), author: author.trim(),
           year, month, rating, notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,
+          is_audiobook: isAudiobook,
         })
         if (!coverUrl && title) {
           try {
@@ -185,6 +188,7 @@ function AddBookContent() {
           title: title.trim(), author: author.trim(),
           status: 'to_read', year: trYear, month: trMonth, rating: 0,
           cover_url: coverUrl.trim() || undefined,
+          is_audiobook: isAudiobook,
         })
         if (!coverUrl && title) {
           try {
@@ -200,6 +204,7 @@ function AddBookContent() {
           title: title.trim(), author: author.trim(),
           status: 'wishlist', year: 0, month: null, rating: 0,
           cover_url: coverUrl.trim() || undefined,
+          is_audiobook: isAudiobook,
         })
         if (!coverUrl && title) {
           try {
@@ -359,10 +364,21 @@ function AddBookContent() {
           </div>
         </div>
 
+        {/* ── Audiobook checkbox ──────────────────────────────────────────── */}
+        <label className="flex items-center gap-3 px-1 pb-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isAudiobook}
+            onChange={(e) => setIsAudiobook(e.target.checked)}
+            className="w-5 h-5 rounded accent-[var(--primary)]"
+          />
+          <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.audiobook}</span>
+        </label>
+
         {/* ── Date read (Read tab only) ─────────────────────────────────────── */}
         {tab === 'read' && (
           <div>
-            <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>{t.whenDidYouRead}</label>
+            <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>{isAudiobook ? t.whenDidYouListen : t.whenDidYouRead}</label>
             <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
               <div className="grid grid-cols-3">
                 <div className="col-span-2" style={{ borderRight: '1px solid var(--separator)' }}>
