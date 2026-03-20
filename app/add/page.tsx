@@ -186,6 +186,7 @@ function AddBookContent() {
         const saved = await addBook(supabase, user.id, {
           title: title.trim(), author: author.trim(),
           status: 'to_read', year: trYear, month: trMonth, rating: 0,
+          notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,
           is_audiobook: isAudiobook,
         })
@@ -202,6 +203,7 @@ function AddBookContent() {
         const saved = await addBook(supabase, user.id, {
           title: title.trim(), author: author.trim(),
           status: 'wishlist', year: 0, month: null, rating: 0,
+          notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,
           is_audiobook: isAudiobook,
         })
@@ -476,8 +478,8 @@ function AddBookContent() {
           </div>
         )}
 
-        {/* ── Notes (Read tab only) ────────────────────────────────────────── */}
-        {tab === 'read' && (
+        {/* ── Notes ───────────────────────────────────────────────────────── */}
+        {(
           <div>
             <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>{t.myNotesLabel}</label>
             <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
