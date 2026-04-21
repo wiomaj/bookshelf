@@ -2,9 +2,10 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Book } from '@/types/book'
 import { monthSortKey } from '@/lib/month'
 
-// NOTE: started_reading_month + started_reading_year are intentionally excluded
-// until the DB migration has been run:
+// NOTE: started_reading_* columns are intentionally excluded until the DB migration
+// has been run:
 //   ALTER TABLE books
+//     ADD COLUMN IF NOT EXISTS started_reading_day   integer,
 //     ADD COLUMN IF NOT EXISTS started_reading_month integer,
 //     ADD COLUMN IF NOT EXISTS started_reading_year  integer;
 // Add them back to this string once the migration is confirmed.

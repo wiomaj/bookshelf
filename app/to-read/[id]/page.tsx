@@ -83,6 +83,7 @@ export default function ToReadDetailPage() {
   const [moveNotes, setMoveNotes] = useState('')
 
   const [showStartReadingModal, setShowStartReadingModal] = useState(false)
+  const [startDay, setStartDay] = useState<number>(0)   // 0 = not specified
   const [startMonth, setStartMonth] = useState<number>(new Date().getMonth() + 1)
   const [startYear, setStartYear] = useState<number>(new Date().getFullYear())
   const [startReadingLoading, setStartReadingLoading] = useState(false)
@@ -97,6 +98,7 @@ export default function ToReadDetailPage() {
     if (book.read_year) setMoveYear(book.read_year)
     if (book.rating) setMoveRating(book.rating)
     if (book.notes) setMoveNotes(book.notes)
+    if (book.started_reading_day) setStartDay(book.started_reading_day)
     if (book.started_reading_month) setStartMonth(book.started_reading_month)
     if (book.started_reading_year) setStartYear(book.started_reading_year)
   }, [book?.id])
@@ -250,6 +252,7 @@ export default function ToReadDetailPage() {
     try {
       const updated = await updateBook(supabase, user.id, book.id, {
         status: 'currently_reading',
+        started_reading_day: startDay || null,
         started_reading_month: startMonth,
         started_reading_year: startYear,
       })
@@ -351,11 +354,14 @@ export default function ToReadDetailPage() {
   const displayGenre = book.genre || apiGenre
   const addedDate = formatAddedDate(book.created_at)
   const isCurrentlyReading = book.status === 'currently_reading'
-  const startedDate = isCurrentlyReading && book.started_reading_month && book.started_reading_year
-    ? `${SHORT_MONTHS[book.started_reading_month - 1]} ${book.started_reading_year}`
-    : isCurrentlyReading && book.started_reading_year
-      ? String(book.started_reading_year)
-      : null
+  const startedDate = (() => {
+    if (!isCurrentlyReading || !book.started_reading_year) return null
+    const parts: string[] = []
+    if (book.started_reading_day) parts.push(String(book.started_reading_day))
+    if (book.started_reading_month) parts.push(SHORT_MONTHS[book.started_reading_month - 1])
+    parts.push(String(book.started_reading_year))
+    return parts.join(' ')
+  })()
 
   // ── View mode ────────────────────────────────────────────────────────────────
   return (
@@ -672,10 +678,25 @@ export default function ToReadDetailPage() {
                 {t.startReadingWhen}
               </h3>
 
-              {/* Month + Year pickers */}
+              {/* Day / Month / Year pickers */}
               <div className="rounded-[14px] overflow-hidden mb-6" style={{ backgroundColor: 'var(--fill)' }}>
-                <div className="grid grid-cols-3">
-                  <div className="col-span-2" style={{ borderRight: '1px solid var(--separator)' }}>
+                <div className="grid grid-cols-[72px_1fr_88px]">
+                  {/* Day (optional) */}
+                  <div style={{ borderRight: '1px solid var(--separator)' }}>
+                    <select
+                      value={startDay}
+                      onChange={e => setStartDay(Number(e.target.value))}
+                      className="w-full px-3 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
+                      style={{ color: startDay === 0 ? 'var(--label-tertiary)' : 'var(--label)' }}
+                    >
+                      <option value={0}>—</option>
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* Month */}
+                  <div style={{ borderRight: '1px solid var(--separator)' }}>
                     <select
                       value={startMonth}
                       onChange={e => setStartMonth(Number(e.target.value))}
@@ -687,11 +708,12 @@ export default function ToReadDetailPage() {
                       ))}
                     </select>
                   </div>
+                  {/* Year */}
                   <div>
                     <select
                       value={startYear}
                       onChange={e => setStartYear(Number(e.target.value))}
-                      className="w-full px-4 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
+                      className="w-full px-3 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
                       style={{ color: 'var(--label)' }}
                     >
                       {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(y => (

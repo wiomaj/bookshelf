@@ -242,11 +242,13 @@ function CurrentlyReadingRail({ books }: { books: Book[] }) {
       {/* Horizontal scroll strip */}
       <div className="flex gap-3 overflow-x-auto px-5 pb-4" style={{ scrollSnapType: 'x mandatory' }}>
         {books.map((book) => {
-          const startLabel = book.started_reading_month && book.started_reading_year
-            ? `${SHORT_MONTHS_LIST[book.started_reading_month - 1]} ${book.started_reading_year}`
-            : book.started_reading_year
-              ? String(book.started_reading_year)
-              : null
+          const startLabel = book.started_reading_year
+            ? [
+                book.started_reading_day ? String(book.started_reading_day) : null,
+                book.started_reading_month ? SHORT_MONTHS_LIST[book.started_reading_month - 1] : null,
+                String(book.started_reading_year),
+              ].filter(Boolean).join(' ')
+            : null
 
           return (
             <motion.button
