@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { AnimatePresence } from 'framer-motion'
@@ -87,6 +87,9 @@ export default function ToReadDetailPage() {
   const [startYear, setStartYear] = useState<number>(new Date().getFullYear())
   const [startReadingLoading, setStartReadingLoading] = useState(false)
 
+  const [showCtaDropdown, setShowCtaDropdown] = useState(false)
+  const ctaDropdownRef = useRef<HTMLDivElement>(null)
+
   // Pre-fill dates from stored per-status columns when book loads
   useEffect(() => {
     if (!book) return
@@ -147,6 +150,17 @@ export default function ToReadDetailPage() {
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [user, id])
+
+  // Close dropdown on outside click
+  const handleOutsideClick = useCallback((e: MouseEvent) => {
+    if (ctaDropdownRef.current && !ctaDropdownRef.current.contains(e.target as Node)) {
+      setShowCtaDropdown(false)
+    }
+  }, [])
+  useEffect(() => {
+    if (showCtaDropdown) document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [showCtaDropdown, handleOutsideClick])
 
   async function handleUpdate(data: ToReadFormData | Omit<Book, 'id' | 'user_id' | 'created_at'>) {
     if (!book || !user) return
@@ -479,45 +493,102 @@ export default function ToReadDetailPage() {
           </div>
 
           {/* CTAs */}
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-3">
-              {/* Abandon icon */}
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setShowAbandonConfirm(true)}
-                className="shrink-0 w-[52px] h-[52px] rounded-[14px] flex items-center justify-center"
-                style={{ backgroundColor: 'rgba(255, 56, 60, 0.12)' }}
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF383C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
-                  <path d="m14.5 7-5 5" />
-                  <path d="m9.5 7 5 5" />
-                </svg>
-              </motion.button>
+          <div className="flex gap-3">
+            {/* Abandon icon */}
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setShowAbandonConfirm(true)}
+              className="shrink-0 w-[52px] h-[52px] rounded-[14px] flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 56, 60, 0.12)' }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF383C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
+                <path d="m14.5 7-5 5" />
+                <path d="m9.5 7 5 5" />
+              </svg>
+            </motion.button>
 
-              {/* Primary CTA — always Mark as Read */}
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setShowMoveModal(true)}
-                disabled={moveLoading}
-                className="flex-1 py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center"
+            {/* Split CTA — label on left, chevron on right opens dropdown */}
+            <div ref={ctaDropdownRef} className="relative flex-1">
+              <div
+                className="flex rounded-[14px] overflow-hidden text-white text-[17px] font-semibold"
                 style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
               >
-                {moveLoading ? t.loading : (book.is_audiobook ? t.markAsListened : t.markAsRead)}
-              </motion.button>
-            </div>
+                {/* Main label — triggers primary action directly */}
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => { setShowCtaDropdown(false); setShowMoveModal(true) }}
+                  disabled={moveLoading}
+                  className="flex-1 py-[15px] pl-4 text-left disabled:opacity-60"
+                >
+                  {moveLoading ? t.loading : (book.is_audiobook ? t.markAsListened : t.markAsRead)}
+                </motion.button>
 
-            {/* Secondary — Start Reading, only for to_read books */}
-            {!isCurrentlyReading && (
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setShowStartReadingModal(true)}
-                className="w-full py-[13px] rounded-[14px] text-[16px] font-semibold text-center"
-                style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
-              >
-                {t.startReading}
-              </motion.button>
-            )}
+                {/* Divider + chevron — opens dropdown (only for to_read) */}
+                {!isCurrentlyReading && (
+                  <>
+                    <div className="w-px my-3" style={{ backgroundColor: 'rgba(255,255,255,0.25)' }} />
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setShowCtaDropdown(v => !v)}
+                      className="px-4 flex items-center justify-center"
+                      aria-label="More options"
+                    >
+                      <motion.svg
+                        width="14" height="14" viewBox="0 0 14 14" fill="none"
+                        animate={{ rotate: showCtaDropdown ? 180 : 0 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        <path d="M2 4.5L7 9.5L12 4.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </motion.svg>
+                    </motion.button>
+                  </>
+                )}
+              </div>
+
+              {/* Dropdown menu */}
+              <AnimatePresence>
+                {showCtaDropdown && (
+                  <motion.div
+                    key="cta-dropdown"
+                    initial={{ opacity: 0, scale: 0.95, y: 6 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 6 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                    className="absolute bottom-[calc(100%+8px)] right-0 min-w-[220px] rounded-[14px] overflow-hidden z-20"
+                    style={{
+                      backgroundColor: 'var(--bg-elevated)',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10)',
+                    }}
+                  >
+                    {/* Mark as Read */}
+                    <button
+                      onClick={() => { setShowCtaDropdown(false); setShowMoveModal(true) }}
+                      className="w-full flex items-center gap-3 px-4 py-[14px] text-left text-[16px] font-medium"
+                      style={{ color: 'var(--label)' }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary)', flexShrink: 0 }}>
+                        <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                      </svg>
+                      {book.is_audiobook ? t.markAsListened : t.markAsRead}
+                    </button>
+
+                    {/* Separator */}
+                    <div className="mx-4 h-px" style={{ backgroundColor: 'var(--separator)' }} />
+
+                    {/* Start Reading */}
+                    <button
+                      onClick={() => { setShowCtaDropdown(false); setShowStartReadingModal(true) }}
+                      className="w-full flex items-center gap-3 px-4 py-[14px] text-left text-[16px] font-medium"
+                      style={{ color: 'var(--label)' }}
+                    >
+                      <BookOpen size={18} style={{ color: 'var(--label-secondary)', flexShrink: 0 }} />
+                      {t.startReading}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* My notes */}

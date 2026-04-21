@@ -451,7 +451,7 @@ const de: Translations = {
   chipAbandoned: 'Abgebrochen',
   chipCurrentlyReading: 'Lese gerade',
   resumeReading: 'Weiterlesen',
-  startReading: 'Jetzt lesen',
+  startReading: 'Lese ich gerade',
   startReadingWhen: 'Wann hast du angefangen?',
   startedReadingLabel: 'Begonnen',
   currentlyReadingSection: 'Lese ich gerade',
