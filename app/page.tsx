@@ -75,12 +75,16 @@ export default function HomePage() {
   // ── loadBooks (stable reference for PTR handler) ─────────────────────────
   const loadBooks = useCallback(async () => {
     if (!user) return
-    const { read, toRead, wishlist } = await getAllBooks(supabase, user.id)
-    setBooks(read)
-    setToReadBooks(toRead)
-    setWishlistBooks(wishlist)
-    setToReadCount(toRead.length)
-    setWishlistCount(wishlist.length)
+    try {
+      const { read, toRead, wishlist } = await getAllBooks(supabase, user.id)
+      setBooks(read)
+      setToReadBooks(toRead)
+      setWishlistBooks(wishlist)
+      setToReadCount(toRead.length)
+      setWishlistCount(wishlist.length)
+    } catch (err) {
+      console.error('[loadBooks] Failed to load books:', err)
+    }
   }, [user, setToReadCount, setWishlistCount])
 
   // ── Scroll shadow trigger ─────────────────────────────────────────────────
