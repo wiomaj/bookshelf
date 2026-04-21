@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Camera, Loader2, Search, ScanBarcode } from 'lucide-react'
+import { LONG_MONTHS } from '@/lib/month'
 import ISBNScanner from './ISBNScanner'
 import { useApp, useT } from '@/contexts/AppContext'
 import { uploadCoverPhoto } from '@/lib/coverUpload'
@@ -20,6 +21,9 @@ export type ToReadFormData = {
   notes?: string
   cover_url?: string
   is_audiobook?: boolean
+  started_reading_day?: number | null
+  started_reading_month?: number | null
+  started_reading_year?: number | null
 }
 
 interface ToReadFormProps {
@@ -52,6 +56,9 @@ export default function ToReadForm({
   const [notes, setNotes] = useState(initialData?.notes ?? '')
   const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
   const [isAudiobook, setIsAudiobook] = useState(initialData?.is_audiobook ?? false)
+  const [startDay, setStartDay] = useState<number>(initialData?.started_reading_day ?? 0)
+  const [startMonth, setStartMonth] = useState<number | null>(initialData?.started_reading_month ?? null)
+  const [startYear, setStartYear] = useState<number>(initialData?.started_reading_year ?? 0)
   const [photoLoading, setPhotoLoading] = useState(false)
 
   // Track whether any field has been edited
@@ -146,7 +153,18 @@ export default function ToReadForm({
     }
 
     try {
-      await onSubmit({ title: title.trim(), author: author.trim(), month, year, notes: notes.trim() || undefined, cover_url: coverUrl.trim() || undefined, is_audiobook: isAudiobook })
+      await onSubmit({
+        title: title.trim(),
+        author: author.trim(),
+        month,
+        year,
+        notes: notes.trim() || undefined,
+        cover_url: coverUrl.trim() || undefined,
+        is_audiobook: isAudiobook,
+        started_reading_day: startDay || null,
+        started_reading_month: startMonth || null,
+        started_reading_year: startYear || null,
+      })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t.errorSomethingWentWrong)
     }
@@ -284,6 +302,57 @@ export default function ToReadForm({
           </div>
         </div>
       </div>}
+
+      {/* ── Started reading (Day / Month / Year) ───────────────────────────── */}
+      <div>
+        <label className={sectionLabel} style={{ color: 'var(--label-secondary)' }}>{t.startReadingWhen}</label>
+        <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+          <div className="grid grid-cols-[72px_1fr_88px]">
+            {/* Day */}
+            <div style={{ borderRight: '1px solid var(--separator)' }}>
+              <select
+                value={startDay}
+                onChange={e => setStartDay(Number(e.target.value))}
+                className={inputBase + ' appearance-none cursor-pointer px-3'}
+                style={{ color: startDay === 0 ? 'var(--label-tertiary)' : 'var(--label)' }}
+              >
+                <option value={0}>—</option>
+                {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            </div>
+            {/* Month */}
+            <div style={{ borderRight: '1px solid var(--separator)' }}>
+              <select
+                value={startMonth ?? ''}
+                onChange={e => setStartMonth(e.target.value === '' ? null : Number(e.target.value))}
+                className={inputBase + ' appearance-none cursor-pointer'}
+                style={{ color: startMonth == null ? 'var(--label-tertiary)' : 'var(--label)' }}
+              >
+                <option value="">—</option>
+                {LONG_MONTHS.map((m, i) => (
+                  <option key={i + 1} value={i + 1}>{m}</option>
+                ))}
+              </select>
+            </div>
+            {/* Year */}
+            <div>
+              <select
+                value={startYear === 0 ? '' : startYear}
+                onChange={e => setStartYear(e.target.value === '' ? 0 : Number(e.target.value))}
+                className={inputBase + ' appearance-none cursor-pointer px-3'}
+                style={{ color: startYear === 0 ? 'var(--label-tertiary)' : 'var(--label)' }}
+              >
+                <option value="">—</option>
+                {Array.from({ length: 5 }, (_, i) => currentYear - i).map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ── My Notes ───────────────────────────────────────────────────────── */}
       <div>
