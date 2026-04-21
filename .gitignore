@@ -10,7 +10,12 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+
+# Environment files — never commit secrets
 *.local
+.env
+.env.*
+!.env.*.example
 
 # Build output
 .next/

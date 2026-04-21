@@ -8,8 +8,10 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 
 const BUCKET = 'covers'
-const MAX_PX = 900      // max width or height after compression
-const QUALITY = 0.88    // JPEG quality
+const MAX_PX = 900          // max width or height after compression
+const QUALITY = 0.88        // JPEG quality
+const MAX_INPUT_BYTES = 15 * 1024 * 1024  // 15 MB pre-compression limit
+const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
 /**
  * Compress an image File to a JPEG Blob at MAX_PX × MAX_PX max resolution.
@@ -64,6 +66,13 @@ export async function uploadCoverPhoto(
   userId: string,
   file: File
 ): Promise<string> {
+  if (!ALLOWED_MIME_TYPES.has(file.type)) {
+    throw new Error('Only JPEG, PNG, WebP, or GIF images are supported.')
+  }
+  if (file.size > MAX_INPUT_BYTES) {
+    throw new Error('Image must be smaller than 15 MB.')
+  }
+
   const compressed = await compressImage(file)
   const path = `${userId}/${Date.now()}.jpg`
 

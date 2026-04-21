@@ -65,6 +65,16 @@ interface Candidate {
 
 import { gbUrl } from '@/lib/gbUrl'
 
+// ─── Regex safety ─────────────────────────────────────────────────────────────
+
+/**
+ * Escape all regex metacharacters in a user-supplied string so it can be
+ * safely embedded inside `new RegExp(...)` without ReDoS or unexpected matches.
+ */
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 // ─── Query type detection ─────────────────────────────────────────────────────
 
 /**
@@ -162,12 +172,14 @@ function titleRelevanceBonus(title: string, query: string): number {
   const stripArticle = (s: string) => s.replace(/^(der|die|das|ein|eine|the|a|an)\s+/i, '')
   if (stripArticle(t).startsWith(stripArticle(q))) return 60
 
+  // Compile word-boundary regexes once with escaped input to prevent ReDoS.
+  const regexes = words.map((w) => new RegExp(`\\b${escapeRegex(w)}\\b`))
+
   // Tier 3: all query words present as whole words (any order)
-  const allMatch = words.every((w) => new RegExp(`\\b${w}\\b`).test(t))
-  if (allMatch) return 40
+  const matchCount = regexes.filter((re) => re.test(t)).length
+  if (matchCount === words.length) return 40
 
   // Tier 4: partial credit — proportional to fraction of matching whole words
-  const matchCount = words.filter((w) => new RegExp(`\\b${w}\\b`).test(t)).length
   return matchCount > 0 ? Math.round((matchCount / words.length) * 15) : 0
 }
 

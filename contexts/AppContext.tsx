@@ -161,8 +161,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   async function resetPassword(email: string): Promise<{ error: string | null }> {
+    // Prefer an explicit env var so the redirect target is consistent across
+    // tabs, embedded contexts, and staging/preview deployments.
+    const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset`,
+      redirectTo: `${origin}/reset`,
     })
     return { error: error?.message ?? null }
   }

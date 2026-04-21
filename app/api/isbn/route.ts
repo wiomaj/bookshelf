@@ -16,6 +16,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { gbUrl } from '@/lib/gbUrl'
+import { checkRateLimit, clientIp } from '@/lib/rateLimit'
+import { cleanDnbTitle, stripCreatorRole, normaliseCreator } from '@/lib/dnbUtils'
 
 export const runtime = 'nodejs'
 
@@ -57,7 +59,8 @@ async function fromGoogleBooks(isbn: string): Promise<IsbnResult | null> {
       cover_url,
       publishedYear: yearMatch ? parseInt(yearMatch[1]) : undefined,
     }
-  } catch {
+  } catch (err) {
+    console.error('[isbn] Google Books fetch failed:', err)
     return null
   }
 }
@@ -81,7 +84,8 @@ async function gbCoverByTitleAuthor(title: string, author: string): Promise<stri
     const links = data.items?.[0]?.volumeInfo?.imageLinks
     const raw = links?.thumbnail ?? links?.smallThumbnail
     return raw ? raw.replace(/^http:/, 'https:').replace(/zoom=\d/, 'zoom=1') : undefined
-  } catch {
+  } catch (err) {
+    console.error('[isbn] GB title+author cover fetch failed:', err)
     return undefined
   }
 }
@@ -92,35 +96,6 @@ async function gbCoverByTitleAuthor(title: string, author: string): Promise<stri
 function dcField(xml: string, tag: string): string | undefined {
   const m = new RegExp(`<dc:${tag}[^>]*>([^<]+)</dc:${tag}>`, 'i').exec(xml)
   return m?.[1]?.trim()
-}
-
-/**
- * Strip ISBD/MARC formatting from a DNB dc:title value.
- * DNB titles often look like: "[Parallel title] ; Main title : Subtitle / Responsibility"
- * Returns the plain main title only.
- */
-function cleanDnbTitle(raw: string): string {
-  let s = raw.trim()
-  // Drop optional leading parallel-title in brackets + semicolon separator
-  // e.g. "[Geh langsam…] ; Geh langsam…" → "Geh langsam…"
-  s = s.replace(/^\[.*?\]\s*;\s*/, '')
-  // Drop subtitle (" : …") and responsibility statement (" / …")
-  s = s.replace(/\s*[:/].*$/, '')
-  return s.trim()
-}
-
-/** Remove role annotations like [Illustrator], [Verfasser], [Übers.] from creator */
-function stripCreatorRole(raw: string): string {
-  return raw.replace(/\s*\[.*?\]/g, '').trim()
-}
-
-/** Invert "Lastname, Firstname" → "Firstname Lastname" */
-function normaliseCreator(raw: string): string {
-  if (raw.includes(',')) {
-    const [last, ...firstParts] = raw.split(',').map((p) => p.trim())
-    return [...firstParts, last].join(' ')
-  }
-  return raw
 }
 
 async function fromDNB(isbn: string): Promise<IsbnResult | null> {
@@ -163,7 +138,8 @@ async function fromDNB(isbn: string): Promise<IsbnResult | null> {
       : undefined
 
     return { title, author, cover_url, publishedYear }
-  } catch {
+  } catch (err) {
+    console.error('[isbn] DNB fetch failed:', err)
     return null
   }
 }
@@ -171,7 +147,19 @@ async function fromDNB(isbn: string): Promise<IsbnResult | null> {
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
+  const { ok, retryAfter } = checkRateLimit(`isbn:${clientIp(req)}`, 30, 60_000) // 30/min
+  if (!ok) {
+    return NextResponse.json(
+      { result: null },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } }
+    )
+  }
+
   const raw = req.nextUrl.searchParams.get('isbn')?.trim() ?? ''
+  // Reject oversized inputs before the regex even runs
+  if (raw.length > 20) {
+    return NextResponse.json({ result: null }, { status: 400 })
+  }
   const isbn = raw.replace(/[\s\-]/g, '')
 
   if (!isbn || !/^\d{10,13}X?$/.test(isbn)) {

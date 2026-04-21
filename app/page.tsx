@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, LayoutGrid, List, BookOpenCheck, User, Settings, Loader2, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
-import { getReadBooks, getToReadBooks, getWishlistBooks, updateBook } from '@/lib/bookApi'
+import { getAllBooks, updateBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import YearSection from '@/components/YearSection'
 import ToReadList from '@/components/ToReadList'
@@ -75,11 +75,7 @@ export default function HomePage() {
   // ── loadBooks (stable reference for PTR handler) ─────────────────────────
   const loadBooks = useCallback(async () => {
     if (!user) return
-    const [read, toRead, wishlist] = await Promise.all([
-      getReadBooks(supabase, user.id),
-      getToReadBooks(supabase, user.id),
-      getWishlistBooks(supabase, user.id),
-    ])
+    const { read, toRead, wishlist } = await getAllBooks(supabase, user.id)
     setBooks(read)
     setToReadBooks(toRead)
     setWishlistBooks(wishlist)

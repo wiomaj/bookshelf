@@ -17,6 +17,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { gbUrl } from '@/lib/gbUrl'
+import { checkRateLimit, clientIp } from '@/lib/rateLimit'
+import { cleanDnbTitle, stripCreatorRole, normaliseCreator } from '@/lib/dnbUtils'
 
 export const runtime = 'nodejs'
 
@@ -25,30 +27,6 @@ export interface SearchResult {
   author: string
   cover_url?: string
   isbn?: string
-}
-
-// ── Title / author cleaning (mirrors app/api/isbn/route.ts) ───────────────────
-
-function cleanDnbTitle(raw: string): string {
-  let s = raw.trim()
-  // Drop optional leading parallel-title in brackets + semicolon separator
-  // e.g. "[Geh langsam…] ; Geh langsam…" → "Geh langsam…"
-  s = s.replace(/^\[.*?\]\s*;\s*/, '')
-  // Drop subtitle (" : …") and responsibility statement (" / …")
-  s = s.replace(/\s*[:/].*$/, '')
-  return s.trim()
-}
-
-function stripCreatorRole(raw: string): string {
-  return raw.replace(/\s*\[.*?\]/g, '').trim()
-}
-
-function normaliseCreator(raw: string): string {
-  if (raw.includes(',')) {
-    const [last, ...firstParts] = raw.split(',').map((p) => p.trim())
-    return [...firstParts, last].join(' ')
-  }
-  return raw
 }
 
 // ── MARC21-xml field extractor (regex-based, no DOM needed) ───────────────────
@@ -120,9 +98,38 @@ async function fetchCover(isbn: string | undefined): Promise<string | undefined>
 
 // ── Route handler ─────────────────────────────────────────────────────────────
 
+/**
+ * Strip characters that have special meaning in SRU CQL queries so a
+ * user-supplied string cannot break out of its tit="…" context or inject
+ * additional query clauses (e.g. `" OR isbn=1234`).
+ *
+ * Removed: double-quote (CQL string delimiter), backslash (CQL escape),
+ *          and the CQL boolean/proximity operators to be safe.
+ */
+function sanitizeSruQuery(raw: string): string {
+  return raw
+    .replace(/["\\]/g, '')          // strip CQL string-delimiter and escape chars
+    .replace(/\s+(AND|OR|NOT|PROX)\s+/gi, ' ')  // neutralise CQL boolean operators
+    .trim()
+    .slice(0, 200)                   // hard length cap
+}
+
 export async function GET(req: NextRequest) {
-  const q = req.nextUrl.searchParams.get('q')?.trim()
-  if (!q || q.length < 2) {
+  const { ok, retryAfter } = checkRateLimit(`search:${clientIp(req)}`, 20, 60_000) // 20/min
+  if (!ok) {
+    return NextResponse.json(
+      { results: [] },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } }
+    )
+  }
+
+  const raw = req.nextUrl.searchParams.get('q')?.trim()
+  if (!raw || raw.length < 2) {
+    return NextResponse.json({ results: [] })
+  }
+
+  const q = sanitizeSruQuery(raw)
+  if (q.length < 2) {
     return NextResponse.json({ results: [] })
   }
 
@@ -185,7 +192,8 @@ export async function GET(req: NextRequest) {
       { results },
       { headers: { 'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400' } }
     )
-  } catch {
+  } catch (err) {
+    console.error('[search] DNB SRU request failed:', err)
     return NextResponse.json({ results: [] })
   }
 }
