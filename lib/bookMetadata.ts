@@ -178,62 +178,75 @@ export async function fetchBookByISBN(
 // ─── Cover-only search by title + author ──────────────────────────────────────
 
 /**
- * Search for a cover image using title + author across multiple sources in
- * parallel. Returns the first cover URL found, or undefined if all fail.
+ * Search for a cover image using title + author across multiple sources.
  *
- * Sources tried simultaneously (first non-empty result wins):
- *   1. Google Books  intitle + inauthor  (most precise)
- *   2. OpenLibrary   title  + author
- *   3. Google Books  title  only         (broader fallback)
- *   4. OpenLibrary   title  only         (broadest fallback)
+ * Strategy (two sequential phases to avoid returning the wrong book's cover):
  *
- * A 4-second timeout prevents the caller from waiting too long.
+ *   Phase 1 — Precise (title + author, both sources in parallel):
+ *     1. Google Books  intitle:"…" inauthor:"…"
+ *     2. OpenLibrary   title + author
+ *   → If either finds a cover, return it immediately.
+ *
+ *   Phase 2 — Broad fallback (title only, both sources in parallel).
+ *     Only reached when the author is unknown OR phase 1 found nothing.
+ *     3. Google Books  intitle:"…"
+ *     4. OpenLibrary   title only
+ *
+ * Running broad searches concurrently with precise ones (the old approach)
+ * caused fast title-only results to win the race and return a cover for a
+ * completely different book with the same title (e.g. Miéville's "Kraken"
+ * appearing on Svenja Beller's "Kraken").
  */
 export async function fetchCoverByTitleAuthor(
   title: string,
   author: string
 ): Promise<string | undefined> {
-  // Helper: resolves with the cover URL or rejects if none found
-  const coverOrReject = async (fn: () => Promise<string | undefined>): Promise<string> => {
-    const cover = await fn()
-    if (!cover) throw new Error('no cover')
-    return cover
-  }
+  const withTimeout = <T>(p: Promise<T>, ms: number): Promise<T> =>
+    Promise.race([p, new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))])
 
   const googleBooks = async (q: string): Promise<string | undefined> => {
-    const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=5`
-    )
-    if (!res.ok) return undefined
-    return googleCoverFromResponse(await res.json())
+    try {
+      const res = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=5`
+      )
+      if (!res.ok) return undefined
+      return googleCoverFromResponse(await res.json())
+    } catch { return undefined }
   }
 
   const openLibrary = async (params: Record<string, string>): Promise<string | undefined> => {
-    const qs = new URLSearchParams({ ...params, fields: 'cover_i,cover_edition_key,isbn', limit: '1' })
-    const res = await fetch(`https://openlibrary.org/search.json?${qs}`)
-    if (!res.ok) return undefined
-    const data = await res.json()
-    return olCoverFromDoc(data.docs?.[0])
+    try {
+      const qs = new URLSearchParams({ ...params, fields: 'cover_i,cover_edition_key,isbn', limit: '1' })
+      const res = await fetch(`https://openlibrary.org/search.json?${qs}`)
+      if (!res.ok) return undefined
+      const data = await res.json()
+      return olCoverFromDoc(data.docs?.[0])
+    } catch { return undefined }
   }
 
-  const sources = [
-    // Most precise: exact title + author in Google Books
-    coverOrReject(() => googleBooks(`intitle:"${title}" inauthor:"${author}"`)),
-    // OpenLibrary title + author
-    coverOrReject(() => openLibrary({ title, author })),
-    // Broader: title only in Google Books
-    coverOrReject(() => googleBooks(`intitle:"${title}"`)),
-    // Broadest fallback: OpenLibrary title only
-    coverOrReject(() => openLibrary({ title })),
-  ]
-
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error('timeout')), 4000)
-  )
-
-  try {
-    return await Promise.race([Promise.any(sources), timeout])
-  } catch {
-    return undefined
+  // Returns the first non-undefined cover from a set of concurrent searches
+  const firstOf = async (promises: Promise<string | undefined>[]): Promise<string | undefined> => {
+    try {
+      return await Promise.any(promises.map(async p => {
+        const r = await p
+        if (!r) throw new Error('no cover')
+        return r
+      }))
+    } catch { return undefined }
   }
+
+  // Phase 1: precise title + author (skip if no author)
+  if (author) {
+    const precise = await withTimeout(firstOf([
+      googleBooks(`intitle:"${title}" inauthor:"${author}"`),
+      openLibrary({ title, author }),
+    ]), 4000).catch(() => undefined)
+    if (precise) return precise
+  }
+
+  // Phase 2: broad title-only fallback
+  return withTimeout(firstOf([
+    googleBooks(`intitle:"${title}"`),
+    openLibrary({ title }),
+  ]), 4000).catch(() => undefined)
 }
