@@ -2,14 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Book } from '@/types/book'
 import { monthSortKey } from '@/lib/month'
 
-// NOTE: started_reading_* columns are intentionally excluded until the DB migration
-// has been run:
-//   ALTER TABLE books
-//     ADD COLUMN IF NOT EXISTS started_reading_day   integer,
-//     ADD COLUMN IF NOT EXISTS started_reading_month integer,
-//     ADD COLUMN IF NOT EXISTS started_reading_year  integer;
-// Add them back to this string once the migration is confirmed.
-const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at, status, acquired_month, acquired_year, read_month, read_year, is_audiobook'
+const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at, status, acquired_month, acquired_year, read_month, read_year, is_audiobook, started_reading_day, started_reading_month, started_reading_year'
 
 /**
  * Fetch every book for a user in a single query, then split by status client-side.
