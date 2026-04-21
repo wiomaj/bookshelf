@@ -259,9 +259,8 @@ export default function ToReadDetailPage() {
       setBook(updated)
       setShowStartReadingModal(false)
     } catch (err) {
-      console.error('[handleStartReading] DB write failed — migration may not have run:', err)
-      // Surface the error so the user sees feedback rather than a hung spinner
-      alert('Could not save — please ask the admin to run the DB migration.')
+      console.error('[handleStartReading] DB write failed:', err)
+      alert(`Could not save: ${err instanceof Error ? err.message : String(err)}`)
     } finally {
       setStartReadingLoading(false)
     }
