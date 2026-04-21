@@ -263,57 +263,71 @@ function CurrentlyReadingRail({ books }: { books: Book[] }) {
               ].filter(Boolean).join(' ')
             : null
 
+          const showCover = !!book.cover_url
+
           return (
             <motion.button
               key={book.id}
-              whileTap={{ scale: 0.96, opacity: 0.85 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => router.push(`/to-read/${book.id}`)}
-              className="shrink-0 flex flex-col gap-2 text-left"
-              style={{ width: 110, scrollSnapAlign: 'start' }}
+              className="shrink-0 rounded-[8px] overflow-hidden"
+              style={{
+                width: 150,
+                height: 230,
+                scrollSnapAlign: 'start',
+                flexShrink: 0,
+                boxShadow: '0 16px 32px -4px rgba(12,12,13,0.10), 0 4px 4px -4px rgba(12,12,13,0.05)',
+              }}
             >
-              {/* Cover */}
-              <div
-                className="w-full rounded-[10px] overflow-hidden"
-                style={{
-                  height: 164,
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.16), 0 1px 4px rgba(0,0,0,0.08)',
-                }}
-              >
-                {book.cover_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={coverUrl(book.cover_url)}
-                    alt={book.title}
-                    className="w-full h-full object-cover"
-                  />
+              <div className="relative w-full h-full flex items-end pb-4 pt-2 px-2">
+                {/* Cover / placeholder */}
+                <div className="absolute inset-0">
+                  {showCover ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={coverUrl(book.cover_url)}
+                      alt={book.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="relative w-full h-full" style={{ backgroundColor: 'var(--primary)' }}>
+                      <div
+                        className="absolute inset-0 opacity-[0.16]"
+                        style={{ backgroundImage: bookPatternUrl, backgroundSize: '32px 32px', backgroundRepeat: 'repeat' }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Gradient overlay */}
+                {showCover ? (
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70" />
                 ) : (
                   <div
-                    className="relative w-full h-full flex items-center justify-center"
-                    style={{ backgroundColor: 'var(--primary)' }}
-                  >
-                    <div
-                      className="absolute inset-0 opacity-[0.08]"
-                      style={{ backgroundImage: bookPatternUrl, backgroundSize: '18px 18px', backgroundRepeat: 'repeat' }}
-                    />
-                    <BookIcon size={18} color="white" className="relative z-10" />
-                  </div>
+                    className="absolute inset-0"
+                    style={{ background: 'linear-gradient(to bottom, color-mix(in srgb, var(--primary), transparent), var(--primary))' }}
+                  />
                 )}
+
+                {/* Text pinned to bottom */}
+                <div className="relative z-10 flex flex-col gap-1 w-full">
+                  {startLabel && (
+                    <p className="text-[11px] leading-[13px] tracking-[0.06px]" style={{ color: 'rgba(255,255,255,0.80)' }}>
+                      {startLabel}
+                    </p>
+                  )}
+                  {!showCover && (
+                    <p className="text-white text-[17px] font-semibold leading-[22px] tracking-[-0.43px] line-clamp-2">
+                      {book.title}
+                    </p>
+                  )}
+                  {book.author && (
+                    <p className="font-semibold text-[11px] leading-[13px] tracking-[0.06px] line-clamp-1" style={{ color: 'rgba(255,255,255,0.80)' }}>
+                      {book.author}
+                    </p>
+                  )}
+                </div>
               </div>
-
-              {/* Title */}
-              <p
-                className="text-[13px] font-semibold leading-[17px] line-clamp-2"
-                style={{ color: 'var(--label)' }}
-              >
-                {book.title}
-              </p>
-
-              {/* Started date */}
-              {startLabel && (
-                <p className="text-[11px] leading-[14px]" style={{ color: 'var(--label-tertiary)' }}>
-                  {startLabel}
-                </p>
-              )}
             </motion.button>
           )
         })}
