@@ -119,20 +119,23 @@ export default function WishlistDetailPage() {
 
   useEffect(() => {
     if (!user || !id) return
+    let cancelled = false
     getBook(supabase, user.id, id)
       .then(b => {
+        if (cancelled) return
         setBook(b)
         if (b) {
           setBookDataLoading(true)
           fetchBookData(b.title, b.author).then(data => {
-            setDescription(data.description)
-            setApiGenre(data.genre)
-            setPublishedYear(data.publishedYear)
+            if (cancelled) return
+            if (data.description) setDescription(data.description)
+            if (data.genre) setApiGenre(data.genre)
+            if (data.publishedYear) setPublishedYear(data.publishedYear)
             setBookDataLoading(false)
-          })
+          }).catch(() => { if (!cancelled) setBookDataLoading(false) })
           if (!b.cover_url && b.title) {
             fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
-              if (!cover) return
+              if (cancelled || !cover) return
               updateBook(supabase, user.id, b.id, { cover_url: cover }).catch(() => {})
               setBook((prev) => prev ? { ...prev, cover_url: cover } : prev)
             }).catch(() => {})
@@ -140,8 +143,10 @@ export default function WishlistDetailPage() {
         }
       })
       .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [user, id])
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, id])
 
   async function handleUpdate(data: ToReadFormData | Omit<Book, 'id' | 'user_id' | 'created_at'>) {
     if (!book || !user) return

@@ -160,7 +160,8 @@ export default function ToReadDetailPage() {
       .finally(() => { if (!cancelled) setLoading(false) })
 
     return () => { cancelled = true }
-  }, [user, id])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, id])
 
   // Close dropdown on outside click
   const handleOutsideClick = useCallback((e: MouseEvent) => {

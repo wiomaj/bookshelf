@@ -99,29 +99,33 @@ export default function BookDetailPage() {
 
   useEffect(() => {
     if (!user) return
+    let cancelled = false
     getBook(supabase, user.id, id).then((b) => {
+      if (cancelled) return
       if (!b) setNotFound(true)
       else {
         setBook(b)
         setBookDataLoading(true)
         fetchBookData(b.title, b.author).then((data) => {
-          setDescription(data.description)
-          setApiGenre(data.genre)
-          setApiPublishedYear(data.publishedYear)
+          if (cancelled) return
+          if (data.description) setDescription(data.description)
+          if (data.genre) setApiGenre(data.genre)
+          if (data.publishedYear) setApiPublishedYear(data.publishedYear)
           setBookDataLoading(false)
-        })
-        // If no cover, search for one in the background and update silently
+        }).catch(() => { if (!cancelled) setBookDataLoading(false) })
         if (!b.cover_url && b.title) {
           fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
-            if (!cover) return
+            if (cancelled || !cover) return
             updateBook(supabase, user.id, b.id, { cover_url: cover }).catch(() => {})
             setBook((prev) => prev ? { ...prev, cover_url: cover } : prev)
           }).catch(() => {})
         }
       }
-      setLoading(false)
+      if (!cancelled) setLoading(false)
     })
-  }, [id, user])
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user?.id])
 
   async function handleUpdate(data: Omit<Book, 'id' | 'user_id' | 'created_at'> | ToReadFormData) {
     if (!book || !user) return
