@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Book } from '@/types/book'
 import { monthSortKey } from '@/lib/month'
 
-const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at, status, acquired_month, acquired_year, read_month, read_year, is_audiobook'
+const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at, status, acquired_month, acquired_year, read_month, read_year, started_reading_month, started_reading_year, is_audiobook'
 
 /**
  * Fetch every book for a user in a single query, then split by status client-side.
@@ -34,7 +34,7 @@ export async function getAllBooks(supabase: SupabaseClient, userId: string): Pro
 
   return {
     read:     sorted.filter(b => b.status === 'read' || b.status === 'abandoned'),
-    toRead:   all.filter(b => b.status === 'to_read'),   // creation order, already sorted by DB
+    toRead:   all.filter(b => b.status === 'to_read' || b.status === 'currently_reading'),
     wishlist: all.filter(b => b.status === 'wishlist'),
   }
 }
@@ -86,7 +86,7 @@ export async function getToReadBooks(supabase: SupabaseClient, userId: string): 
     .from('books')
     .select(COLUMNS)
     .eq('user_id', userId)
-    .eq('status', 'to_read')
+    .in('status', ['to_read', 'currently_reading'])
     .order('created_at', { ascending: false })
 
   if (error) throw new Error(error.message)

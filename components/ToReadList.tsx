@@ -10,6 +10,8 @@ import type { Book } from '@/types/book'
 import type { ViewMode } from '@/contexts/AppContext'
 import { useT } from '@/contexts/AppContext'
 
+const SHORT_MONTHS_LIST = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
 const bookPatternUrl =
   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-4 -4 32 32' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20'/%3E%3C/svg%3E")`
 
@@ -217,11 +219,105 @@ function ToReadYearSection({ year, books, viewMode }: YearSectionProps) {
   )
 }
 
+// ─── Currently Reading rail ───────────────────────────────────────────────────
+
+function CurrentlyReadingRail({ books }: { books: Book[] }) {
+  const router = useRouter()
+  const t = useT()
+
+  return (
+    <div className="mb-2">
+      {/* Section header */}
+      <div className="px-5 pt-5 pb-3 flex items-center gap-2">
+        <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>
+          {t.currentlyReadingSection}
+        </span>
+        {/* Live pulse dot */}
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ backgroundColor: 'var(--primary)' }} />
+          <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: 'var(--primary)' }} />
+        </span>
+      </div>
+
+      {/* Horizontal scroll strip */}
+      <div className="flex gap-3 overflow-x-auto px-5 pb-4" style={{ scrollSnapType: 'x mandatory' }}>
+        {books.map((book) => {
+          const startLabel = book.started_reading_month && book.started_reading_year
+            ? `${SHORT_MONTHS_LIST[book.started_reading_month - 1]} ${book.started_reading_year}`
+            : book.started_reading_year
+              ? String(book.started_reading_year)
+              : null
+
+          return (
+            <motion.button
+              key={book.id}
+              whileTap={{ scale: 0.96, opacity: 0.85 }}
+              onClick={() => router.push(`/to-read/${book.id}`)}
+              className="shrink-0 flex flex-col gap-2 text-left"
+              style={{ width: 110, scrollSnapAlign: 'start' }}
+            >
+              {/* Cover */}
+              <div
+                className="w-full rounded-[10px] overflow-hidden"
+                style={{
+                  height: 164,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.16), 0 1px 4px rgba(0,0,0,0.08)',
+                }}
+              >
+                {book.cover_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={coverUrl(book.cover_url)}
+                    alt={book.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className="relative w-full h-full flex items-center justify-center"
+                    style={{ backgroundColor: 'var(--primary)' }}
+                  >
+                    <div
+                      className="absolute inset-0 opacity-[0.08]"
+                      style={{ backgroundImage: bookPatternUrl, backgroundSize: '18px 18px', backgroundRepeat: 'repeat' }}
+                    />
+                    <BookIcon size={18} color="white" className="relative z-10" />
+                  </div>
+                )}
+              </div>
+
+              {/* Title */}
+              <p
+                className="text-[13px] font-semibold leading-[17px] line-clamp-2"
+                style={{ color: 'var(--label)' }}
+              >
+                {book.title}
+              </p>
+
+              {/* Started date */}
+              {startLabel && (
+                <p className="text-[11px] leading-[14px]" style={{ color: 'var(--label-tertiary)' }}>
+                  {startLabel}
+                </p>
+              )}
+            </motion.button>
+          )
+        })}
+      </div>
+
+      {/* Separator before the to-read list */}
+      <div className="mx-5 h-px" style={{ backgroundColor: 'var(--separator)' }} />
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ToReadList({ books, viewMode = 'list' }: ToReadListProps) {
-  const byYear = books.reduce<Record<number, Book[]>>((acc, book) => {
-    const y = book.year ?? 0
+  const currentlyReading = books.filter(b => b.status === 'currently_reading')
+  const toRead = books.filter(b => b.status !== 'currently_reading')
+
+  const byYear = toRead.reduce<Record<number, Book[]>>((acc, book) => {
+    const y = book.acquired_year ?? book.year ?? 0
     acc[y] = [...(acc[y] ?? []), book]
     return acc
   }, {})
@@ -236,6 +332,9 @@ export default function ToReadList({ books, viewMode = 'list' }: ToReadListProps
 
   return (
     <div className="pb-8">
+      {currentlyReading.length > 0 && (
+        <CurrentlyReadingRail books={currentlyReading} />
+      )}
       {years.map((year) => (
         <ToReadYearSection
           key={year}

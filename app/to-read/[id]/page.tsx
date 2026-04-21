@@ -82,6 +82,11 @@ export default function ToReadDetailPage() {
   const [moveRating, setMoveRating] = useState(0)
   const [moveNotes, setMoveNotes] = useState('')
 
+  const [showStartReadingModal, setShowStartReadingModal] = useState(false)
+  const [startMonth, setStartMonth] = useState<number>(new Date().getMonth() + 1)
+  const [startYear, setStartYear] = useState<number>(new Date().getFullYear())
+  const [startReadingLoading, setStartReadingLoading] = useState(false)
+
   // Pre-fill dates from stored per-status columns when book loads
   useEffect(() => {
     if (!book) return
@@ -89,6 +94,8 @@ export default function ToReadDetailPage() {
     if (book.read_year) setMoveYear(book.read_year)
     if (book.rating) setMoveRating(book.rating)
     if (book.notes) setMoveNotes(book.notes)
+    if (book.started_reading_month) setStartMonth(book.started_reading_month)
+    if (book.started_reading_year) setStartYear(book.started_reading_year)
   }, [book?.id])
 
   const [description, setDescription] = useState<string | undefined>(undefined)
@@ -223,6 +230,22 @@ export default function ToReadDetailPage() {
     }
   }
 
+  async function handleStartReading() {
+    if (!user || !book) return
+    setStartReadingLoading(true)
+    try {
+      const updated = await updateBook(supabase, user.id, book.id, {
+        status: 'currently_reading',
+        started_reading_month: startMonth,
+        started_reading_year: startYear,
+      })
+      setBook(updated)
+      setShowStartReadingModal(false)
+    } finally {
+      setStartReadingLoading(false)
+    }
+  }
+
   // ── Loading ──────────────────────────────────────────────────────────────────
   if (loading) {
     return (
@@ -309,6 +332,12 @@ export default function ToReadDetailPage() {
   const showCover = book.cover_url && !coverFailed
   const displayGenre = book.genre || apiGenre
   const addedDate = formatAddedDate(book.created_at)
+  const isCurrentlyReading = book.status === 'currently_reading'
+  const startedDate = isCurrentlyReading && book.started_reading_month && book.started_reading_year
+    ? `${SHORT_MONTHS[book.started_reading_month - 1]} ${book.started_reading_year}`
+    : isCurrentlyReading && book.started_reading_year
+      ? String(book.started_reading_year)
+      : null
 
   // ── View mode ────────────────────────────────────────────────────────────────
   return (
@@ -436,14 +465,18 @@ export default function ToReadDetailPage() {
           {/* Info chips — horizontal scroll */}
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
             <InfoChip icon={BookIcon} label={t.chipReceived} value={addedDate} />
+            {startedDate && (
+              <InfoChip icon={BookOpen} label={t.startedReadingLabel} value={startedDate} />
+            )}
             <InfoChip icon={Rocket} label={t.released} value={publishedYear} />
             {displayGenre && (
               <InfoChip icon={LibraryBig} label={t.genre} value={displayGenre} />
             )}
           </div>
 
-          {/* Mark as read CTA with abandon button */}
+          {/* CTAs */}
           <div className="flex gap-3">
+            {/* Abandon */}
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={() => setShowAbandonConfirm(true)}
@@ -456,15 +489,40 @@ export default function ToReadDetailPage() {
                 <path d="m9.5 7 5 5" />
               </svg>
             </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setShowMoveModal(true)}
-              disabled={moveLoading}
-              className="flex-1 py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center"
-              style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
-            >
-              {moveLoading ? t.loading : (book.is_audiobook ? t.markAsListened : t.markAsRead)}
-            </motion.button>
+
+            {isCurrentlyReading ? (
+              /* Currently reading — only show Mark as Read */
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setShowMoveModal(true)}
+                disabled={moveLoading}
+                className="flex-1 py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center"
+                style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+              >
+                {moveLoading ? t.loading : (book.is_audiobook ? t.markAsListened : t.markAsRead)}
+              </motion.button>
+            ) : (
+              /* To-read — Start Reading + Mark as Read side by side */
+              <>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setShowStartReadingModal(true)}
+                  className="flex-1 py-[15px] rounded-[14px] text-[17px] font-semibold text-center"
+                  style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+                >
+                  {t.startReading}
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setShowMoveModal(true)}
+                  disabled={moveLoading}
+                  className="flex-1 py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center"
+                  style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+                >
+                  {moveLoading ? t.loading : (book.is_audiobook ? t.markAsListened : t.markAsRead)}
+                </motion.button>
+              </>
+            )}
           </div>
 
           {/* My notes */}
@@ -518,6 +576,89 @@ export default function ToReadDetailPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* ── Start reading modal ───────────────────────────────────────── */}
+      <AnimatePresence>
+        {showStartReadingModal && (
+          <>
+            <motion.div
+              key="start-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowStartReadingModal(false)}
+              className="fixed inset-0 z-40"
+              style={{ backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+            />
+            <motion.div
+              key="start-sheet"
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+              className="fixed bottom-0 left-0 right-0 z-50 max-w-[600px] mx-auto rounded-t-[28px] p-6 pb-10"
+              style={{ backgroundColor: 'var(--bg-elevated)' }}
+            >
+              <div className="w-10 h-1 rounded-full mx-auto mb-5"
+                   style={{ backgroundColor: 'var(--separator-opaque)' }} />
+
+              <h3 className="text-[22px] font-bold tracking-[-0.3px] mb-5" style={{ color: 'var(--label)' }}>
+                {t.startReadingWhen}
+              </h3>
+
+              {/* Month + Year pickers */}
+              <div className="rounded-[14px] overflow-hidden mb-6" style={{ backgroundColor: 'var(--fill)' }}>
+                <div className="grid grid-cols-3">
+                  <div className="col-span-2" style={{ borderRight: '1px solid var(--separator)' }}>
+                    <select
+                      value={startMonth}
+                      onChange={e => setStartMonth(Number(e.target.value))}
+                      className="w-full px-4 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
+                      style={{ color: 'var(--label)' }}
+                    >
+                      {LONG_MONTHS.map((m, i) => (
+                        <option key={i + 1} value={i + 1}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <select
+                      value={startYear}
+                      onChange={e => setStartYear(Number(e.target.value))}
+                      className="w-full px-4 h-[52px] bg-transparent focus:outline-none text-[17px] appearance-none cursor-pointer"
+                      style={{ color: 'var(--label)' }}
+                    >
+                      {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleStartReading}
+                  disabled={startReadingLoading}
+                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white disabled:opacity-50"
+                  style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+                >
+                  {startReadingLoading ? t.loading : t.startReading}
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setShowStartReadingModal(false)}
+                  className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold"
+                  style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+                >
+                  {t.cancel}
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* ── Mark as read modal ─────────────────────────────────────────── */}
       <AnimatePresence>

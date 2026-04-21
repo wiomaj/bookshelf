@@ -60,7 +60,12 @@ export type Translations = {
   abandonDialogTitle: string
   abandonDialogMessage: string
   chipAbandoned: string
+  chipCurrentlyReading: string
   resumeReading: string
+  startReading: string
+  startReadingWhen: string
+  startedReadingLabel: string
+  currentlyReadingSection: string
   bookNotFound: string
   backToBookshelf: string
   // Confirm dialog
@@ -258,7 +263,12 @@ const en: Translations = {
   abandonDialogTitle: 'Mark as abandoned?',
   abandonDialogMessage: 'This book will be moved to your abandoned list.',
   chipAbandoned: 'Abandoned',
+  chipCurrentlyReading: 'Reading',
   resumeReading: 'Resume reading',
+  startReading: 'Start Reading',
+  startReadingWhen: 'When did you start?',
+  startedReadingLabel: 'Started',
+  currentlyReadingSection: 'Currently Reading',
   bookNotFound: 'Book not found',
   backToBookshelf: 'Back to bookshelf',
   deleteDialogTitle: 'Delete this book?',
@@ -439,7 +449,12 @@ const de: Translations = {
   abandonDialogTitle: 'Als abgebrochen markieren?',
   abandonDialogMessage: 'Das Buch wird in deine Abgebrochen-Liste verschoben.',
   chipAbandoned: 'Abgebrochen',
+  chipCurrentlyReading: 'Lese gerade',
   resumeReading: 'Weiterlesen',
+  startReading: 'Jetzt lesen',
+  startReadingWhen: 'Wann hast du angefangen?',
+  startedReadingLabel: 'Begonnen',
+  currentlyReadingSection: 'Lese ich gerade',
   bookNotFound: 'Buch nicht gefunden',
   backToBookshelf: 'Zurück zum Regal',
   deleteDialogTitle: 'Dieses Buch löschen?',
@@ -620,7 +635,12 @@ const fr: Translations = {
   abandonDialogTitle: 'Marquer comme abandonné ?',
   abandonDialogMessage: 'Ce livre sera déplacé vers votre liste des abandonnés.',
   chipAbandoned: 'Abandonné',
+  chipCurrentlyReading: 'En cours',
   resumeReading: 'Reprendre la lecture',
+  startReading: 'Commencer à lire',
+  startReadingWhen: 'Quand avez-vous commencé ?',
+  startedReadingLabel: 'Commencé le',
+  currentlyReadingSection: 'En cours de lecture',
   bookNotFound: 'Livre introuvable',
   backToBookshelf: 'Retour à la bibliothèque',
   deleteDialogTitle: 'Supprimer ce livre ?',
@@ -801,7 +821,12 @@ const es: Translations = {
   abandonDialogTitle: '¿Marcar como abandonado?',
   abandonDialogMessage: 'Este libro se moverá a tu lista de abandonados.',
   chipAbandoned: 'Abandonado',
+  chipCurrentlyReading: 'Leyendo',
   resumeReading: 'Seguir leyendo',
+  startReading: 'Empezar a leer',
+  startReadingWhen: '¿Cuándo empezaste?',
+  startedReadingLabel: 'Empezado',
+  currentlyReadingSection: 'Leyendo ahora',
   bookNotFound: 'Libro no encontrado',
   backToBookshelf: 'Volver a la estantería',
   deleteDialogTitle: '¿Eliminar este libro?',
@@ -982,7 +1007,12 @@ const pl: Translations = {
   abandonDialogTitle: 'Oznaczyć jako porzuconą?',
   abandonDialogMessage: 'Ta książka zostanie przeniesiona na listę porzuconych.',
   chipAbandoned: 'Porzucona',
+  chipCurrentlyReading: 'Czytam',
   resumeReading: 'Wznów czytanie',
+  startReading: 'Zacznij czytać',
+  startReadingWhen: 'Kiedy zacząłeś?',
+  startedReadingLabel: 'Zaczęto',
+  currentlyReadingSection: 'Aktualnie czytam',
   bookNotFound: 'Nie znaleziono książki',
   backToBookshelf: 'Wróć do półki',
   deleteDialogTitle: 'Usunąć tę książkę?',

@@ -12,10 +12,12 @@ export type Book = {
   notes?: string
   cover_url?: string
   created_at: string // ISO timestamp, set by Supabase automatically
-  status?: 'read' | 'to_read' | 'wishlist' | 'abandoned'  // defaults to 'read' in DB
-  acquired_month?: number | null  // month when user got the book (to_read date)
+  status?: 'read' | 'to_read' | 'wishlist' | 'abandoned' | 'currently_reading'
+  acquired_month?: number | null      // month when user got the book (to_read date)
   acquired_year?: number | null
-  read_month?: number | null      // month when user finished reading
+  read_month?: number | null          // month when user finished reading
   read_year?: number | null
+  started_reading_month?: number | null  // month the user started the current read
+  started_reading_year?: number | null
   is_audiobook?: boolean
 }
