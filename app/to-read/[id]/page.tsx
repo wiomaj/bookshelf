@@ -479,23 +479,23 @@ export default function ToReadDetailPage() {
           </div>
 
           {/* CTAs */}
-          <div className="flex gap-3">
-            {/* Abandon */}
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setShowAbandonConfirm(true)}
-              className="shrink-0 w-[52px] h-[52px] rounded-[14px] flex items-center justify-center"
-              style={{ backgroundColor: 'rgba(255, 56, 60, 0.12)' }}
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF383C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
-                <path d="m14.5 7-5 5" />
-                <path d="m9.5 7 5 5" />
-              </svg>
-            </motion.button>
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-3">
+              {/* Abandon icon */}
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setShowAbandonConfirm(true)}
+                className="shrink-0 w-[52px] h-[52px] rounded-[14px] flex items-center justify-center"
+                style={{ backgroundColor: 'rgba(255, 56, 60, 0.12)' }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF383C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
+                  <path d="m14.5 7-5 5" />
+                  <path d="m9.5 7 5 5" />
+                </svg>
+              </motion.button>
 
-            {isCurrentlyReading ? (
-              /* Currently reading — only show Mark as Read */
+              {/* Primary CTA — always Mark as Read */}
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setShowMoveModal(true)}
@@ -505,27 +505,18 @@ export default function ToReadDetailPage() {
               >
                 {moveLoading ? t.loading : (book.is_audiobook ? t.markAsListened : t.markAsRead)}
               </motion.button>
-            ) : (
-              /* To-read — Start Reading + Mark as Read side by side */
-              <>
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => setShowStartReadingModal(true)}
-                  className="flex-1 py-[15px] rounded-[14px] text-[17px] font-semibold text-center"
-                  style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
-                >
-                  {t.startReading}
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => setShowMoveModal(true)}
-                  disabled={moveLoading}
-                  className="flex-1 py-[15px] rounded-[14px] text-white text-[17px] font-semibold text-center"
-                  style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
-                >
-                  {moveLoading ? t.loading : (book.is_audiobook ? t.markAsListened : t.markAsRead)}
-                </motion.button>
-              </>
+            </div>
+
+            {/* Secondary — Start Reading, only for to_read books */}
+            {!isCurrentlyReading && (
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setShowStartReadingModal(true)}
+                className="w-full py-[13px] rounded-[14px] text-[16px] font-semibold text-center"
+                style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+              >
+                {t.startReading}
+              </motion.button>
             )}
           </div>
 
