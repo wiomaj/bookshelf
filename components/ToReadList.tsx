@@ -222,6 +222,19 @@ function ToReadYearSection({ year, books, viewMode }: YearSectionProps) {
 // ─── Currently Reading rail ───────────────────────────────────────────────────
 
 function CurrentlyReadingRail({ books }: { books: Book[] }) {
+  const sorted = [...books].sort((a, b) => {
+    const ay = a.started_reading_year ?? 0
+    const by = b.started_reading_year ?? 0
+    if (by !== ay) return by - ay
+    const am = a.started_reading_month ?? 0
+    const bm = b.started_reading_month ?? 0
+    if (bm !== am) return bm - am
+    const ad = a.started_reading_day ?? 0
+    const bd = b.started_reading_day ?? 0
+    if (bd !== ad) return bd - ad
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  })
+  books = sorted
   const router = useRouter()
   const t = useT()
 
