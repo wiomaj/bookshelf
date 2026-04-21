@@ -129,20 +129,27 @@ export default function ToReadDetailPage() {
 
   useEffect(() => {
     if (!user || !id) return
+    let cancelled = false
+
     getBook(supabase, user.id, id)
       .then(b => {
+        if (cancelled) return
         setBook(b)
         if (b) {
           setBookDataLoading(true)
           fetchBookData(b.title, b.author).then(data => {
-            setDescription(data.description)
-            setApiGenre(data.genre)
-            setPublishedYear(data.publishedYear)
+            if (cancelled) return
+            // Only overwrite state with truthy values — prevents a stale
+            // re-run (e.g. auth token refresh) from clearing data that a
+            // previous successful fetch already populated.
+            if (data.description) setDescription(data.description)
+            if (data.genre) setApiGenre(data.genre)
+            if (data.publishedYear) setPublishedYear(data.publishedYear)
             setBookDataLoading(false)
-          })
+          }).catch(() => { if (!cancelled) setBookDataLoading(false) })
           if (!b.cover_url && b.title) {
             fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
-              if (!cover) return
+              if (cancelled || !cover) return
               updateBook(supabase, user.id, b.id, { cover_url: cover }).catch(() => {})
               setBook((prev) => prev ? { ...prev, cover_url: cover } : prev)
             }).catch(() => {})
@@ -150,7 +157,9 @@ export default function ToReadDetailPage() {
         }
       })
       .catch(console.error)
-      .finally(() => setLoading(false))
+      .finally(() => { if (!cancelled) setLoading(false) })
+
+    return () => { cancelled = true }
   }, [user, id])
 
   // Close dropdown on outside click
