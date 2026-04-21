@@ -168,22 +168,29 @@ export default function ToReadDetailPage() {
     if (!book || !user) return
     setUpdateLoading(true)
     try {
+      // If the user didn't change the status picker away from to_read but the
+      // book is currently_reading, preserve that status so editing metadata
+      // doesn't accidentally kick it out of the "Lese ich gerade" rail.
+      const effectiveStatus = (editStatus === 'to_read' && book.status === 'currently_reading')
+        ? 'currently_reading'
+        : editStatus
+
       const dateColumns: Record<string, unknown> = {}
-      if (editStatus === 'read') {
+      if (effectiveStatus === 'read') {
         dateColumns.read_month = data.month
         dateColumns.read_year = data.year
-      } else if (editStatus === 'to_read') {
+      } else if (effectiveStatus === 'to_read') {
         dateColumns.acquired_month = data.month
         dateColumns.acquired_year = data.year
       }
-      await updateBook(supabase, user.id, book.id, { ...data, status: editStatus, ...dateColumns })
-      if (editStatus !== 'to_read') {
-        sessionStorage.setItem('bookshelf_returnTab', editStatus)
+      await updateBook(supabase, user.id, book.id, { ...data, status: effectiveStatus, ...dateColumns })
+      if (effectiveStatus !== 'to_read' && effectiveStatus !== 'currently_reading') {
+        sessionStorage.setItem('bookshelf_returnTab', effectiveStatus)
         sessionStorage.setItem('bookshelf_flash', 'changesSaved')
         router.replace('/')
         return
       }
-      setBook(prev => prev ? { ...prev, ...data } : prev)
+      setBook(prev => prev ? { ...prev, ...data, status: effectiveStatus } : prev)
       setIsEditing(false)
     } finally {
       setUpdateLoading(false)
