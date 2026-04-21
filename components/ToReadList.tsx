@@ -270,7 +270,7 @@ function CurrentlyReadingRail({ books }: { books: Book[] }) {
               key={book.id}
               whileTap={{ scale: 0.97 }}
               onClick={() => router.push(`/to-read/${book.id}`)}
-              className="shrink-0 rounded-[8px] overflow-hidden"
+              className="shrink-0 rounded-[8px] overflow-hidden text-left"
               style={{
                 width: 150,
                 height: 230,
