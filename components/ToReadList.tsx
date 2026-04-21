@@ -253,7 +253,8 @@ function CurrentlyReadingRail({ books }: { books: Book[] }) {
       </div>
 
       {/* Horizontal scroll strip */}
-      <div className="flex gap-3 overflow-x-auto pb-4" style={{ scrollSnapType: 'x mandatory', paddingLeft: 20, paddingRight: 20 }}>
+      <div className="overflow-x-auto pb-4" style={{ scrollSnapType: 'x mandatory' }}>
+      <div className="flex gap-3 px-5" style={{ width: 'max-content' }}>
         {books.map((book) => {
           const startLabel = book.started_reading_year
             ? [
@@ -331,6 +332,7 @@ function CurrentlyReadingRail({ books }: { books: Book[] }) {
             </motion.button>
           )
         })}
+      </div>
       </div>
 
     </div>
