@@ -333,8 +333,6 @@ function CurrentlyReadingRail({ books }: { books: Book[] }) {
         })}
       </div>
 
-      {/* Separator before the to-read list */}
-      <div className="mx-5 h-px" style={{ backgroundColor: 'var(--separator)' }} />
     </div>
   )
 }
