@@ -200,6 +200,11 @@ export type Translations = {
   seasonSummer: string
   seasonAutumn: string
   seasonWinter: string
+  // Search
+  searchPlaceholder: string
+  searchCancel: string
+  searchNoResults: string
+  searchNoResultsSub: string
   // Validation & errors
   validationTitleRequired: string
   validationRatingRequired: string
@@ -389,6 +394,10 @@ const en: Translations = {
   seasonSummer: 'Summer',
   seasonAutumn: 'Autumn',
   seasonWinter: 'Winter',
+  searchPlaceholder: 'Search books…',
+  searchCancel: 'Cancel',
+  searchNoResults: 'No results',
+  searchNoResultsSub: 'No books match your search.',
   validationTitleRequired: 'Title is required',
   validationRatingRequired: 'Please add a star rating',
   errorSomethingWentWrong: 'Something went wrong',
@@ -575,6 +584,10 @@ const de: Translations = {
   seasonSummer: 'Sommer',
   seasonAutumn: 'Herbst',
   seasonWinter: 'Winter',
+  searchPlaceholder: 'Bücher suchen…',
+  searchCancel: 'Abbrechen',
+  searchNoResults: 'Keine Ergebnisse',
+  searchNoResultsSub: 'Kein Buch passt zu deiner Suche.',
   validationTitleRequired: 'Titel ist erforderlich',
   validationRatingRequired: 'Bitte füge eine Sternebewertung hinzu',
   errorSomethingWentWrong: 'Etwas ist schiefgelaufen',
@@ -761,6 +774,10 @@ const fr: Translations = {
   seasonSummer: 'Été',
   seasonAutumn: 'Automne',
   seasonWinter: 'Hiver',
+  searchPlaceholder: 'Rechercher des livres…',
+  searchCancel: 'Annuler',
+  searchNoResults: 'Aucun résultat',
+  searchNoResultsSub: 'Aucun livre ne correspond à votre recherche.',
   validationTitleRequired: 'Le titre est requis',
   validationRatingRequired: 'Veuillez ajouter une note',
   errorSomethingWentWrong: 'Quelque chose s\'est mal passé',
@@ -947,6 +964,10 @@ const es: Translations = {
   seasonSummer: 'Verano',
   seasonAutumn: 'Otoño',
   seasonWinter: 'Invierno',
+  searchPlaceholder: 'Buscar libros…',
+  searchCancel: 'Cancelar',
+  searchNoResults: 'Sin resultados',
+  searchNoResultsSub: 'Ningún libro coincide con tu búsqueda.',
   validationTitleRequired: 'El título es obligatorio',
   validationRatingRequired: 'Por favor añade una valoración',
   errorSomethingWentWrong: 'Algo salió mal',
@@ -1133,6 +1154,10 @@ const pl: Translations = {
   seasonSummer: 'Lato',
   seasonAutumn: 'Jesień',
   seasonWinter: 'Zima',
+  searchPlaceholder: 'Szukaj książek…',
+  searchCancel: 'Anuluj',
+  searchNoResults: 'Brak wyników',
+  searchNoResultsSub: 'Żadna książka nie pasuje do Twojego wyszukiwania.',
   validationTitleRequired: 'Tytuł jest wymagany',
   validationRatingRequired: 'Proszę dodaj ocenę gwiazdkową',
   errorSomethingWentWrong: 'Coś poszło nie tak',

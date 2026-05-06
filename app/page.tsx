@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpenCheck, User, Settings, Loader2, ChevronDown } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpenCheck, User, Settings, Loader2, ChevronDown, Search, X } from 'lucide-react'
 import Link from 'next/link'
 import { getAllBooks, updateBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
@@ -62,6 +62,11 @@ export default function HomePage() {
   const [pullY, setPullY] = useState(0)
   const [refreshing, setRefreshing] = useState(false)
   const [isTracking, setIsTracking] = useState(false)
+
+  // Search
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showSearch, setShowSearch] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const yearPickerRef    = useRef<HTMLDivElement>(null)
   const yearPickerTopRef = useRef<HTMLDivElement>(null)
@@ -268,6 +273,22 @@ export default function HomePage() {
   const years = Object.keys(booksByYear).map(Number).sort((a, b) => b - a)
   // null = not yet picked → default to most recent year; 'all' = explicit all-time
   const effectiveYear: number | 'all' = dashboardYear ?? (years.length > 0 ? years[0] : 'all')
+
+  // ── Search ───────────────────────────────────────────────────────────────
+  function bookHref(book: Book): string {
+    if (book.status === 'wishlist') return `/wishlist/${book.id}`
+    if (book.status === 'to_read' || book.status === 'currently_reading') return `/to-read/${book.id}`
+    return `/book/${book.id}`
+  }
+
+  const allBooks = [...books, ...toReadBooks, ...wishlistBooks]
+  const q = searchQuery.trim().toLowerCase()
+  const searchResults = q.length > 0
+    ? allBooks.filter(b =>
+        b.title.toLowerCase().includes(q) ||
+        (b.author ?? '').toLowerCase().includes(q)
+      )
+    : []
 
   if (loading) {
     return (
@@ -581,38 +602,97 @@ export default function HomePage() {
             )}
 
             {activeTab === 'books' && hasAnyBooks && (
-              <div className="flex items-center gap-0.5 rounded-[10px] p-0.5"
-                   style={{ backgroundColor: 'var(--fill)' }}>
+              <>
                 <button
-                  onClick={() => setViewMode('grid')}
-                  className="p-2 rounded-[8px] transition-colors"
-                  style={{
-                    backgroundColor: viewMode === 'grid' ? 'var(--bg-elevated)' : 'transparent',
-                    color: viewMode === 'grid' ? 'var(--label)' : 'var(--label-tertiary)',
+                  onClick={() => {
+                    setShowSearch(true)
+                    setTimeout(() => searchInputRef.current?.focus(), 50)
                   }}
-                  aria-label="Grid view"
+                  className="w-9 h-9 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
+                  aria-label="Search"
                 >
-                  <LayoutGrid size={18} />
+                  <Search size={18} />
                 </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className="p-2 rounded-[8px] transition-colors"
-                  style={{
-                    backgroundColor: viewMode === 'list' ? 'var(--bg-elevated)' : 'transparent',
-                    color: viewMode === 'list' ? 'var(--label)' : 'var(--label-tertiary)',
-                  }}
-                  aria-label="List view"
-                >
-                  <List size={18} />
-                </button>
-              </div>
+                <div className="flex items-center gap-0.5 rounded-[10px] p-0.5"
+                     style={{ backgroundColor: 'var(--fill)' }}>
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className="p-2 rounded-[8px] transition-colors"
+                    style={{
+                      backgroundColor: viewMode === 'grid' ? 'var(--bg-elevated)' : 'transparent',
+                      color: viewMode === 'grid' ? 'var(--label)' : 'var(--label-tertiary)',
+                    }}
+                    aria-label="Grid view"
+                  >
+                    <LayoutGrid size={18} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className="p-2 rounded-[8px] transition-colors"
+                    style={{
+                      backgroundColor: viewMode === 'list' ? 'var(--bg-elevated)' : 'transparent',
+                      color: viewMode === 'list' ? 'var(--label)' : 'var(--label-tertiary)',
+                    }}
+                    aria-label="List view"
+                  >
+                    <List size={18} />
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>
       )}
 
+      {/* ── Search bar ───────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showSearch && activeTab === 'books' && (
+          <motion.div
+            key="searchbar"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-3 flex items-center gap-2">
+              <div className="flex-1 flex items-center gap-2 rounded-[12px] px-3 h-[44px]"
+                   style={{ backgroundColor: 'var(--fill)' }}>
+                <Search size={16} style={{ color: 'var(--label-tertiary)', flexShrink: 0 }} />
+                <input
+                  ref={searchInputRef}
+                  type="search"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder={t.searchPlaceholder}
+                  className="flex-1 bg-transparent text-[17px] focus:outline-none min-w-0"
+                  style={{ color: 'var(--label)', caretColor: 'var(--primary)' }}
+                />
+                {searchQuery.length > 0 && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: 'var(--label-tertiary)' }}
+                  >
+                    <X size={11} className="text-white" strokeWidth={2.5} />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={() => { setShowSearch(false); setSearchQuery('') }}
+                className="text-[15px] font-medium shrink-0"
+                style={{ color: 'var(--primary)' }}
+              >
+                {t.searchCancel}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Books tab: segmented control ─────────────────────────────── */}
-      {activeTab === 'books' && !isEmptyState && (
+      {activeTab === 'books' && !isEmptyState && !showSearch && (
         <div className="px-4 pb-3">
           <div className="flex p-[3px] rounded-full" style={{ backgroundColor: 'var(--fill)' }}>
             {([
@@ -637,8 +717,91 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* ── Search results ───────────────────────────────────────────── */}
+      {activeTab === 'books' && showSearch && searchQuery.trim().length > 0 && (
+        <div className="px-4">
+          {searchResults.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center text-center pt-12 gap-2"
+            >
+              <p className="text-[17px] font-semibold" style={{ color: 'var(--label)' }}>
+                {t.searchNoResults}
+              </p>
+              <p className="text-[15px]" style={{ color: 'var(--label-secondary)' }}>
+                {t.searchNoResultsSub}
+              </p>
+            </motion.div>
+          ) : (
+            <div className="flex flex-col gap-[1px] overflow-hidden rounded-[14px]"
+                 style={{ backgroundColor: 'var(--separator)' }}>
+              {searchResults.map((book, i) => {
+                const statusLabel =
+                  book.status === 'wishlist'          ? t.tabWishlist :
+                  book.status === 'to_read'           ? t.tabToRead :
+                  book.status === 'currently_reading' ? t.chipCurrentlyReading :
+                  book.status === 'abandoned'         ? t.chipAbandoned :
+                  t.tabRead
+                return (
+                  <motion.button
+                    key={book.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.03 }}
+                    whileTap={{ scale: 0.99 }}
+                    onClick={() => router.push(bookHref(book))}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                    style={{ backgroundColor: 'var(--bg-elevated)' }}
+                  >
+                    {/* Cover thumbnail */}
+                    <div className="w-[42px] h-[60px] rounded-[6px] overflow-hidden shrink-0"
+                         style={{ backgroundColor: 'var(--primary)' }}>
+                      {book.cover_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={book.cover_url}
+                          alt={book.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full opacity-20 flex items-center justify-center">
+                          <Search size={16} className="text-white" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Title + author */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[15px] font-semibold leading-[20px] truncate"
+                         style={{ color: 'var(--label)' }}>
+                        {book.title}
+                      </p>
+                      {book.author && (
+                        <p className="text-[13px] leading-[18px] truncate"
+                           style={{ color: 'var(--label-secondary)' }}>
+                          {book.author}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Status badge */}
+                    <span
+                      className="text-[11px] font-medium px-2 py-[3px] rounded-full shrink-0"
+                      style={{ backgroundColor: 'var(--fill)', color: 'var(--label-secondary)' }}
+                    >
+                      {statusLabel}
+                    </span>
+                  </motion.button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Books tab → Read sub-tab ──────────────────────────────────── */}
-      {activeTab === 'books' && activeBookTab === 'read' && (
+      {activeTab === 'books' && activeBookTab === 'read' && !(showSearch && searchQuery.trim().length > 0) && (
         books.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -681,7 +844,7 @@ export default function HomePage() {
       )}
 
       {/* ── Books tab → To Read sub-tab ───────────────────────────────── */}
-      {activeTab === 'books' && activeBookTab === 'to_read' && (
+      {activeTab === 'books' && activeBookTab === 'to_read' && !(showSearch && searchQuery.trim().length > 0) && (
         toReadBooks.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -720,7 +883,7 @@ export default function HomePage() {
       )}
 
       {/* ── Books tab → Wishlist sub-tab ──────────────────────────────── */}
-      {activeTab === 'books' && activeBookTab === 'wishlist' && (
+      {activeTab === 'books' && activeBookTab === 'wishlist' && !(showSearch && searchQuery.trim().length > 0) && (
         wishlistBooks.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
