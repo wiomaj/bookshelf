@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpenCheck, User, Settings, Loader2, ChevronDown, Search, X } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpenCheck, User, Settings, Loader2, ChevronDown, Search, X, SlidersHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { getAllBooks, updateBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
@@ -67,6 +67,9 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Filter
+  const [showFilter, setShowFilter] = useState(false)
 
   const yearPickerRef    = useRef<HTMLDivElement>(null)
   const yearPickerTopRef = useRef<HTMLDivElement>(null)
@@ -273,6 +276,7 @@ export default function HomePage() {
   const years = Object.keys(booksByYear).map(Number).sort((a, b) => b - a)
   // null = not yet picked → default to most recent year; 'all' = explicit all-time
   const effectiveYear: number | 'all' = dashboardYear ?? (years.length > 0 ? years[0] : 'all')
+
 
   // ── Search ───────────────────────────────────────────────────────────────
   function bookHref(book: Book): string {
@@ -523,173 +527,174 @@ export default function HomePage() {
 
       {/* ── Large title + controls ────────────────────────────────────── */}
       {!isEmptyState && (
-        <div className="flex items-end justify-between px-5 pt-4 pb-4">
-          <h1 className="text-[34px] font-bold tracking-[-0.5px]"
-              style={{ color: 'var(--label)' }}>
-            {title}
-          </h1>
+        <div className="px-5 pt-4 pb-4">
+          {/* Single row: left content + right buttons, always same height */}
+          <div className="flex items-end gap-2">
 
-          <div className="flex items-center gap-2 pb-1">
-            {/* Year picker dropdown — dashboard only */}
-            {activeTab === 'dashboard' && (
-              <div className="relative" ref={yearPickerRef}>
-                <button
-                  onClick={() => setYearPickerSource(s => s === 'large' ? null : 'large')}
-                  className="flex items-center gap-[5px] rounded-full px-[12px] py-[7px]"
-                  style={{ backgroundColor: 'var(--fill)' }}
-                >
-                  <span className="text-[13px] font-semibold" style={{ color: 'var(--label)' }}>
-                    {effectiveYear === 'all' ? t.allTime : String(effectiveYear)}
-                  </span>
-                  <ChevronDown size={12} style={{ color: 'var(--label-secondary)' }} />
-                </button>
-
-                <AnimatePresence>
-                  {yearPickerSource === 'large' && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -4 }}
-                      transition={{ duration: 0.12 }}
-                      className="absolute right-0 top-full mt-[6px] rounded-[12px] overflow-hidden z-[60]"
-                      style={{
-                        backgroundColor: 'var(--bg-elevated)',
-                        boxShadow: '0 4px 24px rgba(0,0,0,0.14)',
-                        minWidth: '110px',
-                      }}
-                    >
-                      {years.map(y => (
-                        <button
-                          key={y}
-                          onClick={() => { setDashboardYear(y); setYearPickerSource(null) }}
-                          className="w-full px-[16px] py-[10px] text-left text-[15px]"
-                          style={{
-                            color: effectiveYear === y ? 'var(--primary)' : 'var(--label)',
-                            fontWeight: effectiveYear === y ? 600 : 400,
-                          }}
-                        >
-                          {y}
-                        </button>
-                      ))}
-                      {years.length > 0 && (
-                        <div className="mx-[12px] h-px" style={{ backgroundColor: 'var(--separator)' }} />
-                      )}
-                      <button
-                        onClick={() => { setDashboardYear('all'); setYearPickerSource(null) }}
-                        className="w-full px-[16px] py-[10px] text-left text-[15px]"
-                        style={{
-                          color: effectiveYear === 'all' ? 'var(--primary)' : 'var(--label)',
-                          fontWeight: effectiveYear === 'all' ? 600 : 400,
-                        }}
-                      >
-                        {t.allTime}
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
-
-            {fabRoute && (
-              <motion.button
-                whileTap={{ scale: 0.90 }}
-                onClick={() => router.push(fabRoute)}
-                className="w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+            {/* Left: title always in DOM (fixes height), search bar overlays it */}
+            <div className="flex-1 min-w-0 relative">
+              {/* Title — always rendered to hold the row height */}
+              <motion.h1
+                className="text-[34px] font-bold tracking-[-0.5px]"
+                style={{ color: 'var(--label)' }}
+                animate={{ opacity: activeTab === 'books' && showSearch ? 0 : 1 }}
+                transition={{ duration: 0.15 }}
               >
-                <Plus size={20} className="text-white" strokeWidth={2.5} />
-              </motion.button>
-            )}
+                {title}
+              </motion.h1>
 
-            {activeTab === 'books' && hasAnyBooks && (
-              <>
-                <button
+              {/* Search bar — absolute over the title, aligns to bottom */}
+              {activeTab === 'books' && (
+                <motion.div
+                  className="absolute inset-0 flex items-end pb-1"
+                  animate={{
+                    clipPath: showSearch
+                      ? 'inset(0% 0% 0% 0% round 12px)'
+                      : 'inset(0% 0% 0% 100% round 18px)',
+                  }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 38 }}
+                >
+                  <motion.div
+                    className="w-full flex items-center gap-2 px-3 h-9"
+                    style={{ backgroundColor: 'var(--fill)' }}
+                    animate={{ borderRadius: showSearch ? '12px' : '18px' }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 38 }}
+                  >
+                    {showSearch && (
+                      <motion.div layoutId="search-icon" style={{ display: 'flex', flexShrink: 0, color: 'var(--label-tertiary)' }}>
+                        <Search size={18} />
+                      </motion.div>
+                    )}
+                    <input
+                      ref={searchInputRef}
+                      type="search"
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      placeholder={t.searchPlaceholder}
+                      className="flex-1 bg-transparent text-[17px] focus:outline-none min-w-0"
+                      style={{ color: 'var(--label)', caretColor: 'var(--primary)' }}
+                    />
+                    {searchQuery.length > 0 && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: 'var(--label-tertiary)' }}
+                      >
+                        <X size={11} className="text-white" strokeWidth={2.5} />
+                      </button>
+                    )}
+                  </motion.div>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Right: action buttons */}
+            <div className="flex items-center gap-2 shrink-0 pb-1">
+              {/* Year picker — dashboard only */}
+              {activeTab === 'dashboard' && (
+                <div className="relative" ref={yearPickerRef}>
+                  <button
+                    onClick={() => setYearPickerSource(s => s === 'large' ? null : 'large')}
+                    className="flex items-center gap-[5px] rounded-full px-[12px] py-[7px]"
+                    style={{ backgroundColor: 'var(--fill)' }}
+                  >
+                    <span className="text-[13px] font-semibold" style={{ color: 'var(--label)' }}>
+                      {effectiveYear === 'all' ? t.allTime : String(effectiveYear)}
+                    </span>
+                    <ChevronDown size={12} style={{ color: 'var(--label-secondary)' }} />
+                  </button>
+                  <AnimatePresence>
+                    {yearPickerSource === 'large' && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                        transition={{ duration: 0.12 }}
+                        className="absolute right-0 top-full mt-[6px] rounded-[12px] overflow-hidden z-[60]"
+                        style={{ backgroundColor: 'var(--bg-elevated)', boxShadow: '0 4px 24px rgba(0,0,0,0.14)', minWidth: '110px' }}
+                      >
+                        {years.map(y => (
+                          <button
+                            key={y}
+                            onClick={() => { setDashboardYear(y); setYearPickerSource(null) }}
+                            className="w-full px-[16px] py-[10px] text-left text-[15px]"
+                            style={{ color: effectiveYear === y ? 'var(--primary)' : 'var(--label)', fontWeight: effectiveYear === y ? 600 : 400 }}
+                          >{y}</button>
+                        ))}
+                        {years.length > 0 && <div className="mx-[12px] h-px" style={{ backgroundColor: 'var(--separator)' }} />}
+                        <button
+                          onClick={() => { setDashboardYear('all'); setYearPickerSource(null) }}
+                          className="w-full px-[16px] py-[10px] text-left text-[15px]"
+                          style={{ color: effectiveYear === 'all' ? 'var(--primary)' : 'var(--label)', fontWeight: effectiveYear === 'all' ? 600 : 400 }}
+                        >{t.allTime}</button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+
+              {/* Filter + Search buttons — collapse width when search is open */}
+              {activeTab === 'books' && hasAnyBooks && (
+                <motion.div
+                  animate={{ width: showSearch ? 0 : 'auto', opacity: showSearch ? 0 : 1 }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 38 }}
+                  style={{ pointerEvents: showSearch ? 'none' : 'auto', overflow: 'hidden' }}
+                  className="flex items-center gap-2"
+                >
+                  <button
+                    onClick={() => setShowFilter(true)}
+                    className="w-9 h-9 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: 'var(--fill)', color: 'var(--label-secondary)' }}
+                    aria-label="Filter"
+                  >
+                    <SlidersHorizontal size={18} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowSearch(true)
+                      setTimeout(() => searchInputRef.current?.focus(), 50)
+                    }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: 'var(--fill)', color: 'var(--label-secondary)' }}
+                    aria-label="Search"
+                  >
+                    <motion.div layoutId="search-icon" style={{ display: 'flex' }}>
+                      <Search size={18} />
+                    </motion.div>
+                  </button>
+                </motion.div>
+              )}
+
+              {/* + button — always visible, spins 45° when search is open */}
+              {fabRoute && (
+                <motion.button
+                  whileTap={{ scale: 0.90 }}
                   onClick={() => {
-                    setShowSearch(true)
-                    setTimeout(() => searchInputRef.current?.focus(), 50)
+                    if (showSearch) { setShowSearch(false); setSearchQuery('') }
+                    else router.push(fabRoute)
                   }}
                   className="w-9 h-9 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'var(--fill)', color: 'var(--label)' }}
-                  aria-label="Search"
+                  animate={{
+                    backgroundColor: showSearch ? 'var(--fill)' : 'var(--primary)',
+                    boxShadow: showSearch ? 'none' : 'var(--btn-shadow)',
+                  }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <Search size={18} />
-                </button>
-                <div className="flex items-center gap-0.5 rounded-[10px] p-0.5"
-                     style={{ backgroundColor: 'var(--fill)' }}>
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className="p-2 rounded-[8px] transition-colors"
-                    style={{
-                      backgroundColor: viewMode === 'grid' ? 'var(--bg-elevated)' : 'transparent',
-                      color: viewMode === 'grid' ? 'var(--label)' : 'var(--label-tertiary)',
-                    }}
-                    aria-label="Grid view"
+                  <motion.span
+                    animate={{ rotate: showSearch ? 45 : 0 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                    style={{ display: 'flex', color: showSearch ? 'var(--label-secondary)' : 'white' }}
                   >
-                    <LayoutGrid size={18} />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className="p-2 rounded-[8px] transition-colors"
-                    style={{
-                      backgroundColor: viewMode === 'list' ? 'var(--bg-elevated)' : 'transparent',
-                      color: viewMode === 'list' ? 'var(--label)' : 'var(--label-tertiary)',
-                    }}
-                    aria-label="List view"
-                  >
-                    <List size={18} />
-                  </button>
-                </div>
-              </>
-            )}
+                    <Plus size={20} strokeWidth={2.5} />
+                  </motion.span>
+                </motion.button>
+              )}
+            </div>
+
           </div>
         </div>
       )}
 
-      {/* ── Search bar ───────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {showSearch && activeTab === 'books' && (
-          <motion.div
-            key="searchbar"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-3 flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-2 rounded-[12px] px-3 h-[44px]"
-                   style={{ backgroundColor: 'var(--fill)' }}>
-                <Search size={16} style={{ color: 'var(--label-tertiary)', flexShrink: 0 }} />
-                <input
-                  ref={searchInputRef}
-                  type="search"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder={t.searchPlaceholder}
-                  className="flex-1 bg-transparent text-[17px] focus:outline-none min-w-0"
-                  style={{ color: 'var(--label)', caretColor: 'var(--primary)' }}
-                />
-                {searchQuery.length > 0 && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: 'var(--label-tertiary)' }}
-                  >
-                    <X size={11} className="text-white" strokeWidth={2.5} />
-                  </button>
-                )}
-              </div>
-              <button
-                onClick={() => { setShowSearch(false); setSearchQuery('') }}
-                className="text-[15px] font-medium shrink-0"
-                style={{ color: 'var(--primary)' }}
-              >
-                {t.searchCancel}
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* ── Books tab: segmented control ─────────────────────────────── */}
       {activeTab === 'books' && !isEmptyState && !showSearch && (
@@ -1118,6 +1123,59 @@ export default function HomePage() {
                   {t.namePromptSkip}
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Filter / sort bottom sheet ────────────────────────────────── */}
+      <AnimatePresence>
+        {showFilter && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center"
+            style={{ backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)' }}
+            onClick={() => setShowFilter(false)}
+          >
+            <motion.div
+              initial={{ y: 120, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 120, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+              className="w-full max-w-[600px] rounded-t-[28px] px-5 pt-5 pb-10"
+              style={{ backgroundColor: 'var(--bg-elevated)' }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Drag handle */}
+              <div className="w-10 h-1 rounded-full mx-auto mb-5"
+                   style={{ backgroundColor: 'var(--separator-opaque)' }} />
+
+              {/* View section */}
+              <p className="text-[13px] font-semibold uppercase tracking-[0.5px] mb-2"
+                 style={{ color: 'var(--label-secondary)' }}>
+                Ansicht
+              </p>
+              <div className="flex gap-2 mb-5">
+                {([
+                  { mode: 'grid' as const, label: 'Raster', icon: <LayoutGrid size={18} /> },
+                  { mode: 'list' as const, label: 'Liste',  icon: <List size={18} /> },
+                ]).map(({ mode, label, icon }) => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-[12px] text-[15px] font-medium transition-colors"
+                    style={{
+                      backgroundColor: viewMode === mode ? 'var(--primary)' : 'var(--fill)',
+                      color: viewMode === mode ? 'white' : 'var(--label)',
+                    }}
+                  >
+                    {icon}{label}
+                  </button>
+                ))}
+              </div>
+
             </motion.div>
           </motion.div>
         )}
