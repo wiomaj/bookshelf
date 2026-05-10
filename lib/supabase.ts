@@ -15,7 +15,15 @@ if (!url || !key) {
   }
 }
 
+// In the browser, route through the local Next.js proxy (/_supabase/*) so
+// sandboxed preview environments can reach Supabase without direct internet access.
+// On the server, use the real URL directly.
+const clientUrl =
+  typeof window !== 'undefined'
+    ? `${window.location.origin}/_supabase`
+    : (url ?? 'https://placeholder.supabase.co')
+
 export const supabase = createClient(
-  url ?? 'https://placeholder.supabase.co',
+  clientUrl,
   key ?? 'placeholder-anon-key'
 )
