@@ -25,5 +25,14 @@ const clientUrl =
 
 export const supabase = createClient(
   clientUrl,
-  key ?? 'placeholder-anon-key'
+  key ?? 'placeholder-anon-key',
+  {
+    auth: {
+      // Implicit flow so password-reset links work across devices/browsers.
+      // PKCE requires the code verifier to be in the same browser that
+      // initiated the request — which breaks when the email is opened on a
+      // different device.
+      flowType: 'implicit',
+    },
+  }
 )

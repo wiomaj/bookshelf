@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import { useT } from '@/contexts/AppContext'
@@ -9,7 +9,6 @@ import { useT } from '@/contexts/AppContext'
 function ResetContent() {
   const t = useT()
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   const [status, setStatus] = useState<'loading' | 'ready' | 'invalid' | 'success'>('loading')
   const [password, setPassword] = useState('')
@@ -18,12 +17,26 @@ function ResetContent() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const code = searchParams.get('code')
-    if (!code) { setStatus('invalid'); return }
-    supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-      setStatus(error ? 'invalid' : 'ready')
+    // Implicit flow: Supabase redirects with #access_token=...&type=recovery
+    // in the hash. The client detects this automatically and fires
+    // PASSWORD_RECOVERY. We also check the existing session in case the
+    // event already fired before this component mounted.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') setStatus('ready')
     })
-  }, [searchParams])
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setStatus('ready')
+      } else {
+        // Give the hash-fragment a moment to be processed
+        const timer = setTimeout(() => setStatus('invalid'), 2000)
+        return () => clearTimeout(timer)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
