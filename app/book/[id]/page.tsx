@@ -139,7 +139,12 @@ export default function BookDetailPage() {
         dateColumns.acquired_month = data.month
         dateColumns.acquired_year = data.year
       }
-      await updateBook(supabase, user.id, book.id, { ...data, status: editStatus, ...dateColumns })
+      const updated = await updateBook(supabase, user.id, book.id, { ...data, status: editStatus, ...dateColumns })
+      // Sync local state immediately so the detail view is up-to-date if the
+      // page is restored from bfcache or the navigation is delayed.
+      setBook(updated)
+      setCoverFailed(false)
+      setIsEditing(false)
       sessionStorage.setItem('bookshelf_returnTab', editStatus === 'abandoned' ? 'read' : editStatus)
       sessionStorage.setItem('bookshelf_flash', 'changesSaved')
       router.replace('/')
