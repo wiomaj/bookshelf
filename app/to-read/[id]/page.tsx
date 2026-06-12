@@ -368,7 +368,9 @@ export default function ToReadDetailPage() {
 
   const showCover = book.cover_url && !coverFailed
   const displayGenre = book.genre || apiGenre
-  const addedDate = formatAddedDate(book.created_at)
+  const addedDate = (book.acquired_month && book.acquired_year)
+    ? `${SHORT_MONTHS[book.acquired_month - 1]} ${book.acquired_year}`
+    : formatAddedDate(book.created_at)
   const isCurrentlyReading = book.status === 'currently_reading'
   const startedDate = (() => {
     if (!isCurrentlyReading || !book.started_reading_year) return null
