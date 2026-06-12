@@ -6,8 +6,8 @@ import { motion } from 'framer-motion'
 import { BookOpen, BookOpenCheck, Pencil, X, Rocket, LibraryBig, type LucideIcon } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
-import { fetchBookData } from '@/lib/bookDescription'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
+import { searchBooks } from '@/lib/bookSearch'
 import StarRating from '@/components/StarRating'
 import BookForm from '@/components/BookForm'
 import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
@@ -76,7 +76,11 @@ export default function BookDetailPage() {
   const [description, setDescription] = useState<string | undefined>(undefined)
   const [apiGenre, setApiGenre] = useState<string | undefined>(undefined)
   const [apiPublishedYear, setApiPublishedYear] = useState<string | undefined>(undefined)
+  const [apiPageCount, setApiPageCount] = useState<number | null>(null)
+  const [apiPublisher, setApiPublisher] = useState<string | null>(null)
+  const [apiSubjects, setApiSubjects] = useState<string[]>([])
   const [bookDataLoading, setBookDataLoading] = useState(false)
+  const [descExpanded, setDescExpanded] = useState(false)
   const [coverFailed, setCoverFailed] = useState(false)
   const coverRetryRef = useRef(false)
 
@@ -106,11 +110,20 @@ export default function BookDetailPage() {
       else {
         setBook(b)
         setBookDataLoading(true)
-        fetchBookData(b.title, b.author).then((data) => {
+        searchBooks(b.title, 3).then((results) => {
           if (cancelled) return
-          if (data.description) setDescription(data.description)
-          if (data.genre) setApiGenre(data.genre)
-          if (data.publishedYear) setApiPublishedYear(data.publishedYear)
+          const best = results.find((r) =>
+            r.author.toLowerCase().includes((b.author ?? '').toLowerCase().split(' ')[0]) ||
+            (b.author ?? '').toLowerCase().includes(r.author.toLowerCase().split(' ')[0])
+          ) ?? results[0]
+          if (best) {
+            if (best.description) setDescription(best.description)
+            if (best.subjects?.[0]) setApiGenre(best.subjects[0])
+            if (best.publishedDate) setApiPublishedYear(best.publishedDate.slice(0, 4))
+            if (best.pageCount) setApiPageCount(best.pageCount)
+            if (best.publisher) setApiPublisher(best.publisher)
+            if (best.subjects?.length) setApiSubjects(best.subjects.slice(0, 6))
+          }
           setBookDataLoading(false)
         }).catch(() => { if (!cancelled) setBookDataLoading(false) })
         if (!b.cover_url && b.title) {
@@ -416,6 +429,20 @@ export default function BookDetailPage() {
                 value={book.genre || apiGenre}
               />
             )}
+            {apiPageCount && (
+              <InfoChip
+                icon={BookOpen}
+                label={t.pages}
+                value={String(apiPageCount)}
+              />
+            )}
+            {apiPublisher && (
+              <InfoChip
+                icon={LibraryBig}
+                label={t.publisher}
+                value={apiPublisher}
+              />
+            )}
           </div>
 
           {/* My notes */}
@@ -446,15 +473,53 @@ export default function BookDetailPage() {
                 <span className="text-[14px]" style={{ color: 'var(--label-tertiary)' }}>{t.loading}</span>
               </div>
             ) : description ? (
-              <p className="text-[17px] leading-[22px] tracking-[-0.43px]" style={{ color: 'var(--label)' }}>
-                {description}
-              </p>
+              <div>
+                <p
+                  className="text-[17px] leading-[22px] tracking-[-0.43px]"
+                  style={{
+                    color: 'var(--label)',
+                    overflow: 'hidden',
+                    display: '-webkit-box',
+                    WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: descExpanded ? 'unset' : 3,
+                  } as React.CSSProperties}
+                >
+                  {description}
+                </p>
+                <button
+                  onClick={() => setDescExpanded((v) => !v)}
+                  className="text-[14px] mt-1 font-medium"
+                  style={{ color: 'var(--primary)' }}
+                >
+                  {descExpanded ? t.showLess : t.readMore}
+                </button>
+              </div>
             ) : (
               <p className="text-[16px] leading-6 italic" style={{ color: 'var(--label-tertiary)' }}>
                 {t.noDescriptionAvailable}
               </p>
             )}
           </div>
+
+          {/* Subjects / tag pills */}
+          {apiSubjects.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <span className="text-[12px] leading-[16px]" style={{ color: 'var(--label-secondary)' }}>
+                {t.subjects}
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {apiSubjects.map((subj) => (
+                  <span
+                    key={subj}
+                    className="text-[13px] px-3 py-1 rounded-full"
+                    style={{ backgroundColor: 'var(--fill)', color: 'var(--label-secondary)' }}
+                  >
+                    {subj}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Resume reading CTA for abandoned books */}
           {book.status === 'abandoned' && (

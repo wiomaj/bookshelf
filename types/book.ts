@@ -1,3 +1,20 @@
+/**
+ * Rich metadata for a book fetched from Open Library / Google Books.
+ * Stored in book_metadata_cache; returned by /api/books/search and /api/books/metadata.
+ */
+export type BookMetadata = {
+  isbn13: string | null
+  title: string
+  authors: string[]
+  description: string | null
+  pageCount: number | null
+  publishedDate: string | null   // "2003-06-26" | "2003" — varies by source
+  publisher: string | null
+  subjects: string[]             // genres/subject tags, max 8
+  coverUrl: string | null
+  source: 'openlibrary' | 'googlebooks' | 'cache'
+}
+
 // The core data shape for a book in the database.
 // Every field maps 1:1 to a column in the Supabase `books` table.
 export type Book = {

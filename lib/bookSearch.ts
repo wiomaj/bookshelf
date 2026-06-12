@@ -1,23 +1,13 @@
 /**
  * lib/bookSearch.ts
  *
- * Unified book search across Open Library and Google Books.
- * Supports title, author, and ISBN queries (including raw ISBN numbers).
+ * Unified book search, now routing through the server-side /api/books/search route
+ * (Open Library primary + Google Books enrichment, Supabase ISBN cache).
  *
- * Imported by BookForm and ToReadForm — both use the same function.
+ * DNB (Deutsche Nationalbibliothek) is still fetched client-side in parallel for
+ * German, Austrian, and Swiss books that OL/GB miss.
  *
- * Design:
- *  - ISBN queries → server-side /api/isbn (GB + DNB; handles German books OL misses)
- *  - Text queries → client-side OL + GB in parallel (both allow CORS)
- *  - OL uses title= (field-scoped) not q= (full-text) to avoid noisy matches
- *  - GB uses intitle: operator for title-field search
- *  - Dedup key = normalised title + first author (not just title)
- *  - OL edition_count used as a popularity signal so classics rise
- *  - Title-relevance bonus: exact phrase (80) > prefix (60) > all words (40) > partial
- *  - Word-boundary check: "langsam" does NOT match inside "langsamer"
- *  - Multi-word post-filter: drops results missing any query word from the title
- *  - Results with covers are preferred in the final sort
- *  - 6-second shared abort timeout
+ * Imported by BookForm — uses the same BookSuggestion type for backward compat.
  */
 
 // ─── Public type ──────────────────────────────────────────────────────────────
@@ -26,40 +16,29 @@ export interface BookSuggestion {
   title: string
   author: string
   cover_url?: string
+  // Rich fields from /api/books/search
+  isbn13?: string | null
+  description?: string | null
+  pageCount?: number | null
+  publishedDate?: string | null
+  publisher?: string | null
+  subjects?: string[]
 }
 
 // ─── Internal types ───────────────────────────────────────────────────────────
 
-interface OLDoc {
-  title?: string
-  author_name?: string[]
-  cover_i?: number
-  cover_edition_key?: string
-  isbn?: string[]
-  edition_count?: number
-}
-
-interface GBIdentifier {
-  type: 'ISBN_10' | 'ISBN_13' | string
-  identifier: string
-}
-
-interface GBVolumeInfo {
-  title?: string
-  authors?: string[]
-  imageLinks?: { thumbnail?: string; smallThumbnail?: string }
-  industryIdentifiers?: GBIdentifier[]
-}
-
-interface GBItem {
-  id: string
-  volumeInfo?: GBVolumeInfo
-}
+import type { BookMetadata } from '@/types/book'
 
 interface Candidate {
   title: string
   author: string
   cover_url: string | undefined
+  isbn13: string | null
+  description: string | null
+  pageCount: number | null
+  publishedDate: string | null
+  publisher: string | null
+  subjects: string[]
   score: number
 }
 
@@ -67,22 +46,13 @@ import { gbUrl } from '@/lib/gbUrl'
 
 // ─── Regex safety ─────────────────────────────────────────────────────────────
 
-/**
- * Escape all regex metacharacters in a user-supplied string so it can be
- * safely embedded inside `new RegExp(...)` without ReDoS or unexpected matches.
- */
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 // ─── Query type detection ─────────────────────────────────────────────────────
 
-/**
- * Returns the cleaned ISBN (digits only) if the query is a valid ISBN-10 or ISBN-13,
- * otherwise returns null.
- */
 function detectISBN(query: string): string | null {
-  // Strip explicit "isbn:" prefix if the user typed it
   const stripped = query.replace(/^isbn[:\s]*/i, '').trim()
   const digits = stripped.replace(/[\s\-]/g, '').toUpperCase()
   if ((digits.length === 10 || digits.length === 13) && /^[\dX]+$/.test(digits)) {
@@ -91,13 +61,6 @@ function detectISBN(query: string): string | null {
   return null
 }
 
-/**
- * Heuristic: does the query look like a person's name (author search)?
- *
- * Conditions: exactly 2 words, both ≥2 chars, both starting with an uppercase
- * letter, no digits. We keep this tight (2 words only) to avoid false positives
- * like "Dune Frank" which is really title + author.
- */
 function looksLikeAuthorName(query: string): boolean {
   const words = query.trim().split(/\s+/)
   if (words.length !== 2) return false
@@ -106,30 +69,13 @@ function looksLikeAuthorName(query: string): boolean {
 
 // ─── Author normalisation ─────────────────────────────────────────────────────
 
-/**
- * Normalise bibliographic "Lastname, Firstname" → "Firstname Lastname".
- * Some sources (GB for German books, OL in MARC mode) store names inverted.
- * Only inverts when exactly one comma is present (avoids "Jr., III" edge cases).
- */
 function normalizeAuthorName(name: string): string {
   if (!name) return name
   const commaIdx = name.indexOf(',')
-  if (commaIdx === -1) return name          // already "First Last" — nothing to do
+  if (commaIdx === -1) return name
   const last  = name.slice(0, commaIdx).trim()
   const first = name.slice(commaIdx + 1).trim()
-  return first ? `${first} ${last}` : last  // "Marjolein Bastin"
-}
-
-// ─── Cover / URL helpers ──────────────────────────────────────────────────────
-
-function cleanGoogleCover(url: string): string {
-  return url.replace(/^http:/, 'https:').replace(/zoom=\d/, 'zoom=1')
-}
-
-function olCover(doc: OLDoc): string | undefined {
-  if (doc.cover_i) return `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
-  if (doc.cover_edition_key) return `https://covers.openlibrary.org/b/olid/${doc.cover_edition_key}-M.jpg`
-  return undefined
+  return first ? `${first} ${last}` : last
 }
 
 // ─── Dedup key ────────────────────────────────────────────────────────────────
@@ -139,25 +85,11 @@ function normalizeKey(s: string): string {
 }
 
 function dedupKey(title: string, author: string): string {
-  // Normalise the author before keying so "Bastin, Marjolein" and "Marjolein Bastin"
-  // map to the same slot and get merged rather than shown as separate results.
   return `${normalizeKey(title)}|||${normalizeKey(normalizeAuthorName(author))}`
 }
 
 // ─── Title relevance scoring ──────────────────────────────────────────────────
 
-/**
- * Returns a bonus score reflecting how well the candidate title matches the
- * search query. Uses \b word-boundary matching so "langsam" does NOT match
- * inside "langsamer", preventing false near-matches from outranking exact hits.
- *
- * Tiers (highest → lowest):
- *  80 – exact phrase found in title   ("geh langsam" in "Geh langsam, wenn…")
- *  60 – title starts with the query   (prefix, after stripping leading articles)
- *  40 – all query words present as whole words, any order
- *  ≤15 – partial credit proportional to fraction of matching whole words
- *   0  – no whole-word query term appears in title
- */
 function titleRelevanceBonus(title: string, query: string): number {
   if (!title || !query) return 0
   const t = title.toLowerCase()
@@ -165,123 +97,44 @@ function titleRelevanceBonus(title: string, query: string): number {
   const words = q.split(/\s+/).filter((w) => w.length >= 2)
   if (words.length === 0) return 0
 
-  // Tier 1: exact phrase present anywhere in title
   if (t.includes(q)) return 80
 
-  // Tier 2: title starts with the query (strip leading articles for robustness)
   const stripArticle = (s: string) => s.replace(/^(der|die|das|ein|eine|the|a|an)\s+/i, '')
   if (stripArticle(t).startsWith(stripArticle(q))) return 60
 
-  // Compile word-boundary regexes once with escaped input to prevent ReDoS.
   const regexes = words.map((w) => new RegExp(`\\b${escapeRegex(w)}\\b`))
-
-  // Tier 3: all query words present as whole words (any order)
   const matchCount = regexes.filter((re) => re.test(t)).length
   if (matchCount === words.length) return 40
-
-  // Tier 4: partial credit — proportional to fraction of matching whole words
   return matchCount > 0 ? Math.round((matchCount / words.length) * 15) : 0
 }
 
-// ─── Provider fetchers ────────────────────────────────────────────────────────
+// ─── Server route fetcher ─────────────────────────────────────────────────────
 
-async function fetchOpenLibrary(query: string, _isbn: null, isAuthor: boolean, signal: AbortSignal): Promise<Candidate[]> {
-  const params = new URLSearchParams({
-    fields: 'title,author_name,cover_i,cover_edition_key,isbn,edition_count',
-    limit: '12',
-  })
-
-  if (isAuthor) {
-    // Author-focused query: OL's author field gives better results than q=
-    params.set('author', query)
-  } else {
-    // title= restricts search to the title field only.
-    // q= does full-text matching (descriptions, subjects, …) which returns
-    // notebooks, softcover journals and other noise for queries like "geh langsam".
-    params.set('title', query)
-  }
-
+async function fetchServerSearch(query: string, signal: AbortSignal): Promise<Candidate[]> {
   try {
-    const res = await fetch(`https://openlibrary.org/search.json?${params}`, { signal })
+    const params = new URLSearchParams({ q: query })
+    const res = await fetch(`/api/books/search?${params}`, { signal })
     if (!res.ok) return []
-    const data = await res.json() as { docs?: OLDoc[] }
-
-    return (data.docs ?? []).map((doc, position) => {
-      const editionBoost = Math.min(doc.edition_count ?? 0, 60)
-      const titleBonus = isAuthor ? 0 : titleRelevanceBonus(doc.title ?? '', query)
-      const score = (12 - position) * 10 + editionBoost + titleBonus
-
-      return {
-        title: doc.title ?? '',
-        // OL can return names in MARC "Lastname, Firstname" order — normalise to natural order
-        author: normalizeAuthorName(doc.author_name?.[0] ?? ''),
-        cover_url: olCover(doc),
-        score,
-      }
-    })
+    const data = await res.json() as { results?: BookMetadata[] }
+    return (data.results ?? []).map((m, position) => ({
+      title: m.title,
+      author: m.authors[0] ?? '',
+      cover_url: m.coverUrl ?? undefined,
+      isbn13: m.isbn13,
+      description: m.description,
+      pageCount: m.pageCount,
+      publishedDate: m.publishedDate,
+      publisher: m.publisher,
+      subjects: m.subjects,
+      score: (10 - position) * 10 + titleRelevanceBonus(m.title, query),
+    }))
   } catch {
     return []
-  }
-}
-
-async function fetchGoogleBooks(query: string, _isbn: null, isAuthor: boolean, signal: AbortSignal): Promise<Candidate[]> {
-  // Build the GB query string.
-  // For title queries we use intitle: so GB searches the title field specifically.
-  // Multi-word: each word gets its own intitle: operator so any title order is accepted.
-  // Quoted exact phrases (intitle:"word1 word2") return zero results for non-English
-  // titles in practice, so we avoid them.
-  const buildTitleQ = (q: string) =>
-    q.split(/\s+/).map((w) => `intitle:${w}`).join(' ')
-
-  const q = isAuthor
-    ? `inauthor:"${query}"`
-    : buildTitleQ(query)  // each word must appear in title, any order
-
-  try {
-    const res = await fetch(gbUrl({ q, maxResults: '10', printType: 'books' }), { signal })
-    if (!res.ok) return []
-    const data = await res.json() as { items?: GBItem[] }
-
-    return (data.items ?? []).map((item, position) => {
-      const info = item.volumeInfo
-      const links = info?.imageLinks
-      const rawCover = links?.thumbnail ?? links?.smallThumbnail
-      const cover_url = rawCover ? cleanGoogleCover(rawCover) : undefined
-
-      const titleBonus = isAuthor ? 0 : titleRelevanceBonus(info?.title ?? '', query)
-      const score = (10 - position) * 10 + titleBonus
-
-      return {
-        title: info?.title ?? '',
-        // GB occasionally returns German/Dutch authors in MARC inverted format
-        author: normalizeAuthorName(info?.authors?.[0] ?? ''),
-        cover_url,
-        score,
-      }
-    })
-  } catch {
-    return []
-  }
-}
-
-// ─── Merge + rank ─────────────────────────────────────────────────────────────
-
-function merge(a: Candidate, b: Candidate): Candidate {
-  return {
-    title: a.title || b.title,
-    author: a.author || b.author,
-    cover_url: a.cover_url ?? b.cover_url,
-    score: Math.max(a.score, b.score),
   }
 }
 
 // ─── DNB title search via server route ───────────────────────────────────────
 
-/**
- * Call the server-side /api/search route which queries DNB by title.
- * DNB has comprehensive coverage of German, Austrian, and Swiss books that
- * Google Books and Open Library largely miss.
- */
 async function fetchDNBSearch(query: string, signal: AbortSignal): Promise<Candidate[]> {
   try {
     const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal })
@@ -293,6 +146,12 @@ async function fetchDNBSearch(query: string, signal: AbortSignal): Promise<Candi
       title: r.title,
       author: normalizeAuthorName(r.author),
       cover_url: r.cover_url,
+      isbn13: null,
+      description: null,
+      pageCount: null,
+      publishedDate: null,
+      publisher: null,
+      subjects: [],
       score: (8 - position) * 10 + titleRelevanceBonus(r.title, query),
     }))
   } catch {
@@ -300,21 +159,20 @@ async function fetchDNBSearch(query: string, signal: AbortSignal): Promise<Candi
   }
 }
 
-// ─── ISBN lookup via server route ─────────────────────────────────────────────
+// ─── Merge ────────────────────────────────────────────────────────────────────
 
-/**
- * For ISBN queries, call the server-side /api/isbn route which tries:
- *  1. Google Books (no CORS/rate-limit issues server-side)
- *  2. DNB (Deutsche Nationalbibliothek) — catches German books that GB misses
- */
-async function fetchByISBN(isbn: string): Promise<BookSuggestion | null> {
-  try {
-    const res = await fetch(`/api/isbn?isbn=${encodeURIComponent(isbn)}`)
-    if (!res.ok) return null
-    const data = await res.json() as { result: BookSuggestion | null }
-    return data.result ?? null
-  } catch {
-    return null
+function merge(a: Candidate, b: Candidate): Candidate {
+  return {
+    title: a.title || b.title,
+    author: a.author || b.author,
+    cover_url: a.cover_url ?? b.cover_url,
+    isbn13: a.isbn13 ?? b.isbn13,
+    description: a.description ?? b.description,
+    pageCount: a.pageCount ?? b.pageCount,
+    publishedDate: a.publishedDate ?? b.publishedDate,
+    publisher: a.publisher ?? b.publisher,
+    subjects: a.subjects.length > 0 ? a.subjects : b.subjects,
+    score: Math.max(a.score, b.score),
   }
 }
 
@@ -323,10 +181,9 @@ async function fetchByISBN(isbn: string): Promise<BookSuggestion | null> {
 /**
  * Search for books by title, author, or ISBN.
  *
- * - Raw ISBN numbers (10 or 13 digits, with or without dashes) are routed to
- *   /api/isbn (server-side Google Books + DNB) for reliable German book support.
- * - Two-word proper-name queries use author-specific search endpoints.
- * - Everything else uses OL + GB + DNB in parallel (OL/GB client-side, DNB via /api/search).
+ * ISBN queries and text queries both route through /api/books/search (server-side
+ * OL + Google Books with Supabase ISBN caching). DNB is fetched in parallel for
+ * text queries to improve German book coverage.
  *
  * Returns at most `maxResults` suggestions, covers-first, sorted by score.
  * Never throws — returns [] on network errors or empty queries.
@@ -338,59 +195,46 @@ export async function searchBooks(
   const q = query.trim()
   if (!q) return []
 
-  // ── ISBN: single exact lookup via server route ──────────────────────────────
-  const isbn = detectISBN(q)
-  if (isbn) {
-    const result = await fetchByISBN(isbn)
-    return result ? [result] : []
-  }
-
-  // ── Text search: OL + GB + DNB in parallel ─────────────────────────────────
-  const isAuthor = looksLikeAuthorName(q)
+  const isISBN = !!detectISBN(q)
+  const isAuthor = !isISBN && looksLikeAuthorName(q)
 
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 6_000)
+  const timeoutId = setTimeout(() => controller.abort(), 7_000)
 
-  let olResults: Candidate[] = []
-  let gbResults: Candidate[] = []
+  let serverResults: Candidate[] = []
   let dnbResults: Candidate[] = []
 
   try {
-    const [ol, gb, dnb] = await Promise.allSettled([
-      fetchOpenLibrary(q, null, isAuthor, controller.signal),
-      fetchGoogleBooks(q, null, isAuthor, controller.signal),
-      isAuthor ? Promise.resolve([]) : fetchDNBSearch(q, controller.signal),
-    ])
-    if (ol.status === 'fulfilled') olResults = ol.value
-    if (gb.status === 'fulfilled') gbResults = gb.value
-    if (dnb.status === 'fulfilled') dnbResults = dnb.value
+    const tasks: Promise<Candidate[]>[] = [
+      fetchServerSearch(q, controller.signal),
+      // DNB is author-agnostic, skip for ISBN and author queries
+      ...(!isISBN && !isAuthor ? [fetchDNBSearch(q, controller.signal)] : []),
+    ]
+    const settled = await Promise.allSettled(tasks)
+    if (settled[0].status === 'fulfilled') serverResults = settled[0].value
+    if (settled[1]?.status === 'fulfilled') dnbResults = settled[1].value
   } finally {
     clearTimeout(timeoutId)
   }
 
-  // Deduplicate: merge candidates that refer to the same work
+  // Deduplicate: server results are primary, DNB enriches or adds
   const seen = new Map<string, Candidate>()
-  for (const c of [...olResults, ...gbResults, ...dnbResults]) {
+  for (const c of [...serverResults, ...dnbResults]) {
     if (!c.title) continue
     const key = dedupKey(c.title, c.author)
     const existing = seen.get(key)
     seen.set(key, existing ? merge(existing, c) : c)
   }
 
-  // For multi-word title queries, suppress candidates that are missing at least
-  // one query word from their title entirely (substring check — not word-boundary,
-  // so this is a broad safety net, not a strict filter).
-  // This removes genuine noise like unrelated notebooks or softcover design journals
-  // that happen to mention one word somewhere in a long subtitle.
-  const qWords = isAuthor ? [] : q.toLowerCase().split(/\s+/).filter((w) => w.length >= 2)
-  const needsTitleFilter = !isAuthor && qWords.length >= 2
+  const qWords = (!isISBN && !isAuthor)
+    ? q.toLowerCase().split(/\s+/).filter((w) => w.length >= 2)
+    : []
+  const needsTitleFilter = qWords.length >= 2
 
-  // Sort: covers first, then by score descending
   const ranked = [...seen.values()]
     .filter((c) => {
       if (!needsTitleFilter) return true
       const tl = c.title.toLowerCase()
-      // Keep only if every query word appears somewhere in the title
       return qWords.every((w) => tl.includes(w))
     })
     .sort((a, b) => {
@@ -400,5 +244,15 @@ export async function searchBooks(
     })
     .slice(0, maxResults)
 
-  return ranked.map(({ title, author, cover_url }) => ({ title, author, cover_url }))
+  return ranked.map(({ title, author, cover_url, isbn13, description, pageCount, publishedDate, publisher, subjects }) => ({
+    title,
+    author,
+    cover_url,
+    isbn13,
+    description,
+    pageCount,
+    publishedDate,
+    publisher,
+    subjects,
+  }))
 }

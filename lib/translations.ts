@@ -218,6 +218,12 @@ export type Translations = {
   athsInstall: string
   // New version banner
   newVersionBanner: string
+  // Rich book metadata
+  pages: string
+  publisher: string
+  subjects: string
+  readMore: string
+  showLess: string
 }
 
 const en: Translations = {
@@ -408,6 +414,11 @@ const en: Translations = {
   athsIosThen: 'then',
   athsInstall: 'Install',
   newVersionBanner: 'A newer version of bookshelf is available. Click here to refresh.',
+  pages: 'Pages',
+  publisher: 'Publisher',
+  subjects: 'Subjects',
+  readMore: 'Read more',
+  showLess: 'Show less',
 }
 
 const de: Translations = {
@@ -598,6 +609,11 @@ const de: Translations = {
   athsIosThen: 'dann auf',
   athsInstall: 'Installieren',
   newVersionBanner: 'Eine neuere Version von Bookshelf ist verfügbar. Hier klicken zum Aktualisieren.',
+  pages: 'Seiten',
+  publisher: 'Verlag',
+  subjects: 'Themen',
+  readMore: 'Mehr lesen',
+  showLess: 'Weniger',
 }
 
 const fr: Translations = {
@@ -788,6 +804,11 @@ const fr: Translations = {
   athsIosThen: 'puis sur',
   athsInstall: 'Installer',
   newVersionBanner: 'Une nouvelle version de Bookshelf est disponible. Cliquez ici pour rafraîchir.',
+  pages: 'Pages',
+  publisher: 'Éditeur',
+  subjects: 'Sujets',
+  readMore: 'Lire plus',
+  showLess: 'Réduire',
 }
 
 const es: Translations = {
@@ -978,6 +999,11 @@ const es: Translations = {
   athsIosThen: 'luego',
   athsInstall: 'Instalar',
   newVersionBanner: 'Hay una nueva versión de Bookshelf disponible. Haz clic aquí para actualizar.',
+  pages: 'Páginas',
+  publisher: 'Editorial',
+  subjects: 'Temas',
+  readMore: 'Leer más',
+  showLess: 'Menos',
 }
 
 const pl: Translations = {
@@ -1168,6 +1194,11 @@ const pl: Translations = {
   athsIosThen: 'a następnie',
   athsInstall: 'Zainstaluj',
   newVersionBanner: 'Dostępna jest nowsza wersja Bookshelf. Kliknij tutaj, aby odświeżyć.',
+  pages: 'Strony',
+  publisher: 'Wydawca',
+  subjects: 'Tematy',
+  readMore: 'Czytaj więcej',
+  showLess: 'Mniej',
 }
 
 export const translations: Record<Locale, Translations> = { en, de, fr, es, pl }

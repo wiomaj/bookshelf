@@ -179,6 +179,11 @@ export default function BookForm({
     setTitle(s.title)
     setAuthor(s.author)
     if (s.cover_url) setCoverUrl(s.cover_url)
+    // Pre-fill year from publishedDate if available and user hasn't set a custom year
+    if (s.publishedDate) {
+      const y = parseInt(s.publishedDate.slice(0, 4))
+      if (!isNaN(y) && y >= 1000 && y <= currentYear) setYear(y)
+    }
     setShowSuggestions(false)
     if (process.env.NODE_ENV === 'development') {
       console.debug('[BookForm] suggestion selected:', {
@@ -278,29 +283,70 @@ export default function BookForm({
         </div>
 
         {/* Dropdown */}
-        {showSuggestions && (
+        {(showSuggestions || searchLoading) && (
           <div className="absolute top-full left-0 right-0 mt-2 rounded-[16px] z-20 overflow-hidden"
                style={{ backgroundColor: 'var(--bg-elevated)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
-            {suggestions.map((s, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => selectSuggestion(s)}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors active:opacity-70"
-                style={{ borderBottom: i < suggestions.length - 1 ? '1px solid var(--separator)' : undefined }}
-              >
-                {s.cover_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={s.cover_url} alt="" className="w-8 h-11 object-cover rounded-[6px] flex-shrink-0" />
-                ) : (
-                  <div className="w-8 h-11 rounded-[6px] flex-shrink-0" style={{ backgroundColor: 'var(--fill)' }} />
-                )}
-                <div className="min-w-0">
-                  <p className="font-semibold text-[16px] truncate" style={{ color: 'var(--label)' }}>{s.title}</p>
-                  <p className="text-[13px] truncate" style={{ color: 'var(--label-secondary)' }}>{s.author}</p>
+            {searchLoading && suggestions.length === 0 ? (
+              /* Loading skeleton */
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 px-4 py-3"
+                     style={{ borderBottom: i < 2 ? '1px solid var(--separator)' : undefined }}>
+                  <div className="w-10 h-14 rounded-[6px] flex-shrink-0 animate-pulse" style={{ backgroundColor: 'var(--fill)' }} />
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="h-4 w-3/4 rounded animate-pulse" style={{ backgroundColor: 'var(--fill)' }} />
+                    <div className="h-3 w-1/2 rounded animate-pulse" style={{ backgroundColor: 'var(--fill)' }} />
+                  </div>
                 </div>
-              </button>
-            ))}
+              ))
+            ) : (
+              suggestions.map((s, i) => {
+                const year = s.publishedDate ? parseInt(s.publishedDate.slice(0, 4)) : null
+                const yearStr = year && !isNaN(year) ? String(year) : null
+                const meta = [s.author, yearStr].filter(Boolean).join(' · ')
+                const topSubjects = (s.subjects ?? []).slice(0, 3)
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => selectSuggestion(s)}
+                    className="w-full flex items-start gap-3 px-4 py-3 text-left transition-colors active:opacity-70"
+                    style={{ borderBottom: i < suggestions.length - 1 ? '1px solid var(--separator)' : undefined }}
+                  >
+                    {s.cover_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={s.cover_url} alt="" className="w-10 h-14 object-cover rounded-[6px] flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <div className="w-10 h-14 rounded-[6px] flex-shrink-0 mt-0.5 flex items-center justify-center"
+                           style={{ backgroundColor: 'var(--fill)' }}>
+                        <svg width="16" height="20" viewBox="0 0 16 20" fill="none" style={{ opacity: 0.3 }}>
+                          <rect x="1" y="1" width="14" height="18" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+                          <line x1="4" y1="6" x2="12" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                          <line x1="4" y1="9.5" x2="12" y2="9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                          <line x1="4" y1="13" x2="9" y2="13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-[15px] leading-snug line-clamp-2" style={{ color: 'var(--label)' }}>{s.title}</p>
+                      {meta && (
+                        <p className="text-[13px] mt-0.5 truncate" style={{ color: 'var(--label-secondary)' }}>{meta}</p>
+                      )}
+                      {topSubjects.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {topSubjects.map((subj) => (
+                            <span key={subj}
+                              className="text-[11px] px-1.5 py-0.5 rounded-full"
+                              style={{ backgroundColor: 'var(--fill)', color: 'var(--label-secondary)' }}>
+                              {subj}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                )
+              })
+            )}
           </div>
         )}
       </div>

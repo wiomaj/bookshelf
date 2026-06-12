@@ -175,6 +175,26 @@ export async function fetchBookByISBN(
   return { title, author, cover_url }
 }
 
+// ─── Server-backed full metadata lookup ──────────────────────────────────────
+
+import type { BookMetadata } from '@/types/book'
+
+/**
+ * Fetch full metadata for a single ISBN via the /api/books/metadata route.
+ * Results are cached in Supabase for 90 days — repeat calls are instant.
+ * Returns null when the ISBN cannot be found or the request fails.
+ */
+export async function fetchBookMetadata(isbn: string): Promise<BookMetadata | null> {
+  try {
+    const res = await fetch(`/api/books/metadata?isbn=${encodeURIComponent(isbn)}`)
+    if (!res.ok) return null
+    const data = await res.json() as { result: BookMetadata | null }
+    return data.result ?? null
+  } catch {
+    return null
+  }
+}
+
 // ─── Cover-only search by title + author ──────────────────────────────────────
 
 /**
