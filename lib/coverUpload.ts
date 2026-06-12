@@ -11,7 +11,14 @@ const BUCKET = 'covers'
 const MAX_PX = 900          // max width or height after compression
 const QUALITY = 0.88        // JPEG quality
 const MAX_INPUT_BYTES = 15 * 1024 * 1024  // 15 MB pre-compression limit
-const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+// Accept HEIC/HEIF (iOS native format) in addition to common web formats.
+// Empty type ('') can occur with some mobile browsers when capturing directly —
+// we allow it and let the canvas step fail if the file isn't a real image.
+const ALLOWED_MIME_TYPES = new Set([
+  'image/jpeg', 'image/png', 'image/webp', 'image/gif',
+  'image/heic', 'image/heif',
+  '',
+])
 
 /**
  * Compress an image File to a JPEG Blob at MAX_PX × MAX_PX max resolution.
@@ -67,7 +74,7 @@ export async function uploadCoverPhoto(
   file: File
 ): Promise<string> {
   if (!ALLOWED_MIME_TYPES.has(file.type)) {
-    throw new Error('Only JPEG, PNG, WebP, or GIF images are supported.')
+    throw new Error('Please select an image file (JPEG, PNG, WebP, HEIC, etc.).')
   }
   if (file.size > MAX_INPUT_BYTES) {
     throw new Error('Image must be smaller than 15 MB.')
@@ -82,6 +89,11 @@ export async function uploadCoverPhoto(
 
   if (error) throw new Error(error.message)
 
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
-  return data.publicUrl
+  // getPublicUrl() constructs the URL from the client's base URL, which in the
+  // browser is the /_supabase proxy. We need the real Supabase URL so the stored
+  // cover_url is a canonical https://<project>.supabase.co/... URL that works
+  // everywhere (including the /api/cover proxy allowlist check).
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!supabaseUrl) throw new Error('Supabase URL not configured')
+  return `${supabaseUrl}/storage/v1/object/public/${BUCKET}/${path}`
 }

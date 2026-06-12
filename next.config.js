@@ -7,8 +7,8 @@ const securityHeaders = [
   { key: 'X-Frame-Options', value: 'DENY' },
   // Limit referrer information sent to third parties
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  // Disable browser features not used by the app
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  // Camera is used for cover photo capture and ISBN scanning.
+  { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=()' },
   {
     key: 'Content-Security-Policy',
     value: [
