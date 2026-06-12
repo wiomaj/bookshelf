@@ -369,10 +369,14 @@ export default function ToReadDetailPage() {
   const showCover = book.cover_url && !coverFailed
   const displayGenre = book.genre || apiGenre
   const addedDate = (() => {
-    // Priority: dedicated acquired columns → generic month/year (set on initial add) → created_at
-    const m = book.acquired_month ?? (book.month && book.month <= 12 ? book.month : null)
+    const m = book.acquired_month ?? book.month
     const y = book.acquired_year ?? (book.year && book.year > 0 ? book.year : null)
-    return (m && y) ? `${SHORT_MONTHS[m - 1]} ${y}` : formatAddedDate(book.created_at)
+    if (!y) return formatAddedDate(book.created_at)
+    if (!m) return String(y)
+    if (m >= 1 && m <= 12) return `${SHORT_MONTHS[m - 1]} ${y}`
+    // Season months: 13=Spring 14=Summer 15=Fall 16=Winter
+    if (m >= 13 && m <= 16) return `${t.seasonNames[m - 13]} ${y}`
+    return String(y)
   })()
   const isCurrentlyReading = book.status === 'currently_reading'
   const startedDate = (() => {
