@@ -224,6 +224,11 @@ export type Translations = {
   subjects: string
   readMore: string
   showLess: string
+  // Search-first add flow
+  searchBooksPlaceholder: string
+  searchHint: string
+  showMore: string
+  addManually: string
 }
 
 const en: Translations = {
@@ -419,6 +424,10 @@ const en: Translations = {
   subjects: 'Subjects',
   readMore: 'Read more',
   showLess: 'Show less',
+  searchBooksPlaceholder: 'Search by title or author',
+  searchHint: 'Search for a book by title or author to add it to your shelf.',
+  showMore: 'Show more',
+  addManually: 'Add manually',
 }
 
 const de: Translations = {
@@ -614,6 +623,10 @@ const de: Translations = {
   subjects: 'Themen',
   readMore: 'Mehr lesen',
   showLess: 'Weniger',
+  searchBooksPlaceholder: 'Nach Titel oder Autor suchen',
+  searchHint: 'Suche nach einem Buch über Titel oder Autor, um es zu deinem Regal hinzuzufügen.',
+  showMore: 'Mehr anzeigen',
+  addManually: 'Manuell hinzufügen',
 }
 
 const fr: Translations = {
@@ -809,6 +822,10 @@ const fr: Translations = {
   subjects: 'Sujets',
   readMore: 'Lire plus',
   showLess: 'Réduire',
+  searchBooksPlaceholder: 'Rechercher par titre ou auteur',
+  searchHint: 'Recherchez un livre par titre ou auteur pour l\'ajouter à votre bibliothèque.',
+  showMore: 'Afficher plus',
+  addManually: 'Ajouter manuellement',
 }
 
 const es: Translations = {
@@ -1004,6 +1021,10 @@ const es: Translations = {
   subjects: 'Temas',
   readMore: 'Leer más',
   showLess: 'Menos',
+  searchBooksPlaceholder: 'Buscar por título o autor',
+  searchHint: 'Busca un libro por título o autor para añadirlo a tu estantería.',
+  showMore: 'Mostrar más',
+  addManually: 'Añadir manualmente',
 }
 
 const pl: Translations = {
@@ -1199,6 +1220,10 @@ const pl: Translations = {
   subjects: 'Tematy',
   readMore: 'Czytaj więcej',
   showLess: 'Mniej',
+  searchBooksPlaceholder: 'Szukaj po tytule lub autorze',
+  searchHint: 'Wyszukaj książkę po tytule lub autorze, aby dodać ją do półki.',
+  showMore: 'Pokaż więcej',
+  addManually: 'Dodaj ręcznie',
 }
 
 export const translations: Record<Locale, Translations> = { en, de, fr, es, pl }
