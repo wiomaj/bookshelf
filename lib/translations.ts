@@ -605,7 +605,7 @@ const de: Translations = {
   seasonAutumn: 'Herbst',
   seasonWinter: 'Winter',
   searchPlaceholder: 'Bücher suchen…',
-  searchCancel: 'Abbrechen',
+  searchCancel: 'Suche',
   searchNoResults: 'Keine Ergebnisse',
   searchNoResultsSub: 'Kein Buch passt zu deiner Suche.',
   validationTitleRequired: 'Titel ist erforderlich',
