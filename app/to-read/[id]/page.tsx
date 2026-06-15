@@ -91,6 +91,12 @@ export default function ToReadDetailPage() {
   const [showCtaDropdown, setShowCtaDropdown] = useState(false)
   const ctaDropdownRef = useRef<HTMLDivElement>(null)
 
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [celebrationDuration, setCelebrationDuration] = useState<string | null>(null)
+  const [celebrationDays, setCelebrationDays] = useState<number | null>(null)
+  const [celebrationRating, setCelebrationRating] = useState(0)
+  const celebrationBookRef = useRef<Book | null>(null)
+
   // Pre-fill dates from stored per-status columns when book loads
   useEffect(() => {
     if (!book) return
@@ -226,10 +232,33 @@ export default function ToReadDetailPage() {
       sessionStorage.setItem('bookshelf_returnTab', 'read')
       sessionStorage.setItem('bookshelf_flash', 'markedAsRead')
       sessionStorage.setItem('bookshelf_flash_undo', JSON.stringify({ bookId: book.id, month: prevMonth, year: prevYear }))
-      router.replace('/')
+
+      // Compute reading duration if start date is known
+      let duration: string | null = null
+      let rawDays: number | null = null
+      if (book.started_reading_year && book.started_reading_month) {
+        const start = new Date(book.started_reading_year, book.started_reading_month - 1, book.started_reading_day || 1)
+        const end = new Date(moveYear, moveMonth - 1, 1)
+        const days = Math.round((end.getTime() - start.getTime()) / 86_400_000)
+        if (days >= 1) {
+          rawDays = days
+          if (days < 30) duration = `${days} Tag${days !== 1 ? 'en' : ''}`
+          else { const m = Math.round(days / 30); duration = `${m} Monat${m !== 1 ? 'en' : ''}` }
+        }
+      }
+      celebrationBookRef.current = book
+      setCelebrationDuration(duration)
+      setCelebrationDays(rawDays)
+      setCelebrationRating(moveRating)
+      setShowCelebration(true)
     } finally {
       setMoveLoading(false)
     }
+  }
+
+  function handleCelebrationDismiss() {
+    setShowCelebration(false)
+    router.replace('/')
   }
 
   async function handleDelete() {
@@ -977,6 +1006,218 @@ export default function ToReadDetailPage() {
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteConfirm(false)}
       />
+
+      {/* ── Celebration overlay ───────────────────────────────────────── */}
+      <AnimatePresence>
+        {showCelebration && (() => {
+          const speed: ReadSpeed = celebrationDays === null ? 'unknown' : celebrationDays < 21 ? 'fast' : celebrationDays >= 60 ? 'slow' : 'unknown'
+          const msg = getCelebrationMessage(celebrationRating, speed)
+          return (
+            <motion.div
+              key="celebration"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCelebrationDismiss}
+              className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden cursor-pointer"
+              style={{ backgroundColor: 'var(--bg)' }}
+            >
+              <CelebrationConfetti />
+              <motion.div
+                initial={{ scale: 0.7, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                transition={{ type: 'spring', stiffness: 280, damping: 22, delay: 0.15 }}
+                className="relative z-10 flex flex-col items-center text-center px-8 gap-3"
+              >
+                {celebrationBookRef.current?.cover_url && (
+                  <motion.div
+                    initial={{ y: -220, rotate: -16, scale: 0.65, opacity: 0 }}
+                    animate={{ y: 0, rotate: 0, scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 210, damping: 13, delay: 0.05 }}
+                  >
+                    <motion.img
+                      src={heroCoverUrl(celebrationBookRef.current.cover_url)}
+                      alt={celebrationBookRef.current.title}
+                      className="w-[96px] h-[140px] rounded-[8px] object-cover mb-2"
+                      style={{ boxShadow: '0 16px 40px rgba(0,0,0,0.25)' }}
+                      animate={{ y: [0, -10, 0], rotate: [0, 1.5, -1.5, 0] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.9 }}
+                    />
+                  </motion.div>
+                )}
+                <h2 className="text-[28px] font-bold leading-[34px]" style={{ color: 'var(--label)' }}>
+                  {msg.title}
+                </h2>
+                <p className="text-[17px]" style={{ color: 'var(--label-secondary)' }}>
+                  {msg.subtitle}
+                </p>
+                {celebrationDuration && (
+                  <p className="text-[15px] mt-1 px-4 py-2 rounded-full" style={{ backgroundColor: 'var(--fill)', color: 'var(--label-secondary)' }}>
+                    {t.celebrationDuration} {celebrationDuration}{t.celebrationDurationSuffix ? ` ${t.celebrationDurationSuffix}` : ''}
+                  </p>
+                )}
+                <p className="text-[13px] mt-6" style={{ color: 'var(--label-tertiary)' }}>
+                  {t.celebrationTap}
+                </p>
+              </motion.div>
+            </motion.div>
+          )
+        })()}
+      </AnimatePresence>
     </>
+  )
+}
+
+type ReadSpeed = 'fast' | 'slow' | 'unknown'
+
+function getCelebrationMessage(rating: number, speed: ReadSpeed): { title: string; subtitle: string } {
+  const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)]
+  const msgs: Record<number, Record<ReadSpeed, { title: string; subtitles: string[] }>> = {
+    0: {
+      fast: { title: 'Gelesen! 📖', subtitles: [
+        'Und das in Rekordzeit — weiter so!',
+        'Blitzschnell durch — du bist nicht aufzuhalten!',
+        'Schneller als gedacht — das nächste wartet schon!',
+      ]},
+      slow: { title: 'Geschafft! ✨', subtitles: [
+        'Du hast dir Zeit gelassen — manchmal genau richtig.',
+        'In aller Ruhe — so macht Lesen Spaß.',
+        'Kein Stress, kein Druck — einfach gelesen. Schön.',
+      ]},
+      unknown: { title: 'Geschafft! 🎉', subtitles: [
+        'Wieder ein Buch im Regal mehr!',
+        'Eins nach dem anderen — du machst das großartig.',
+        'Gelesen ist gelesen — auf das nächste!',
+      ]},
+    },
+    1: {
+      fast: { title: 'Schnell vorbei! 😮‍💨', subtitles: [
+        'Zum Glück war es kurz — das nächste wird besser!',
+        'Schnell durch und abgehakt — sehr weise.',
+        'Nicht jedes Buch ist ein Gewinner — aber du bist es!',
+      ]},
+      slow: { title: 'Endlich! 😵‍💫', subtitles: [
+        'Auch wenn es nicht toll war, du hast es durchgezogen. Gut gemacht!',
+        'So eine Ausdauer verdient Respekt — auch wenn das Buch sie nicht verdient hat.',
+        'Hartnäckig bis zur letzten Seite — das ist Stärke!',
+      ]},
+      unknown: { title: 'Respekt! 💪', subtitles: [
+        'Nicht jedes Buch trifft — aber du hast es zu Ende gelesen. Das zählt.',
+        'Ein Stern, aber fertig gelesen — das nennt man Charakter.',
+        'Manchmal muss man durch — du hast es getan.',
+      ]},
+    },
+    2: {
+      fast: { title: 'Immerhin schnell! 😅', subtitles: [
+        'War kein Highlight, aber gut — weiter geht\'s!',
+        'Kurz und okay — manchmal reicht das.',
+        'Nicht das Beste, aber erledigt — und das zählt!',
+      ]},
+      slow: { title: 'Ausdauer! 🏋️', subtitles: [
+        'Manchmal kämpft man sich durch. Du hast es geschafft!',
+        'Langer Weg für zwei Sterne — aber du bist am Ziel.',
+        'Nicht begeistert, aber treu bis zur letzten Seite.',
+      ]},
+      unknown: { title: 'Abgehakt! ✅', subtitles: [
+        'Nicht jedes Buch kann begeistern — das nächste vielleicht?',
+        'Zwei Sterne und weiter — du gibst nicht auf!',
+        'Gelesen, abgehakt, weitergezogen — so geht\'s!',
+      ]},
+    },
+    3: {
+      fast: { title: 'Solide! 👍', subtitles: [
+        'Ein ordentliches Buch — und du warst dabei fix.',
+        'Solide Lektüre, solides Tempo — alles passt.',
+        'Nicht zu begeistert, nicht enttäuscht — und schon fertig!',
+      ]},
+      slow: { title: 'Gut gemacht! 🙌', subtitles: [
+        'Manchmal braucht ein Buch seine Zeit. Du hast sie ihm gegeben.',
+        'Mit Bedacht gelesen — drei Sterne wohl verdient.',
+        'Langsam aber sicher — und das Ergebnis kann sich sehen lassen.',
+      ]},
+      unknown: { title: 'Geschafft! 📚', subtitles: [
+        'Ein solides Buch im Regal mehr — weiter so!',
+        'Drei Sterne — eine ehrliche Bewertung für ein ehrliches Buch.',
+        'Nicht jedes Buch muss perfekt sein — dieses war gut genug!',
+      ]},
+    },
+    4: {
+      fast: { title: 'Kaum wegzulegen! 😍', subtitles: [
+        'So ein gutes Buch liest sich einfach von selbst.',
+        'Wenn man nicht aufhören kann — und dann plötzlich fertig ist!',
+        'Vier Sterne und kaum zu bremsen — das sagt alles.',
+      ]},
+      slow: { title: 'Gut Ding will Weile! ⭐', subtitles: [
+        'Du hast es ausgekostet — und vier Sterne sprechen für sich.',
+        'Seite für Seite genossen — das ist die wahre Lesekunst.',
+        'Langsam lesen, gut lesen — vier Sterne verdient.',
+      ]},
+      unknown: { title: 'Tolle Wahl! 🌟', subtitles: [
+        'Ein richtig gutes Buch hast du da gelesen!',
+        'Vier Sterne — da war definitiv was dabei!',
+        'Fast ein Highlight — und ein klares Lesezeichen im Gedächtnis.',
+      ]},
+    },
+    5: {
+      fast: { title: 'Verschlungen! 💕', subtitles: [
+        'Schon zu Ende? 🥺 Tolle Bücher lesen sich einfach zu schnell!',
+        'Wenn man nicht merkt, wie die Seiten fliegen — das ist Magie.',
+        'In einem Rutsch — so fühlt sich ein echtes 5-Sterne-Buch an!',
+      ]},
+      slow: { title: 'Ein Genuss! 🫶', subtitles: [
+        'Du hast jeden Moment ausgekostet — und das zurecht!',
+        'Manche Bücher verdienen es, langsam gelesen zu werden. Dieses war so eines.',
+        'Jede Seite ein Genuss — und du hast keine übersprungen.',
+      ]},
+      unknown: { title: 'Wow! 🤩', subtitles: [
+        '5 Sterne! Was für ein Buch — das bleibt im Gedächtnis.',
+        'Ein absolutes Highlight — dieses Buch wirst du nicht vergessen.',
+        'Selten, aber wunderbar — ein echtes 5-Sterne-Erlebnis!',
+      ]},
+    },
+  }
+  const entry = msgs[rating]?.[speed] ?? msgs[0].unknown
+  return { title: entry.title, subtitle: pick(entry.subtitles) }
+}
+
+function CelebrationConfetti() {
+  const particles = Array.from({ length: 70 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    size: 7 + Math.random() * 7,
+    color: ['#FF6B6B','#FFD93D','#6BCB77','#4D96FF','#FF922B','#CC5DE8','#20C997','#F06595'][i % 8],
+    delay: Math.random() * 1.8,
+    duration: 2.4 + Math.random() * 2,
+    isCircle: Math.random() > 0.5,
+    initialRotate: Math.random() * 360,
+  }))
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <style>{`
+        @keyframes confetti-drop {
+          0%   { transform: translateY(-24px) rotate(var(--r0)); opacity: 1; }
+          100% { transform: translateY(110vh)  rotate(var(--r1)); opacity: 0.2; }
+        }
+      `}</style>
+      {particles.map(p => (
+        <div
+          key={p.id}
+          style={{
+            position: 'absolute',
+            left: `${p.x}%`,
+            top: 0,
+            width: p.size,
+            height: p.isCircle ? p.size : p.size * 0.55,
+            backgroundColor: p.color,
+            borderRadius: p.isCircle ? '50%' : '2px',
+            // @ts-ignore
+            '--r0': `${p.initialRotate}deg`,
+            '--r1': `${p.initialRotate + 540}deg`,
+            animation: `confetti-drop ${p.duration}s ${p.delay}s ease-in both`,
+          }}
+        />
+      ))}
+    </div>
   )
 }

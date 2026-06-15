@@ -66,6 +66,11 @@ export type Translations = {
   startReadingWhen: string
   startedReadingLabel: string
   currentlyReadingSection: string
+  celebrationTitle: string
+  celebrationSubtitle: string
+  celebrationDuration: string
+  celebrationDurationSuffix: string
+  celebrationTap: string
   bookNotFound: string
   backToBookshelf: string
   // Confirm dialog
@@ -285,6 +290,11 @@ const en: Translations = {
   startReadingWhen: 'When did you start?',
   startedReadingLabel: 'Started',
   currentlyReadingSection: 'Currently Reading',
+  celebrationTitle: 'You finished it! 🎉',
+  celebrationSubtitle: 'Amazing — another book done!',
+  celebrationDuration: 'You read it in',
+  celebrationDurationSuffix: '',
+  celebrationTap: 'Tap to continue',
   bookNotFound: 'Book not found',
   backToBookshelf: 'Back to bookshelf',
   deleteDialogTitle: 'Delete this book?',
@@ -484,6 +494,11 @@ const de: Translations = {
   startReadingWhen: 'Wann hast du angefangen?',
   startedReadingLabel: 'Begonnen',
   currentlyReadingSection: 'Lese ich gerade',
+  celebrationTitle: 'Geschafft! 🎉',
+  celebrationSubtitle: 'Wieder ein Buch gelesen — toll!',
+  celebrationDuration: 'Du hast das Buch in',
+  celebrationDurationSuffix: 'gelesen',
+  celebrationTap: 'Tippe zum Schließen',
   bookNotFound: 'Buch nicht gefunden',
   backToBookshelf: 'Zurück zum Regal',
   deleteDialogTitle: 'Dieses Buch löschen?',
@@ -683,6 +698,11 @@ const fr: Translations = {
   startReadingWhen: 'Quand avez-vous commencé ?',
   startedReadingLabel: 'Commencé le',
   currentlyReadingSection: 'En cours de lecture',
+  celebrationTitle: 'Terminé ! 🎉',
+  celebrationSubtitle: 'Bravo — encore un livre lu !',
+  celebrationDuration: 'Lu en',
+  celebrationDurationSuffix: '',
+  celebrationTap: 'Appuyer pour continuer',
   bookNotFound: 'Livre introuvable',
   backToBookshelf: 'Retour à la bibliothèque',
   deleteDialogTitle: 'Supprimer ce livre ?',
@@ -882,6 +902,11 @@ const es: Translations = {
   startReadingWhen: '¿Cuándo empezaste?',
   startedReadingLabel: 'Empezado',
   currentlyReadingSection: 'Leyendo ahora',
+  celebrationTitle: '¡Lo terminaste! 🎉',
+  celebrationSubtitle: '¡Genial — otro libro leído!',
+  celebrationDuration: 'Lo leíste en',
+  celebrationDurationSuffix: '',
+  celebrationTap: 'Toca para continuar',
   bookNotFound: 'Libro no encontrado',
   backToBookshelf: 'Volver a la estantería',
   deleteDialogTitle: '¿Eliminar este libro?',
@@ -1081,6 +1106,11 @@ const pl: Translations = {
   startReadingWhen: 'Kiedy zacząłeś?',
   startedReadingLabel: 'Zaczęto',
   currentlyReadingSection: 'Aktualnie czytam',
+  celebrationTitle: 'Skończono! 🎉',
+  celebrationSubtitle: 'Super — kolejna przeczytana książka!',
+  celebrationDuration: 'Czytano przez',
+  celebrationDurationSuffix: '',
+  celebrationTap: 'Dotknij, aby kontynuować',
   bookNotFound: 'Nie znaleziono książki',
   backToBookshelf: 'Wróć do półki',
   deleteDialogTitle: 'Usunąć tę książkę?',
