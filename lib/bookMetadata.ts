@@ -255,18 +255,10 @@ export async function fetchCoverByTitleAuthor(
     } catch { return undefined }
   }
 
-  // Phase 1: precise title + author (skip if no author)
-  if (author) {
-    const precise = await withTimeout(firstOf([
-      googleBooks(`intitle:"${title}" inauthor:"${author}"`),
-      openLibrary({ title, author }),
-    ]), 4000).catch(() => undefined)
-    if (precise) return precise
-  }
-
-  // Phase 2: broad title-only fallback
+  // Precise title + author only — no title-only fallback to avoid wrong covers
+  if (!author) return undefined
   return withTimeout(firstOf([
-    googleBooks(`intitle:"${title}"`),
-    openLibrary({ title }),
+    googleBooks(`intitle:"${title}" inauthor:"${author}"`),
+    openLibrary({ title, author }),
   ]), 4000).catch(() => undefined)
 }
