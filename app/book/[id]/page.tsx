@@ -501,25 +501,6 @@ export default function BookDetailPage() {
             )}
           </div>
 
-          {/* Subjects / tag pills */}
-          {apiSubjects.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <span className="text-[12px] leading-[16px]" style={{ color: 'var(--label-secondary)' }}>
-                {t.subjects}
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {apiSubjects.map((subj) => (
-                  <span
-                    key={subj}
-                    className="text-[13px] px-3 py-1 rounded-full"
-                    style={{ backgroundColor: 'var(--fill)', color: 'var(--label-secondary)' }}
-                  >
-                    {subj}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Resume reading CTA for abandoned books */}
           {book.status === 'abandoned' && (
