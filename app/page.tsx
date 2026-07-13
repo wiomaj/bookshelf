@@ -15,6 +15,7 @@ import ReadingPaceChart from '@/components/ReadingPaceChart'
 import RatingDistributionChart from '@/components/RatingDistributionChart'
 import FavouriteAuthors from '@/components/FavouriteAuthors'
 import GenreBreakdown from '@/components/GenreBreakdown'
+import BookCover from '@/components/BookCover'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 
@@ -298,7 +299,7 @@ export default function HomePage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
         <div className="flex flex-col items-center gap-3">
-          <div className="w-7 h-7 border-2 border-black/10 rounded-full animate-spin"
+          <div className="w-7 h-7 border-2 border-[var(--fill)] rounded-full animate-spin"
                style={{ borderTopColor: 'var(--primary)' }} />
           <p className="text-[15px]" style={{ color: 'var(--label-secondary)' }}>{t.loadingBookshelf}</p>
         </div>
@@ -762,18 +763,7 @@ export default function HomePage() {
                     {/* Cover thumbnail */}
                     <div className="w-[42px] h-[60px] rounded-[6px] overflow-hidden shrink-0"
                          style={{ backgroundColor: 'var(--primary)' }}>
-                      {book.cover_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={book.cover_url}
-                          alt={book.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full opacity-20 flex items-center justify-center">
-                          <Search size={16} className="text-white" />
-                        </div>
-                      )}
+                      <BookCover src={book.cover_url} alt={book.title} iconSize={12} patternSize={14} />
                     </div>
 
                     {/* Title + author */}

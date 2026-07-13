@@ -182,7 +182,7 @@ export default function BookDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
-        <div className="w-7 h-7 border-2 border-black/10 rounded-full animate-spin"
+        <div className="w-7 h-7 border-2 border-[var(--fill)] rounded-full animate-spin"
              style={{ borderTopColor: 'var(--primary)' }} />
       </div>
     )
@@ -285,7 +285,10 @@ export default function BookDetailPage() {
               onLoad={handleCoverLoad}
             />
             {/* Gentle fade at bottom */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60" />
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(to bottom, transparent, transparent, color-mix(in srgb, var(--bg-elevated) 60%, transparent))' }}
+            />
           </div>
         ) : (
           <div
@@ -331,6 +334,14 @@ export default function BookDetailPage() {
               <div className="absolute top-2 left-2 z-10 w-[26px] h-[26px] rounded-full backdrop-blur-sm flex items-center justify-center" style={{ backgroundColor: 'rgba(60, 60, 67, 0.60)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
+                </svg>
+              </div>
+            )}
+            {book.is_ebook && (
+              <div className="absolute top-2 z-10 w-[26px] h-[26px] rounded-full backdrop-blur-sm flex items-center justify-center" style={{ backgroundColor: 'rgba(60, 60, 67, 0.60)', left: book.is_audiobook ? '40px' : '8px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+                  <line x1="12" x2="12.01" y1="18" y2="18" />
                 </svg>
               </div>
             )}
@@ -381,6 +392,12 @@ export default function BookDetailPage() {
                   <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
                 </svg>
               )}
+              {book.is_ebook && (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-40">
+                  <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+                  <line x1="12" x2="12.01" y1="18" y2="18" />
+                </svg>
+              )}
               {book.title}
             </h1>
             {book.author && (
@@ -401,12 +418,12 @@ export default function BookDetailPage() {
                 className="shrink-0 flex items-center gap-2 rounded-[16px] px-4 py-2"
                 style={{ backgroundColor: 'rgba(255, 56, 60, 0.12)' }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF383C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
                   <path d="m14.5 7-5 5" />
                   <path d="m9.5 7 5 5" />
                 </svg>
-                <span className="text-[12px] leading-[16px] font-medium" style={{ color: '#FF383C' }}>
+                <span className="text-[12px] leading-[16px] font-medium" style={{ color: 'var(--danger)' }}>
                   {t.chipAbandoned}
                 </span>
               </div>
@@ -468,7 +485,7 @@ export default function BookDetailPage() {
             </span>
             {bookDataLoading ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-black/10 rounded-full animate-spin"
+                <div className="w-4 h-4 border-2 border-[var(--fill)] rounded-full animate-spin"
                      style={{ borderTopColor: 'var(--primary)' }} />
                 <span className="text-[14px]" style={{ color: 'var(--label-tertiary)' }}>{t.loading}</span>
               </div>

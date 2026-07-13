@@ -87,6 +87,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const dark = theme === 'dark' || (theme === 'system' && systemDark)
       document.documentElement.classList.toggle('dark', dark)
       setIsDark(dark)
+      // Keep the browser-chrome / status-bar color in sync when dark mode is
+      // forced manually (the static media-query themeColor can't cover that).
+      document
+        .querySelectorAll('meta[name="theme-color"]')
+        .forEach((m) => m.setAttribute('content', dark ? '#000000' : '#F2F2F7'))
     }
     apply()
     if (theme === 'system') {

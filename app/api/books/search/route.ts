@@ -21,6 +21,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, clientIp } from '@/lib/rateLimit'
+import { fetchWithRetry } from '@/lib/serverFetch'
 import type { BookMetadata } from '@/types/book'
 
 export const runtime = 'nodejs'
@@ -80,7 +81,10 @@ function normalizeIsbn13(isbn: string): string {
 function resolveGbCover(links: { thumbnail?: string; smallThumbnail?: string } | undefined): string | null {
   const raw = links?.thumbnail ?? links?.smallThumbnail
   if (!raw) return null
-  return raw.replace(/^http:/, 'https:').replace(/zoom=\d+/, 'zoom=3')
+  // zoom=1 is the only zoom level reliably available for every volume —
+  // higher levels 404 for many books. High-res display upgrades via fife
+  // in lib/coverUrl.heroImageUrl instead.
+  return raw.replace(/^http:/, 'https:').replace(/zoom=\d+/, 'zoom=1')
 }
 
 function olCoverFromIsbn(isbn13: string | null): string | null {
@@ -124,7 +128,7 @@ const OL_FIELDS = 'title,author_name,cover_i,cover_edition_key,isbn,first_publis
 async function fetchOLByIsbn(isbn: string, signal: AbortSignal): Promise<OLDoc[]> {
   try {
     const params = new URLSearchParams({ fields: OL_FIELDS, limit: '5', isbn })
-    const res = await fetch(`https://openlibrary.org/search.json?${params}`, {
+    const res = await fetchWithRetry(`https://openlibrary.org/search.json?${params}`, {
       headers: { 'User-Agent': OL_UA },
       signal,
     })
@@ -155,7 +159,7 @@ async function fetchOLFreeText(
       limit: String(limit),
       offset: String(offset),
     })
-    const res = await fetch(`https://openlibrary.org/search.json?${params}`, {
+    const res = await fetchWithRetry(`https://openlibrary.org/search.json?${params}`, {
       headers: { 'User-Agent': OL_UA },
       signal,
     })
@@ -232,7 +236,7 @@ async function fetchGBFreeText(
     const key = gbApiKey()
     if (key) params.set('key', key)
 
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?${params}`, { signal })
+    const res = await fetchWithRetry(`https://www.googleapis.com/books/v1/volumes?${params}`, { signal })
     if (!res.ok) return []
     const data = await res.json() as { items?: Array<{ volumeInfo?: GBVolumeInfo }> }
     return (data.items ?? []).map(i => i.volumeInfo ?? {}).filter(i => i.title)
@@ -248,7 +252,7 @@ async function fetchGBByIsbn(isbn: string, signal: AbortSignal): Promise<GBVolum
     const params = new URLSearchParams({ q: `isbn:${isbn}`, maxResults: '3', printType: 'books' })
     const key = gbApiKey()
     if (key) params.set('key', key)
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?${params}`, { signal })
+    const res = await fetchWithRetry(`https://www.googleapis.com/books/v1/volumes?${params}`, { signal })
     if (!res.ok) return []
     const data = await res.json() as { items?: Array<{ volumeInfo?: GBVolumeInfo }> }
     return (data.items ?? []).map(i => i.volumeInfo ?? {}).filter(i => i.title)

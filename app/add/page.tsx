@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase'
 import { useApp, useT } from '@/contexts/AppContext'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { uploadCoverPhoto } from '@/lib/coverUpload'
+import { coverUrl as proxiedCoverUrl } from '@/lib/coverUrl'
 import { searchBooksPage } from '@/lib/bookSearch'
 import type { BookSuggestion } from '@/lib/bookSearch'
 
@@ -46,18 +47,32 @@ function CoverPlaceholder({ className = '' }: { className?: string }) {
   )
 }
 
-/** Cover thumbnail that falls back to a placeholder when the image 404s. */
+/** Cover thumbnail that falls back to a placeholder when the image 404s or is blank. */
 function ResultCover({ src, className, onFail }: { src?: string; className: string; onFail?: () => void }) {
   const [failed, setFailed] = useState(false)
   if (!src || failed) return <CoverPlaceholder className={className} />
+
+  function handleFail() {
+    setFailed(true)
+    onFail?.()
+  }
+
+  // Route external covers through /api/cover: 7-day caching, and blank
+  // 1×1 "no cover" images from Open Library become real 404s.
+  const resolved = src.startsWith('/') ? src : proxiedCoverUrl(src)
+
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={src}
+      src={resolved}
       alt=""
       loading="lazy"
       decoding="async"
-      onError={() => { setFailed(true); onFail?.() }}
+      onError={handleFail}
+      onLoad={(e) => {
+        const img = e.currentTarget
+        if (img.naturalWidth <= 1 || img.naturalHeight <= 1) handleFail()
+      }}
       className={`${className} object-cover`}
       style={{ backgroundColor: 'var(--fill)' }}
     />
@@ -97,6 +112,7 @@ function AddBookContent() {
   const [author, setAuthor] = useState('')
   const [coverUrl, setCoverUrl] = useState('')
   const [isAudiobook, setIsAudiobook] = useState(false)
+  const [isEbook, setIsEbook] = useState(false)
   const [year, setYear] = useState(currentYear)
   const [month, setMonth] = useState<number | null>(new Date().getMonth() + 1)
   const [rating, setRating] = useState(0)
@@ -177,6 +193,7 @@ function AddBookContent() {
     setAuthor(s.author)
     setCoverUrl(s.cover_url ?? '')
     setIsAudiobook(false)
+    setIsEbook(false)
     setRating(0)
     setNotes('')
     setError('')
@@ -241,6 +258,7 @@ function AddBookContent() {
           year, month, rating, notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,
           is_audiobook: isAudiobook,
+          is_ebook: isEbook,
         })
         await enrichCover(saved.id)
         sessionStorage.setItem('bookshelf_returnTab', 'read')
@@ -253,6 +271,7 @@ function AddBookContent() {
           notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,
           is_audiobook: isAudiobook,
+          is_ebook: isEbook,
         })
         await enrichCover(saved.id)
         sessionStorage.setItem('bookshelf_returnTab', 'to_read')
@@ -265,6 +284,7 @@ function AddBookContent() {
           notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,
           is_audiobook: isAudiobook,
+          is_ebook: isEbook,
         })
         await enrichCover(saved.id)
         sessionStorage.setItem('bookshelf_returnTab', 'wishlist')
@@ -384,16 +404,27 @@ function AddBookContent() {
             </div>
           </div>
 
-          {/* Audiobook checkbox */}
-          <label className="flex items-center gap-3 px-1 pb-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isAudiobook}
-              onChange={(e) => setIsAudiobook(e.target.checked)}
-              className="w-5 h-5 rounded accent-[var(--primary)]"
-            />
-            <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.audiobook}</span>
-          </label>
+          {/* Format checkboxes (audiobook / ebook) */}
+          <div className="flex items-center gap-6 px-1 pb-2">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isAudiobook}
+                onChange={(e) => setIsAudiobook(e.target.checked)}
+                className="w-5 h-5 rounded accent-[var(--primary)]"
+              />
+              <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.audiobook}</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isEbook}
+                onChange={(e) => setIsEbook(e.target.checked)}
+                className="w-5 h-5 rounded accent-[var(--primary)]"
+              />
+              <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.ebook}</span>
+            </label>
+          </div>
 
           {/* Date read (Read tab) */}
           {tab === 'read' && (
@@ -508,7 +539,7 @@ function AddBookContent() {
                   <button type="button" onClick={() => photoInputRef.current?.click()} className="text-[14px] text-left" style={{ color: 'var(--primary)' }}>
                     {t.takePhoto}
                   </button>
-                  <button type="button" onClick={() => setCoverUrl('')} className="text-[14px] text-left" style={{ color: '#FF3B30' }}>
+                  <button type="button" onClick={() => setCoverUrl('')} className="text-[14px] text-left" style={{ color: 'var(--danger)' }}>
                     {t.removeCover}
                   </button>
                 </div>
@@ -529,7 +560,7 @@ function AddBookContent() {
             <input ref={photoInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoCapture} />
           </div>
 
-          {error && <p className="text-[14px] px-1" style={{ color: '#FF3B30' }}>{error}</p>}
+          {error && <p className="text-[14px] px-1" style={{ color: 'var(--danger)' }}>{error}</p>}
 
           <motion.button
             type="submit"
@@ -718,7 +749,7 @@ export default function AddBookPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
-        <div className="w-7 h-7 border-2 border-black/10 rounded-full animate-spin" style={{ borderTopColor: 'var(--primary)' }} />
+        <div className="w-7 h-7 border-2 border-[var(--fill)] rounded-full animate-spin" style={{ borderTopColor: 'var(--primary)' }} />
       </div>
     }>
       <AddBookContent />

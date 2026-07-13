@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { gbUrl } from '@/lib/gbUrl'
 import { checkRateLimit, clientIp } from '@/lib/rateLimit'
+import { fetchWithRetry } from '@/lib/serverFetch'
 import { cleanDnbTitle, stripCreatorRole, normaliseCreator } from '@/lib/dnbUtils'
 
 export const runtime = 'nodejs'
@@ -32,7 +33,7 @@ export interface IsbnResult {
 
 async function fromGoogleBooks(isbn: string): Promise<IsbnResult | null> {
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       gbUrl({ q: `isbn:${isbn}`, maxResults: '1' }),
       { next: { revalidate: 3600 } }
     )
@@ -73,7 +74,7 @@ async function gbCoverByTitleAuthor(title: string, author: string): Promise<stri
     const authorHint = author.split(/\s+/).slice(0, 2).join(' ')
     const titleHint = title.split(/\s+/).slice(0, 4).join(' ')
     const q = `intitle:"${titleHint}" inauthor:"${authorHint}"`
-    const res = await fetch(
+    const res = await fetchWithRetry(
       gbUrl({ q, maxResults: '1' }),
       { next: { revalidate: 86400 } }
     )
@@ -107,7 +108,7 @@ async function fromDNB(isbn: string): Promise<IsbnResult | null> {
       maximumRecords: '3',
       recordSchema: 'oai_dc',
     })
-    const res = await fetch(`https://services.dnb.de/sru/dnb?${params}`, {
+    const res = await fetchWithRetry(`https://services.dnb.de/sru/dnb?${params}`, {
       next: { revalidate: 3600 },
       headers: { Accept: 'application/xml, text/xml' },
     })
@@ -166,16 +167,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ result: null }, { status: 400 })
   }
 
+  const cacheHeaders = { 'Cache-Control': 's-maxage=86400, stale-while-revalidate=604800' }
+
   // 1. Try Google Books first — fastest and has covers
   const gb = await fromGoogleBooks(isbn)
   if (gb?.title) {
-    return NextResponse.json({ result: gb })
+    return NextResponse.json({ result: gb }, { headers: cacheHeaders })
   }
 
   // 2. Fall back to DNB — catches German/Austrian/Swiss books that GB misses
   const dnb = await fromDNB(isbn)
   if (dnb?.title) {
-    return NextResponse.json({ result: dnb })
+    return NextResponse.json({ result: dnb }, { headers: cacheHeaders })
   }
 
   return NextResponse.json({ result: null })

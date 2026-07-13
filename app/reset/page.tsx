@@ -63,7 +63,7 @@ function ResetContent() {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
-        <div className="w-7 h-7 border-2 border-black/10 rounded-full animate-spin"
+        <div className="w-7 h-7 border-2 border-[var(--fill)] rounded-full animate-spin"
              style={{ borderTopColor: 'var(--primary)' }} />
       </div>
     )
@@ -78,7 +78,7 @@ function ResetContent() {
             <h1 className="text-[28px] font-bold tracking-[-0.4px]" style={{ color: 'var(--label)' }}>
               {t.resetYourPassword}
             </h1>
-            <p className="text-[15px] leading-5" style={{ color: '#FF3B30' }}>
+            <p className="text-[15px] leading-5" style={{ color: 'var(--danger)' }}>
               This reset link is invalid or has expired. Please request a new one.
             </p>
           </div>
@@ -142,7 +142,7 @@ function ResetContent() {
                    style={{ color: 'var(--label)' }} />
           </div>
 
-          {error && <p className="text-[14px] px-1" style={{ color: '#FF3B30' }}>{error}</p>}
+          {error && <p className="text-[14px] px-1" style={{ color: 'var(--danger)' }}>{error}</p>}
 
           <motion.button type="submit" disabled={loading} whileTap={{ scale: 0.97 }}
             className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold disabled:opacity-50"
@@ -159,7 +159,7 @@ export default function ResetPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
-        <div className="w-7 h-7 border-2 border-black/10 rounded-full animate-spin"
+        <div className="w-7 h-7 border-2 border-[var(--fill)] rounded-full animate-spin"
              style={{ borderTopColor: 'var(--primary)' }} />
       </div>
     }>

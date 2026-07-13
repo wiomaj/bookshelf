@@ -4,16 +4,16 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Camera, Loader2, Search, ScanBarcode } from 'lucide-react'
 import StarRating from './StarRating'
+import BookCover from './BookCover'
 import ISBNScanner from './ISBNScanner'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
 import type { BookStatus } from './StatusPicker'
-import { googleCoverFromResponse } from '@/lib/bookMetadata'
+import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { uploadCoverPhoto } from '@/lib/coverUpload'
 import { supabase } from '@/lib/supabase'
 import { searchBooks } from '@/lib/bookSearch'
 import type { BookSuggestion } from '@/lib/bookSearch'
-import { gbUrl } from '@/lib/gbUrl'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -30,49 +30,17 @@ interface BookFormProps {
   onAudiobookChange?: (value: boolean) => void
 }
 
-// ─── Cover fallback ───────────────────────────────────────────────────────────
-// Used only for the rare case where a suggestion has no cover after the main search.
-
-async function fetchCoverByISBN(isbn: string): Promise<string | undefined> {
-  try {
-    const res = await fetch(gbUrl({ q: `isbn:${isbn}`, maxResults: '1' }))
-    if (!res.ok) return undefined
-    return googleCoverFromResponse(await res.json())
-  } catch { return undefined }
-}
-
-async function fetchCoverByTitleAuthor(title: string, author: string): Promise<string | undefined> {
-  try {
-    const res = await fetch(gbUrl({ q: `intitle:"${title}" inauthor:"${author}"`, maxResults: '1' }))
-    if (!res.ok) return undefined
-    return googleCoverFromResponse(await res.json())
-  } catch { return undefined }
-}
-
 /** Search and enrich covers for the few results that have none. */
 async function searchAllSources(query: string): Promise<BookSuggestion[]> {
-  // isbn is needed here for the cover-enrichment pass
-  type RichSuggestion = BookSuggestion & { isbn?: string }
-
   // Use the shared search — it deduplicates and scores internally
-  const base = await searchBooks(query)
-  const rich: RichSuggestion[] = base.map((s) => ({ ...s }))
+  const rich = (await searchBooks(query)).map((s) => ({ ...s }))
 
-  // Cover enrichment: for suggestions still missing a cover, try a targeted GB lookup
-  const needsCover = rich.filter((r) => !r.cover_url)
+  // Cover enrichment: for suggestions still missing a cover, try a targeted
+  // server-side lookup (Google Books + Open Library by title + author).
+  const needsCover = rich.filter((r) => !r.cover_url && r.author)
   if (needsCover.length > 0) {
     const coverResults = await Promise.allSettled(
-      needsCover.map(async (r) => {
-        const attempts: Promise<string | undefined>[] = []
-        if (r.isbn) attempts.push(fetchCoverByISBN(r.isbn))
-        if (r.author) attempts.push(fetchCoverByTitleAuthor(r.title, r.author))
-        if (attempts.length === 0) return undefined
-        const settled = await Promise.allSettled(attempts)
-        for (const s of settled) {
-          if (s.status === 'fulfilled' && s.value) return s.value
-        }
-        return undefined
-      })
+      needsCover.map((r) => fetchCoverByTitleAuthor(r.title, r.author))
     )
     coverResults.forEach((result, i) => {
       if (result.status === 'fulfilled' && result.value) {
@@ -83,7 +51,7 @@ async function searchAllSources(query: string): Promise<BookSuggestion[]> {
     })
   }
 
-  return rich.map(({ isbn: _isbn, ...rest }) => rest)
+  return rich
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -107,6 +75,7 @@ export default function BookForm({
   const genreRef = useRef(initialData?.genre)
   const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
   const [isAudiobook, setIsAudiobook] = useState(initialData?.is_audiobook ?? false)
+  const [isEbook, setIsEbook] = useState(initialData?.is_ebook ?? false)
 
   // Track whether any field has been edited
   const isDirty =
@@ -117,7 +86,8 @@ export default function BookForm({
     rating !== (initialData?.rating ?? 0) ||
     notes !== (initialData?.notes ?? '') ||
     coverUrl !== (initialData?.cover_url ?? '') ||
-    isAudiobook !== (initialData?.is_audiobook ?? false)
+    isAudiobook !== (initialData?.is_audiobook ?? false) ||
+    isEbook !== (initialData?.is_ebook ?? false)
   const [photoLoading, setPhotoLoading] = useState(false)
   const photoInputRef = useRef<HTMLInputElement>(null)
 
@@ -232,6 +202,7 @@ export default function BookForm({
         notes:     notes.trim() || undefined,
         cover_url: coverUrl.trim() || undefined,
         is_audiobook: isAudiobook,
+        is_ebook: isEbook,
       })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t.errorSomethingWentWrong)
@@ -285,7 +256,7 @@ export default function BookForm({
         {/* Dropdown */}
         {(showSuggestions || searchLoading) && (
           <div className="absolute top-full left-0 right-0 mt-2 rounded-[16px] z-20 overflow-hidden"
-               style={{ backgroundColor: 'var(--bg-elevated)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+               style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--separator)', boxShadow: 'var(--glass-shadow)' }}>
             {searchLoading && suggestions.length === 0 ? (
               /* Loading skeleton */
               Array.from({ length: 3 }).map((_, i) => (
@@ -312,20 +283,9 @@ export default function BookForm({
                     className="w-full flex items-start gap-3 px-4 py-3 text-left transition-colors active:opacity-70"
                     style={{ borderBottom: i < suggestions.length - 1 ? '1px solid var(--separator)' : undefined }}
                   >
-                    {s.cover_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={s.cover_url} alt="" className="w-10 h-14 object-cover rounded-[6px] flex-shrink-0 mt-0.5" />
-                    ) : (
-                      <div className="w-10 h-14 rounded-[6px] flex-shrink-0 mt-0.5 flex items-center justify-center"
-                           style={{ backgroundColor: 'var(--fill)' }}>
-                        <svg width="16" height="20" viewBox="0 0 16 20" fill="none" style={{ opacity: 0.3 }}>
-                          <rect x="1" y="1" width="14" height="18" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-                          <line x1="4" y1="6" x2="12" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                          <line x1="4" y1="9.5" x2="12" y2="9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                          <line x1="4" y1="13" x2="9" y2="13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        </svg>
-                      </div>
-                    )}
+                    <div className="w-10 h-14 rounded-[6px] overflow-hidden flex-shrink-0 mt-0.5">
+                      <BookCover src={s.cover_url} alt="" iconSize={12} patternSize={12} />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-[15px] leading-snug line-clamp-2" style={{ color: 'var(--label)' }}>{s.title}</p>
                       {meta && (
@@ -366,16 +326,27 @@ export default function BookForm({
         </div>
       </div>
 
-      {/* ── Audiobook checkbox ──────────────────────────────────────────── */}
-      <label className="flex items-center gap-3 px-1 pb-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={isAudiobook}
-          onChange={(e) => { setIsAudiobook(e.target.checked); onAudiobookChange?.(e.target.checked) }}
-          className="w-5 h-5 rounded accent-[var(--primary)]"
-        />
-        <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.audiobook}</span>
-      </label>
+      {/* ── Format checkboxes (audiobook / ebook) ────────────────────────── */}
+      <div className="flex items-center gap-6 px-1 pb-2">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isAudiobook}
+            onChange={(e) => { setIsAudiobook(e.target.checked); onAudiobookChange?.(e.target.checked) }}
+            className="w-5 h-5 rounded accent-[var(--primary)]"
+          />
+          <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.audiobook}</span>
+        </label>
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isEbook}
+            onChange={(e) => setIsEbook(e.target.checked)}
+            className="w-5 h-5 rounded accent-[var(--primary)]"
+          />
+          <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.ebook}</span>
+        </label>
+      </div>
 
       {/* ── When did you read it? (Month 2/3 + Year 1/3) ─────────────────── */}
       {status !== 'wishlist' && (
@@ -459,19 +430,16 @@ export default function BookForm({
         </label>
         {coverUrl ? (
           <div className="flex items-center gap-4 px-1">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={coverUrl}
-              alt="Cover preview"
-              className="w-14 h-20 object-cover rounded-[10px] shadow-sm flex-shrink-0"
-            />
+            <div className="w-14 h-20 rounded-[10px] overflow-hidden shadow-sm flex-shrink-0">
+              <BookCover src={coverUrl} alt="Cover preview" />
+            </div>
             <div className="flex flex-col gap-1">
               <button type="button" onClick={() => photoInputRef.current?.click()}
                 className="text-[14px] text-left" style={{ color: 'var(--primary)' }}>
                 {t.takePhoto}
               </button>
               <button type="button" onClick={() => setCoverUrl('')}
-                className="text-[14px] text-left" style={{ color: '#FF3B30' }}>
+                className="text-[14px] text-left" style={{ color: 'var(--danger)' }}>
                 {t.removeCover}
               </button>
             </div>
@@ -502,7 +470,7 @@ export default function BookForm({
 
       {/* ── Error ──────────────────────────────────────────────────────────── */}
       {error && (
-        <p className="text-[14px] px-1" style={{ color: '#FF3B30' }}>{error}</p>
+        <p className="text-[14px] px-1" style={{ color: 'var(--danger)' }}>{error}</p>
       )}
 
       {/* ── ISBN Scanner overlay ───────────────────────────────────────────── */}

@@ -18,6 +18,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, clientIp } from '@/lib/rateLimit'
+import { fetchWithRetry } from '@/lib/serverFetch'
 import type { BookMetadata } from '@/types/book'
 
 export const runtime = 'nodejs'
@@ -65,7 +66,8 @@ function stripHtml(html: string): string {
 function resolveGbCover(links: { thumbnail?: string; smallThumbnail?: string } | undefined): string | null {
   const raw = links?.thumbnail ?? links?.smallThumbnail
   if (!raw) return null
-  return raw.replace(/^http:/, 'https:').replace(/zoom=\d+/, 'zoom=3')
+  // zoom=1 is the only zoom level reliably available for every volume.
+  return raw.replace(/^http:/, 'https:').replace(/zoom=\d+/, 'zoom=1')
 }
 
 // ─── Open Library Books API (edition) ────────────────────────────────────────
@@ -84,7 +86,7 @@ interface OLEdition {
 
 async function fetchOLEdition(isbn: string): Promise<OLEdition | null> {
   try {
-    const res = await fetch(`https://openlibrary.org/isbn/${isbn}.json`, {
+    const res = await fetchWithRetry(`https://openlibrary.org/isbn/${isbn}.json`, {
       headers: { 'User-Agent': OL_UA },
     })
     if (!res.ok) return null
@@ -105,7 +107,7 @@ interface OLWork {
 
 async function fetchOLWork(workKey: string): Promise<OLWork | null> {
   try {
-    const res = await fetch(`https://openlibrary.org${workKey}.json`, {
+    const res = await fetchWithRetry(`https://openlibrary.org${workKey}.json`, {
       headers: { 'User-Agent': OL_UA },
     })
     if (!res.ok) return null
@@ -121,7 +123,7 @@ async function fetchOLWork(workKey: string): Promise<OLWork | null> {
 async function fetchOLSearchByISBN(isbn: string): Promise<{ authors: string[]; title?: string } | null> {
   try {
     const params = new URLSearchParams({ isbn, fields: 'title,author_name', limit: '1' })
-    const res = await fetch(`https://openlibrary.org/search.json?${params}`, {
+    const res = await fetchWithRetry(`https://openlibrary.org/search.json?${params}`, {
       headers: { 'User-Agent': OL_UA },
     })
     if (!res.ok) return null
@@ -156,7 +158,7 @@ async function fetchGB(isbn: string): Promise<GBVolumeInfo | null> {
     const params = new URLSearchParams({ q: `isbn:${isbn}`, maxResults: '1' })
     const key = gbApiKey()
     if (key) params.set('key', key)
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?${params}`)
+    const res = await fetchWithRetry(`https://www.googleapis.com/books/v1/volumes?${params}`)
     if (!res.ok) return null
     const data = await res.json() as { items?: Array<{ volumeInfo?: GBVolumeInfo }> }
     return data.items?.[0]?.volumeInfo ?? null

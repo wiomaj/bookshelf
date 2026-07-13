@@ -198,8 +198,8 @@ export default function SettingsPage() {
             />
           </div>
 
-          {cpError && <p className="text-[14px] px-1" style={{ color: '#FF3B30' }}>{cpError}</p>}
-          {cpSuccess && <p className="text-[14px] px-1" style={{ color: '#34C759' }}>{t.passwordChangedSuccess}</p>}
+          {cpError && <p className="text-[14px] px-1" style={{ color: 'var(--danger)' }}>{cpError}</p>}
+          {cpSuccess && <p className="text-[14px] px-1" style={{ color: 'var(--success)' }}>{t.passwordChangedSuccess}</p>}
 
           <motion.button
             type="submit"
@@ -276,7 +276,7 @@ export default function SettingsPage() {
               <button
                 onClick={() => setCozyMode(!cozyMode)}
                 className="relative w-[51px] h-[31px] rounded-full shrink-0 transition-colors duration-300"
-                style={{ backgroundColor: cozyMode ? '#34C759' : 'rgba(120,120,128,0.22)' }}
+                style={{ backgroundColor: cozyMode ? 'var(--success)' : 'rgba(120,120,128,0.22)' }}
                 aria-pressed={cozyMode}
               >
                 <div
@@ -303,7 +303,7 @@ export default function SettingsPage() {
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'system' : 'dark')}
                 className="relative w-[51px] h-[31px] rounded-full shrink-0 transition-colors duration-300"
-                style={{ backgroundColor: theme === 'dark' ? '#34C759' : 'rgba(120,120,128,0.22)' }}
+                style={{ backgroundColor: theme === 'dark' ? 'var(--success)' : 'rgba(120,120,128,0.22)' }}
                 aria-pressed={theme === 'dark'}
               >
                 <div
@@ -389,10 +389,10 @@ export default function SettingsPage() {
             />
             <ListRow
               label={t.deleteAccount}
-              labelColor="#FF3B30"
+              labelColor='var(--danger)'
               onClick={() => setShowDeleteConfirm(true)}
               last
-              accessory={<ChevronRight size={18} style={{ color: '#FF3B30', opacity: 0.5 }} />}
+              accessory={<ChevronRight size={18} style={{ color: 'var(--danger)', opacity: 0.5 }} />}
             />
           </div>
         </div>
@@ -428,7 +428,7 @@ export default function SettingsPage() {
             </div>
 
             {deleteError && (
-              <p className="text-[14px] mb-4" style={{ color: '#FF3B30' }}>{deleteError}</p>
+              <p className="text-[14px] mb-4" style={{ color: 'var(--danger)' }}>{deleteError}</p>
             )}
 
             <div className="flex flex-col gap-3">
@@ -437,7 +437,7 @@ export default function SettingsPage() {
                 onClick={handleDeleteAccount}
                 disabled={deleteLoading}
                 className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold disabled:opacity-50"
-                style={{ backgroundColor: '#FF3B30' }}
+                style={{ backgroundColor: 'var(--danger)' }}
               >
                 {deleteLoading ? t.deleting : t.deleteAccount}
               </motion.button>

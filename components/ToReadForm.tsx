@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Camera, Loader2, Search, ScanBarcode } from 'lucide-react'
 import { LONG_MONTHS } from '@/lib/month'
+import BookCover from './BookCover'
 import ISBNScanner from './ISBNScanner'
 import { useApp, useT } from '@/contexts/AppContext'
 import { uploadCoverPhoto } from '@/lib/coverUpload'
@@ -21,6 +22,7 @@ export type ToReadFormData = {
   notes?: string
   cover_url?: string
   is_audiobook?: boolean
+  is_ebook?: boolean
   started_reading_day?: number | null
   started_reading_month?: number | null
   started_reading_year?: number | null
@@ -56,6 +58,7 @@ export default function ToReadForm({
   const [notes, setNotes] = useState(initialData?.notes ?? '')
   const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
   const [isAudiobook, setIsAudiobook] = useState(initialData?.is_audiobook ?? false)
+  const [isEbook, setIsEbook] = useState(initialData?.is_ebook ?? false)
   const [startDay, setStartDay] = useState<number>(initialData?.started_reading_day ?? 0)
   const [startMonth, setStartMonth] = useState<number | null>(initialData?.started_reading_month ?? null)
   const [startYear, setStartYear] = useState<number>(initialData?.started_reading_year ?? 0)
@@ -69,7 +72,8 @@ export default function ToReadForm({
     year !== (initialData?.year ?? 0) ||
     notes !== (initialData?.notes ?? '') ||
     coverUrl !== (initialData?.cover_url ?? '') ||
-    isAudiobook !== (initialData?.is_audiobook ?? false)
+    isAudiobook !== (initialData?.is_audiobook ?? false) ||
+    isEbook !== (initialData?.is_ebook ?? false)
   const photoInputRef = useRef<HTMLInputElement>(null)
 
   const [suggestions, setSuggestions] = useState<BookSuggestion[]>([])
@@ -161,6 +165,7 @@ export default function ToReadForm({
         notes: notes.trim() || undefined,
         cover_url: coverUrl.trim() || undefined,
         is_audiobook: isAudiobook,
+        is_ebook: isEbook,
         started_reading_day: startDay || null,
         started_reading_month: startMonth || null,
         started_reading_year: startYear || null,
@@ -211,7 +216,7 @@ export default function ToReadForm({
 
         {showSuggestions && (
           <div className="absolute top-full left-0 right-0 mt-2 rounded-[16px] z-20 overflow-hidden"
-               style={{ backgroundColor: 'var(--bg-elevated)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+               style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--separator)', boxShadow: 'var(--glass-shadow)' }}>
             {suggestions.map((s, i) => (
               <button
                 key={i}
@@ -220,11 +225,9 @@ export default function ToReadForm({
                 className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors active:opacity-70"
                 style={{ borderBottom: i < suggestions.length - 1 ? '1px solid var(--separator)' : undefined }}
               >
-                {s.cover_url
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={s.cover_url} alt="" className="w-8 h-11 object-cover rounded-[6px] flex-shrink-0" />
-                  : <div className="w-8 h-11 rounded-[6px] flex-shrink-0" style={{ backgroundColor: 'var(--fill)' }} />
-                }
+                <div className="w-8 h-11 rounded-[6px] overflow-hidden flex-shrink-0">
+                  <BookCover src={s.cover_url} alt="" iconSize={10} patternSize={12} />
+                </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-[16px] truncate" style={{ color: 'var(--label)' }}>{s.title}</p>
                   <p className="text-[13px] truncate" style={{ color: 'var(--label-secondary)' }}>{s.author}</p>
@@ -250,16 +253,27 @@ export default function ToReadForm({
         </div>
       </div>
 
-      {/* ── Audiobook checkbox ──────────────────────────────────────────── */}
-      <label className="flex items-center gap-3 px-1 pb-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={isAudiobook}
-          onChange={(e) => { setIsAudiobook(e.target.checked); onAudiobookChange?.(e.target.checked) }}
-          className="w-5 h-5 rounded accent-[var(--primary)]"
-        />
-        <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.audiobook}</span>
-      </label>
+      {/* ── Format checkboxes (audiobook / ebook) ────────────────────────── */}
+      <div className="flex items-center gap-6 px-1 pb-2">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isAudiobook}
+            onChange={(e) => { setIsAudiobook(e.target.checked); onAudiobookChange?.(e.target.checked) }}
+            className="w-5 h-5 rounded accent-[var(--primary)]"
+          />
+          <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.audiobook}</span>
+        </label>
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isEbook}
+            onChange={(e) => setIsEbook(e.target.checked)}
+            className="w-5 h-5 rounded accent-[var(--primary)]"
+          />
+          <span className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: 'var(--label-secondary)' }}>{t.ebook}</span>
+        </label>
+      </div>
 
       {/* ── When did you get it? (Month 2/3 + Year 1/3) ────────────────────── */}
       {!hideDateField && <div>
@@ -376,15 +390,16 @@ export default function ToReadForm({
         </label>
         {coverUrl ? (
           <div className="flex items-center gap-4 px-1">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={coverUrl} alt="Cover preview" className="w-14 h-20 object-cover rounded-[10px] shadow-sm flex-shrink-0" />
+            <div className="w-14 h-20 rounded-[10px] overflow-hidden shadow-sm flex-shrink-0">
+              <BookCover src={coverUrl} alt="Cover preview" />
+            </div>
             <div className="flex flex-col gap-1">
               <button type="button" onClick={() => photoInputRef.current?.click()}
                 className="text-[14px] text-left" style={{ color: 'var(--primary)' }}>
                 {t.takePhoto}
               </button>
               <button type="button" onClick={() => setCoverUrl('')}
-                className="text-[14px] text-left" style={{ color: '#FF3B30' }}>
+                className="text-[14px] text-left" style={{ color: 'var(--danger)' }}>
                 {t.removeCover}
               </button>
             </div>
@@ -415,7 +430,7 @@ export default function ToReadForm({
 
       {/* ── Error ──────────────────────────────────────────────────────────── */}
       {error && (
-        <p className="text-[14px] px-1" style={{ color: '#FF3B30' }}>{error}</p>
+        <p className="text-[14px] px-1" style={{ color: 'var(--danger)' }}>{error}</p>
       )}
 
       {/* ── ISBN Scanner ────────────────────────────────────────────────────── */}

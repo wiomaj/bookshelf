@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { AppProvider } from '@/contexts/AppContext'
@@ -12,12 +12,20 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'My Bookshelf',
   description: 'Track every book you read',
-  themeColor: '#d3f0fb',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'My Bookshelf',
   },
+}
+
+// Status-bar / browser-chrome color follows the system appearance.
+// AppContext keeps it in sync when the user forces dark mode in Settings.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F2F2F7' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+  ],
 }
 
 export default function RootLayout({

@@ -44,6 +44,7 @@ export type Translations = {
   myNotesLabel: string
   notesPlaceholder: string
   audiobook: string
+  ebook: string
   coverPreview: string
   removeCover: string
   takePhoto: string
@@ -269,6 +270,7 @@ const en: Translations = {
   myNotesLabel: 'My Notes',
   notesPlaceholder: 'What do you think about this book?',
   audiobook: 'Audiobook',
+  ebook: 'E-book',
   coverPreview: 'Cover preview',
   removeCover: 'Remove cover',
   takePhoto: 'Take photo',
@@ -473,6 +475,7 @@ const de: Translations = {
   myNotesLabel: 'Meine Notizen',
   notesPlaceholder: 'Was denkst du über dieses Buch?',
   audiobook: 'Hörbuch',
+  ebook: 'E-Book',
   coverPreview: 'Cover-Vorschau',
   removeCover: 'Cover entfernen',
   takePhoto: 'Foto aufnehmen',
@@ -677,6 +680,7 @@ const fr: Translations = {
   myNotesLabel: 'Mes notes',
   notesPlaceholder: "Que pensez-vous de ce livre ?",
   audiobook: 'Livre audio',
+  ebook: 'Livre numérique',
   coverPreview: 'Aperçu de la couverture',
   removeCover: 'Supprimer la couverture',
   takePhoto: 'Prendre une photo',
@@ -881,6 +885,7 @@ const es: Translations = {
   myNotesLabel: 'Mis notas',
   notesPlaceholder: '¿Qué piensas de este libro?',
   audiobook: 'Audiolibro',
+  ebook: 'Libro electrónico',
   coverPreview: 'Vista previa de portada',
   removeCover: 'Eliminar portada',
   takePhoto: 'Tomar foto',
@@ -1085,6 +1090,7 @@ const pl: Translations = {
   myNotesLabel: 'Moje notatki',
   notesPlaceholder: 'Co myślisz o tej książce?',
   audiobook: 'Audiobook',
+  ebook: 'E-book',
   coverPreview: 'Podgląd okładki',
   removeCover: 'Usuń okładkę',
   takePhoto: 'Zrób zdjęcie',

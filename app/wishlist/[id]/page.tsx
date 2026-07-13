@@ -240,7 +240,7 @@ export default function WishlistDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
-        <div className="w-7 h-7 border-2 border-black/10 rounded-full animate-spin"
+        <div className="w-7 h-7 border-2 border-[var(--fill)] rounded-full animate-spin"
              style={{ borderTopColor: 'var(--primary)' }} />
       </div>
     )
@@ -338,7 +338,10 @@ export default function WishlistDetailPage() {
               onError={handleCoverError}
               onLoad={handleCoverLoad}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60" />
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(to bottom, transparent, transparent, color-mix(in srgb, var(--bg-elevated) 60%, transparent))' }}
+            />
           </div>
         ) : (
           <div
@@ -387,6 +390,14 @@ export default function WishlistDetailPage() {
                 </svg>
               </div>
             )}
+            {book.is_ebook && (
+              <div className="absolute top-2 z-10 w-[26px] h-[26px] rounded-full backdrop-blur-sm flex items-center justify-center" style={{ backgroundColor: 'rgba(60, 60, 67, 0.60)', left: book.is_audiobook ? '40px' : '8px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+                  <line x1="12" x2="12.01" y1="18" y2="18" />
+                </svg>
+              </div>
+            )}
             {showCover ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -432,6 +443,12 @@ export default function WishlistDetailPage() {
               {book.is_audiobook && (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-40">
                   <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
+                </svg>
+              )}
+              {book.is_ebook && (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-40">
+                  <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+                  <line x1="12" x2="12.01" y1="18" y2="18" />
                 </svg>
               )}
               {book.title}
@@ -489,7 +506,7 @@ export default function WishlistDetailPage() {
             </span>
             {bookDataLoading ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-black/10 rounded-full animate-spin"
+                <div className="w-4 h-4 border-2 border-[var(--fill)] rounded-full animate-spin"
                      style={{ borderTopColor: 'var(--primary)' }} />
                 <span className="text-[14px]" style={{ color: 'var(--label-tertiary)' }}>{t.loading}</span>
               </div>
@@ -600,7 +617,7 @@ export default function WishlistDetailPage() {
                   whileTap={{ scale: 0.97 }}
                   onClick={() => handleConfirmMove('read')}
                   className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white"
-                  style={{ backgroundColor: '#34C759' }}
+                  style={{ backgroundColor: 'var(--success)' }}
                 >
                   {book.is_audiobook ? t.markAsListened : t.markAsRead}
                 </motion.button>

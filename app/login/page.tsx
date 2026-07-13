@@ -43,7 +43,7 @@ function MockDashboard() {
         </svg>
       ))}
       <svg width="16" height="16" viewBox="0 0 16 16">
-        <path d="M8 1l2.2 4.5 5 .7-3.6 3.5.8 5L8 12.4 3.6 14.7l.8-5L.8 6.2l5-.7L8 1z" fill="#E0E0E0" />
+        <path d="M8 1l2.2 4.5 5 .7-3.6 3.5.8 5L8 12.4 3.6 14.7l.8-5L.8 6.2l5-.7L8 1z" fill="var(--fill)" />
       </svg>
     </div>
   )
@@ -64,7 +64,7 @@ function MockDashboard() {
     <div
       className="w-[339px] rounded-t-[16px] overflow-hidden"
       style={{
-        backgroundColor: '#f2f2f7',
+        backgroundColor: 'var(--bg)',
         boxShadow: '0 4px 40px rgba(0,0,0,0.1)',
         height: 454,
         borderLeft: '10px solid var(--label)',
@@ -154,7 +154,7 @@ function ReadingSpeedChart({ t }: { t: ReturnType<typeof useT> }) {
   return (
     <div
       className="w-[340px] rounded-[16px] p-4 flex flex-col gap-5"
-      style={{ backgroundColor: '#f2f2f7', boxShadow: '0 12px 20px rgba(0,0,0,0.05)' }}
+      style={{ backgroundColor: 'var(--bg)', boxShadow: '0 12px 20px rgba(0,0,0,0.05)' }}
     >
       <div className="flex flex-col gap-[2px]">
         <h3 className="text-[17px] font-semibold leading-[22px] tracking-[-0.43px]" style={{ color: 'var(--label)' }}>
@@ -216,7 +216,7 @@ function RatingsCard({ t }: { t: ReturnType<typeof useT> }) {
   )
   const emptyStar = (
     <svg width="24" height="24" viewBox="0 0 24 24">
-      <path d="M12 2l2.9 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 6 21l1.2-6.8-5-4.9 6.9-1L12 2z" fill="#E0E0E0" />
+      <path d="M12 2l2.9 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 6 21l1.2-6.8-5-4.9 6.9-1L12 2z" fill="var(--fill)" />
     </svg>
   )
 
@@ -680,7 +680,7 @@ export default function LoginPage() {
               />
             </div>
 
-            {error && <p className="text-[14px] px-1" style={{ color: '#FF3B30' }}>{error}</p>}
+            {error && <p className="text-[14px] px-1" style={{ color: 'var(--danger)' }}>{error}</p>}
 
             <motion.button
               type="submit" disabled={loading} whileTap={{ scale: 0.97 }}
@@ -746,7 +746,7 @@ export default function LoginPage() {
             )}
           </div>
 
-          {error && <p className="text-[14px] px-1" style={{ color: '#FF3B30' }}>{error}</p>}
+          {error && <p className="text-[14px] px-1" style={{ color: 'var(--danger)' }}>{error}</p>}
 
           <motion.button
             type="submit" disabled={loading} whileTap={{ scale: 0.97 }}

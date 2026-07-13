@@ -4,19 +4,13 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import StarRating from './StarRating'
+import BookCover from './BookCover'
 import { formatMonthShort } from '@/lib/month'
-import { coverUrl } from '@/lib/coverUrl'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { updateBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
-
-// Lucide Book icon (closed book) as a tiled SVG background pattern.
-// viewBox='-4 -4 32 32' adds ~4 px padding around the 24×24 icon so tiles
-// don't run edge-to-edge when rendered at backgroundSize '32px 32px'.
-const bookPatternUrl =
-  `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-4 -4 32 32' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20'/%3E%3C/svg%3E")`
 
 export default function BookCard({ book, href, hideRating }: { book: Book; href?: string; hideRating?: boolean }) {
   const router = useRouter()
@@ -29,16 +23,11 @@ export default function BookCard({ book, href, hideRating }: { book: Book; href?
     setCoverFailed(true)
     if (retryRef.current || !user || !book.title) return
     retryRef.current = true
+    // Self-heal: look up a fresh cover and persist it for the next load.
     fetchCoverByTitleAuthor(book.title, book.author ?? '').then((newCover) => {
       if (!newCover || newCover === book.cover_url) return
       updateBook(supabase, user.id, book.id, { cover_url: newCover }).catch(() => {})
     }).catch(() => {})
-  }
-
-  // Open Library sometimes returns a tiny 1x1 placeholder instead of 404
-  function handleCoverLoad(e: React.SyntheticEvent<HTMLImageElement>) {
-    const img = e.currentTarget
-    if (img.naturalWidth <= 1 || img.naturalHeight <= 1) handleCoverError()
   }
 
   const showCover = book.cover_url && !coverFailed
@@ -57,28 +46,14 @@ export default function BookCard({ book, href, hideRating }: { book: Book; href?
 
         {/* Cover image or no-cover placeholder */}
         <div className="absolute inset-0">
-          {showCover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={coverUrl(book.cover_url)}
-              alt={book.title}
-              className="w-full h-full object-cover"
-              onError={handleCoverError}
-              onLoad={handleCoverLoad}
-            />
-          ) : (
-            <div className="relative w-full h-full" style={{ backgroundColor: 'var(--primary)' }}>
-              {/* Tiled book icon pattern at 16 % opacity */}
-              <div
-                className="absolute inset-0 opacity-[0.16]"
-                style={{
-                  backgroundImage: bookPatternUrl,
-                  backgroundSize: '32px 32px',
-                  backgroundRepeat: 'repeat',
-                }}
-              />
-            </div>
-          )}
+          <BookCover
+            src={book.cover_url}
+            alt={book.title}
+            iconSize={0}
+            patternSize={32}
+            patternOpacity={0.16}
+            onFail={handleCoverError}
+          />
         </div>
 
         {/* Audiobook badge */}
@@ -90,9 +65,19 @@ export default function BookCard({ book, href, hideRating }: { book: Book; href?
           </div>
         )}
 
+        {/* Ebook badge */}
+        {book.is_ebook && (
+          <div className="absolute top-2 z-20 w-[26px] h-[26px] rounded-full backdrop-blur-sm flex items-center justify-center" style={{ backgroundColor: 'rgba(60, 60, 67, 0.60)', left: book.is_audiobook ? '40px' : '8px' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+              <line x1="12" x2="12.01" y1="18" y2="18" />
+            </svg>
+          </div>
+        )}
+
         {/* Abandoned badge */}
         {book.status === 'abandoned' && (
-          <div className="absolute top-[11px] z-20 rounded-full px-2 py-1 backdrop-blur-sm flex items-center justify-center" style={{ backgroundColor: 'rgba(60, 60, 67, 0.60)', left: book.is_audiobook ? '40px' : '8px' }}>
+          <div className="absolute top-[11px] z-20 rounded-full px-2 py-1 backdrop-blur-sm flex items-center justify-center" style={{ backgroundColor: 'rgba(60, 60, 67, 0.60)', left: book.is_ebook && book.is_audiobook ? '72px' : (book.is_audiobook || book.is_ebook) ? '40px' : '8px' }}>
             <span className="text-white text-[11px] leading-[13px] tracking-[0.06px]">{t.chipAbandoned}</span>
           </div>
         )}

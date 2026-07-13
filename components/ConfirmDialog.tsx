@@ -70,7 +70,7 @@ export default function ConfirmDialog({
                 onClick={onConfirm}
                 disabled={loading}
                 className="w-full py-[15px] rounded-[14px] text-white text-[17px] font-semibold disabled:opacity-50"
-                style={{ backgroundColor: '#FF3B30' }}
+                style={{ backgroundColor: 'var(--danger)' }}
               >
                 {loading ? loadingLabel : confirmLabel}
               </motion.button>

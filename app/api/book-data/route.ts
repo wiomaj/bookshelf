@@ -5,8 +5,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, clientIp } from '@/lib/rateLimit'
+import { fetchWithRetry } from '@/lib/serverFetch'
+import { gbUrl } from '@/lib/gbUrl'
 
 export const runtime = 'nodejs'
+
+const OL_UA = 'BookshelfApp/1.0 (bookshelf-app@outlook.com)'
 
 function stripHtml(html: string): string {
   return html
@@ -17,16 +22,17 @@ function stripHtml(html: string): string {
     .trim()
 }
 
-function gbUrl(params: Record<string, string>): string {
-  const key = process.env.GOOGLE_BOOKS_API_KEY
-  const p = new URLSearchParams(params)
-  if (key) p.set('key', key)
-  return `https://www.googleapis.com/books/v1/volumes?${p}`
-}
-
 export async function GET(req: NextRequest) {
-  const title = req.nextUrl.searchParams.get('title')?.trim() ?? ''
-  const author = req.nextUrl.searchParams.get('author')?.trim() ?? ''
+  const { ok, retryAfter } = checkRateLimit(`book-data:${clientIp(req)}`, 30, 60_000) // 30/min
+  if (!ok) {
+    return NextResponse.json({}, {
+      status: 429,
+      headers: { 'Retry-After': String(retryAfter) },
+    })
+  }
+
+  const title = req.nextUrl.searchParams.get('title')?.trim().slice(0, 200) ?? ''
+  const author = req.nextUrl.searchParams.get('author')?.trim().slice(0, 100) ?? ''
 
   if (!title) return NextResponse.json({})
 
@@ -35,7 +41,7 @@ export async function GET(req: NextRequest) {
     const q = author
       ? `intitle:"${title}" inauthor:"${author}"`
       : `intitle:"${title}"`
-    const res = await fetch(gbUrl({ q, maxResults: '5' }), {
+    const res = await fetchWithRetry(gbUrl({ q, maxResults: '5' }), {
       next: { revalidate: 86400 },
     })
     if (res.ok) {
@@ -68,7 +74,8 @@ export async function GET(req: NextRequest) {
       fields: 'key,subject',
       limit: '1',
     })
-    const searchRes = await fetch(`https://openlibrary.org/search.json?${params}`, {
+    const searchRes = await fetchWithRetry(`https://openlibrary.org/search.json?${params}`, {
+      headers: { 'User-Agent': OL_UA },
       next: { revalidate: 86400 },
     })
     if (searchRes.ok) {
@@ -80,7 +87,8 @@ export async function GET(req: NextRequest) {
       if (doc?.subject?.length) result.genre = doc.subject[0]
 
       if (key) {
-        const workRes = await fetch(`https://openlibrary.org${key}.json`, {
+        const workRes = await fetchWithRetry(`https://openlibrary.org${key}.json`, {
+          headers: { 'User-Agent': OL_UA },
           next: { revalidate: 86400 },
         })
         if (workRes.ok) {

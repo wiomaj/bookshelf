@@ -18,6 +18,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { gbUrl } from '@/lib/gbUrl'
 import { checkRateLimit, clientIp } from '@/lib/rateLimit'
+import { fetchWithRetry } from '@/lib/serverFetch'
 import { cleanDnbTitle, stripCreatorRole, normaliseCreator } from '@/lib/dnbUtils'
 
 export const runtime = 'nodejs'
@@ -59,7 +60,7 @@ function marcSubfieldAll(xml: string, tag: string, code: string): string[] {
 
 async function gbCoverByISBN(isbn: string): Promise<string | undefined> {
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       gbUrl({ q: `isbn:${isbn}`, maxResults: '1', fields: 'items(volumeInfo/imageLinks)' }),
       { next: { revalidate: 86400 } }  // cache 24h to conserve GB quota
     )
@@ -79,7 +80,7 @@ async function gbCoverByISBN(isbn: string): Promise<string | undefined> {
 async function olCoverByISBN(isbn: string): Promise<string | undefined> {
   try {
     const url = `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg?default=false`
-    const res = await fetch(url, { method: 'HEAD', next: { revalidate: 86400 } })
+    const res = await fetchWithRetry(url, { method: 'HEAD', next: { revalidate: 86400 } })
     return res.ok ? url.replace('?default=false', '') : undefined
   } catch {
     return undefined
@@ -145,7 +146,7 @@ export async function GET(req: NextRequest) {
   })
 
   try {
-    const res = await fetch(`https://services.dnb.de/sru/dnb?${params}`, {
+    const res = await fetchWithRetry(`https://services.dnb.de/sru/dnb?${params}`, {
       next: { revalidate: 3600 },
       headers: { Accept: 'application/xml, text/xml' },
     })
