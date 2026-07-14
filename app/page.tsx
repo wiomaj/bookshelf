@@ -509,15 +509,20 @@ export default function HomePage() {
             initial={{ opacity: 0, y: -12, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.96 }}
-            className="mx-4 mt-4 px-4 py-3 rounded-2xl text-white text-[14px] font-semibold flex items-center justify-between"
-            style={{ backgroundColor: 'var(--label)' }}
+            className="mx-4 mt-4 px-4 py-3 rounded-2xl text-[14px] font-semibold flex items-center justify-between"
+            style={{
+              // Inverted pill: --label background needs the opposite text
+              // color, otherwise dark mode renders white on white.
+              backgroundColor: 'var(--label)',
+              color: 'var(--bg-elevated)',
+            }}
           >
             <span className={flashUndo ? '' : 'w-full text-center'}>{flashMessage}</span>
             {flashUndo && (
               <button
                 onClick={handleUndo}
                 className="ml-3 shrink-0 px-3 py-1 rounded-lg text-[13px] font-bold"
-                style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+                style={{ backgroundColor: 'color-mix(in srgb, var(--bg-elevated) 22%, transparent)' }}
               >
                 {t.undo}
               </button>
