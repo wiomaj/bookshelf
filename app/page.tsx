@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, LayoutGrid, List, BookOpenCheck, User, Settings, Loader2, ChevronDown, Search, X, SlidersHorizontal } from 'lucide-react'
@@ -36,6 +36,10 @@ const dashCard = {
 const PULL_THRESHOLD = 72
 /** Max visual height (px) of the pull indicator */
 const PULL_MAX = 64
+
+/** Large-title font size bounds — shrinks until the title fits its row */
+const TITLE_MAX_PX = 34
+const TITLE_MIN_PX = 20
 
 export default function HomePage() {
   const router = useRouter()
@@ -88,6 +92,7 @@ export default function HomePage() {
 
   const yearPickerRef    = useRef<HTMLDivElement>(null)
   const yearPickerTopRef = useRef<HTMLDivElement>(null)
+  const titleRef         = useRef<HTMLHeadingElement>(null)
 
   // Mutable refs so touch handlers don't form stale closures
   const pullStartYRef  = useRef(0)
@@ -124,6 +129,32 @@ export default function HomePage() {
   useEffect(() => {
     document.getElementById('scroll-container')?.scrollTo({ top: 0 })
   }, [activeTab, activeBookTab])
+
+  // ── Large-title auto-fit ──────────────────────────────────────────────────
+  // The Unbounded display font is wide; shrink the font size until the title
+  // fits the space left of the action buttons instead of running under them.
+  useLayoutEffect(() => {
+    const el = titleRef.current
+    if (!el) return
+
+    function fit() {
+      if (!el) return
+      let size = TITLE_MAX_PX
+      el.style.fontSize = `${size}px`
+      while (size > TITLE_MIN_PX && el.scrollWidth > el.clientWidth) {
+        size -= 1
+        el.style.fontSize = `${size}px`
+      }
+    }
+
+    fit()
+    // Re-measure once the webfont has actually loaded (metrics change).
+    document.fonts?.ready.then(fit).catch(() => {})
+    // Re-measure when the available width changes (rotation, tab switch).
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [activeTab, loading, displayName, t, books.length, toReadBooks.length, wishlistBooks.length])
 
   // ── Year picker click-outside ─────────────────────────────────────────────
   useEffect(() => {
@@ -437,7 +468,7 @@ export default function HomePage() {
                   ))}
                 </div>
               ) : (
-                <span className="flex-1 text-[17px] font-semibold tracking-[-0.3px]"
+                <span className="flex-1 min-w-0 truncate text-[17px] font-semibold tracking-[-0.3px]"
                       style={{ color: 'var(--label)' }}>
                   {title}
                 </span>
@@ -583,10 +614,13 @@ export default function HomePage() {
 
             {/* Left: title always in DOM (fixes height), search bar overlays it */}
             <div className="flex-1 min-w-0 relative">
-              {/* Title — always rendered to hold the row height */}
+              {/* Title — always rendered to hold the row height. Auto-shrinks
+                  to fit the row (the Unbounded display font is wide and would
+                  otherwise run under the buttons). */}
               <motion.h1
-                className="text-[34px] font-bold tracking-[-0.5px]"
-                style={{ color: 'var(--label)' }}
+                ref={titleRef}
+                className="font-bold tracking-[-0.5px] whitespace-nowrap overflow-hidden text-ellipsis w-full"
+                style={{ color: 'var(--label)', fontSize: TITLE_MAX_PX, lineHeight: '51px' }}
                 animate={{ opacity: activeTab === 'books' && showSearch ? 0 : 1 }}
                 transition={{ duration: 0.15 }}
               >
