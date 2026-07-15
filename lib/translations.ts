@@ -45,6 +45,24 @@ export type Translations = {
   notesPlaceholder: string
   audiobook: string
   ebook: string
+  scanPrompt: string
+  scanLookingUp: string
+  scanNotFound: string
+  scanError: string
+  durationDay: string
+  durationDays: string
+  durationMonth: string
+  durationMonths: string
+  statsWithoutMonth: string
+  resetLinkInvalid: string
+  filterView: string
+  viewGrid: string
+  viewList: string
+  filterFormat: string
+  filterAll: string
+  filterMinRating: string
+  filterHideAbandoned: string
+  filterReset: string
   coverPreview: string
   removeCover: string
   takePhoto: string
@@ -271,6 +289,24 @@ const en: Translations = {
   notesPlaceholder: 'What do you think about this book?',
   audiobook: 'Audiobook',
   ebook: 'E-book',
+  scanPrompt: 'Point at an ISBN barcode',
+  scanLookingUp: 'Found! Looking up book…',
+  scanNotFound: 'Book not found. Try again…',
+  scanError: 'Could not look up book. Try again.',
+  durationDay: 'day',
+  durationDays: 'days',
+  durationMonth: 'month',
+  durationMonths: 'months',
+  statsWithoutMonth: 'without a specific month',
+  resetLinkInvalid: 'This reset link is invalid or has expired. Please request a new one.',
+  filterView: 'View',
+  viewGrid: 'Grid',
+  viewList: 'List',
+  filterFormat: 'Format',
+  filterAll: 'All',
+  filterMinRating: 'Minimum rating',
+  filterHideAbandoned: 'Hide abandoned books',
+  filterReset: 'Reset filters',
   coverPreview: 'Cover preview',
   removeCover: 'Remove cover',
   takePhoto: 'Take photo',
@@ -476,6 +512,24 @@ const de: Translations = {
   notesPlaceholder: 'Was denkst du über dieses Buch?',
   audiobook: 'Hörbuch',
   ebook: 'E-Book',
+  scanPrompt: 'Auf einen ISBN-Barcode richten',
+  scanLookingUp: 'Gefunden! Buch wird gesucht…',
+  scanNotFound: 'Buch nicht gefunden. Versuch es erneut…',
+  scanError: 'Buch konnte nicht gefunden werden. Versuch es erneut.',
+  durationDay: 'Tag',
+  durationDays: 'Tagen',
+  durationMonth: 'Monat',
+  durationMonths: 'Monaten',
+  statsWithoutMonth: 'ohne bestimmten Monat',
+  resetLinkInvalid: 'Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.',
+  filterView: 'Ansicht',
+  viewGrid: 'Raster',
+  viewList: 'Liste',
+  filterFormat: 'Format',
+  filterAll: 'Alle',
+  filterMinRating: 'Mindestbewertung',
+  filterHideAbandoned: 'Abgebrochene Bücher ausblenden',
+  filterReset: 'Filter zurücksetzen',
   coverPreview: 'Cover-Vorschau',
   removeCover: 'Cover entfernen',
   takePhoto: 'Foto aufnehmen',
@@ -681,6 +735,24 @@ const fr: Translations = {
   notesPlaceholder: "Que pensez-vous de ce livre ?",
   audiobook: 'Livre audio',
   ebook: 'Livre numérique',
+  scanPrompt: 'Visez un code-barres ISBN',
+  scanLookingUp: 'Trouvé ! Recherche du livre…',
+  scanNotFound: 'Livre introuvable. Réessayez…',
+  scanError: 'Impossible de rechercher le livre. Réessayez.',
+  durationDay: 'jour',
+  durationDays: 'jours',
+  durationMonth: 'mois',
+  durationMonths: 'mois',
+  statsWithoutMonth: 'sans mois précis',
+  resetLinkInvalid: 'Ce lien est invalide ou a expiré. Veuillez en demander un nouveau.',
+  filterView: 'Affichage',
+  viewGrid: 'Grille',
+  viewList: 'Liste',
+  filterFormat: 'Format',
+  filterAll: 'Tous',
+  filterMinRating: 'Note minimale',
+  filterHideAbandoned: 'Masquer les livres abandonnés',
+  filterReset: 'Réinitialiser les filtres',
   coverPreview: 'Aperçu de la couverture',
   removeCover: 'Supprimer la couverture',
   takePhoto: 'Prendre une photo',
@@ -886,6 +958,24 @@ const es: Translations = {
   notesPlaceholder: '¿Qué piensas de este libro?',
   audiobook: 'Audiolibro',
   ebook: 'Libro electrónico',
+  scanPrompt: 'Apunta a un código de barras ISBN',
+  scanLookingUp: '¡Encontrado! Buscando el libro…',
+  scanNotFound: 'Libro no encontrado. Inténtalo de nuevo…',
+  scanError: 'No se pudo buscar el libro. Inténtalo de nuevo.',
+  durationDay: 'día',
+  durationDays: 'días',
+  durationMonth: 'mes',
+  durationMonths: 'meses',
+  statsWithoutMonth: 'sin mes específico',
+  resetLinkInvalid: 'Este enlace no es válido o ha caducado. Solicita uno nuevo.',
+  filterView: 'Vista',
+  viewGrid: 'Cuadrícula',
+  viewList: 'Lista',
+  filterFormat: 'Formato',
+  filterAll: 'Todos',
+  filterMinRating: 'Valoración mínima',
+  filterHideAbandoned: 'Ocultar libros abandonados',
+  filterReset: 'Restablecer filtros',
   coverPreview: 'Vista previa de portada',
   removeCover: 'Eliminar portada',
   takePhoto: 'Tomar foto',
@@ -1091,6 +1181,24 @@ const pl: Translations = {
   notesPlaceholder: 'Co myślisz o tej książce?',
   audiobook: 'Audiobook',
   ebook: 'E-book',
+  scanPrompt: 'Skieruj na kod kreskowy ISBN',
+  scanLookingUp: 'Znaleziono! Wyszukiwanie książki…',
+  scanNotFound: 'Nie znaleziono książki. Spróbuj ponownie…',
+  scanError: 'Nie udało się wyszukać książki. Spróbuj ponownie.',
+  durationDay: 'dzień',
+  durationDays: 'dni',
+  durationMonth: 'miesiąc',
+  durationMonths: 'miesięcy',
+  statsWithoutMonth: 'bez określonego miesiąca',
+  resetLinkInvalid: 'Ten link jest nieprawidłowy lub wygasł. Poproś o nowy.',
+  filterView: 'Widok',
+  viewGrid: 'Siatka',
+  viewList: 'Lista',
+  filterFormat: 'Format',
+  filterAll: 'Wszystkie',
+  filterMinRating: 'Minimalna ocena',
+  filterHideAbandoned: 'Ukryj porzucone książki',
+  filterReset: 'Wyzeruj filtry',
   coverPreview: 'Podgląd okładki',
   removeCover: 'Usuń okładkę',
   takePhoto: 'Zrób zdjęcie',

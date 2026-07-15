@@ -71,6 +71,20 @@ export default function HomePage() {
 
   // Filter
   const [showFilter, setShowFilter] = useState(false)
+  const [filterFormat, setFilterFormat] = useState<'all' | 'audiobook' | 'ebook'>('all')
+  const [filterMinRating, setFilterMinRating] = useState(0)      // 0 = off
+  const [filterGenre, setFilterGenre] = useState<string | null>(null)
+  const [filterHideAbandoned, setFilterHideAbandoned] = useState(false)
+
+  const filtersActive =
+    filterFormat !== 'all' || filterMinRating > 0 || filterGenre !== null || filterHideAbandoned
+
+  function resetFilters() {
+    setFilterFormat('all')
+    setFilterMinRating(0)
+    setFilterGenre(null)
+    setFilterHideAbandoned(false)
+  }
 
   const yearPickerRef    = useRef<HTMLDivElement>(null)
   const yearPickerTopRef = useRef<HTMLDivElement>(null)
@@ -270,13 +284,43 @@ export default function HomePage() {
     }
   }, [loadBooks])
 
-  const booksByYear = books.reduce<Record<number, Book[]>>((acc, book) => {
+  // ── List filters ──────────────────────────────────────────────────────────
+  // Format applies to every tab; rating / genre / hide-abandoned only make
+  // sense for the Read list (the other tabs have no ratings or genres).
+  const byFormat = (b: Book) =>
+    filterFormat === 'all' ||
+    (filterFormat === 'audiobook' && !!b.is_audiobook) ||
+    (filterFormat === 'ebook' && !!b.is_ebook)
+
+  const filteredReadBooks = books.filter(b =>
+    byFormat(b) &&
+    (filterMinRating === 0 || (b.rating ?? 0) >= filterMinRating) &&
+    (filterGenre === null || (b.genre?.trim() ?? '') === filterGenre) &&
+    (!filterHideAbandoned || b.status !== 'abandoned')
+  )
+  const filteredToRead = toReadBooks.filter(byFormat)
+  const filteredWishlist = wishlistBooks.filter(byFormat)
+
+  // Distinct genres of read books, most frequent first (for the filter sheet)
+  const genreCounts = new Map<string, number>()
+  for (const b of books) {
+    const g = b.genre?.trim()
+    if (g) genreCounts.set(g, (genreCounts.get(g) ?? 0) + 1)
+  }
+  const filterGenres = [...genreCounts.entries()].sort((a, b) => b[1] - a[1]).map(([g]) => g).slice(0, 12)
+  const hasAbandoned = books.some(b => b.status === 'abandoned')
+
+  const booksByYear = filteredReadBooks.reduce<Record<number, Book[]>>((acc, book) => {
     acc[book.year] = [...(acc[book.year] ?? []), book]
     return acc
   }, {})
   const years = Object.keys(booksByYear).map(Number).sort((a, b) => b - a)
+
+  // ── Dashboard data — abandoned books don't count as read ─────────────────
+  const dashboardBooks = books.filter(b => b.status !== 'abandoned')
+  const dashYears = [...new Set(dashboardBooks.map(b => b.year))].sort((a, b) => b - a)
   // null = not yet picked → default to most recent year; 'all' = explicit all-time
-  const effectiveYear: number | 'all' = dashboardYear ?? (years.length > 0 ? years[0] : 'all')
+  const effectiveYear: number | 'all' = dashboardYear ?? (dashYears.length > 0 ? dashYears[0] : 'all')
 
 
   // ── Search ───────────────────────────────────────────────────────────────
@@ -317,7 +361,7 @@ export default function HomePage() {
 
   const isEmptyState =
     (activeTab === 'books' && !hasAnyBooks) ||
-    (activeTab === 'dashboard' && books.length === 0)
+    (activeTab === 'dashboard' && dashboardBooks.length === 0)
 
   const title =
     activeTab === 'dashboard' ? (displayName || t.dashboardTitle) : t.myBookshelf
@@ -427,7 +471,7 @@ export default function HomePage() {
                           minWidth: '110px',
                         }}
                       >
-                        {years.map(y => (
+                        {dashYears.map(y => (
                           <button
                             key={y}
                             onClick={() => { setDashboardYear(y); setYearPickerSource(null) }}
@@ -440,7 +484,7 @@ export default function HomePage() {
                             {y}
                           </button>
                         ))}
-                        {years.length > 0 && (
+                        {dashYears.length > 0 && (
                           <div className="mx-[12px] h-px" style={{ backgroundColor: 'var(--separator)' }} />
                         )}
                         <button
@@ -619,7 +663,7 @@ export default function HomePage() {
                         className="absolute right-0 top-full mt-[6px] rounded-[12px] overflow-hidden z-[60]"
                         style={{ backgroundColor: 'var(--bg-elevated)', boxShadow: '0 4px 24px rgba(0,0,0,0.14)', minWidth: '110px' }}
                       >
-                        {years.map(y => (
+                        {dashYears.map(y => (
                           <button
                             key={y}
                             onClick={() => { setDashboardYear(y); setYearPickerSource(null) }}
@@ -627,7 +671,7 @@ export default function HomePage() {
                             style={{ color: effectiveYear === y ? 'var(--primary)' : 'var(--label)', fontWeight: effectiveYear === y ? 600 : 400 }}
                           >{y}</button>
                         ))}
-                        {years.length > 0 && <div className="mx-[12px] h-px" style={{ backgroundColor: 'var(--separator)' }} />}
+                        {dashYears.length > 0 && <div className="mx-[12px] h-px" style={{ backgroundColor: 'var(--separator)' }} />}
                         <button
                           onClick={() => { setDashboardYear('all'); setYearPickerSource(null) }}
                           className="w-full px-[16px] py-[10px] text-left text-[15px]"
@@ -649,11 +693,15 @@ export default function HomePage() {
                 >
                   <button
                     onClick={() => setShowFilter(true)}
-                    className="w-9 h-9 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: 'var(--fill)', color: 'var(--label-secondary)' }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center relative"
+                    style={{ backgroundColor: 'var(--fill)', color: filtersActive ? 'var(--primary)' : 'var(--label-secondary)' }}
                     aria-label="Filter"
                   >
                     <SlidersHorizontal size={18} />
+                    {filtersActive && (
+                      <span className="absolute top-[2px] right-[2px] w-2 h-2 rounded-full"
+                            style={{ backgroundColor: 'var(--primary)' }} />
+                    )}
                   </button>
                   <button
                     onClick={() => {
@@ -834,6 +882,23 @@ export default function HomePage() {
               </motion.button>
             </div>
           </motion.div>
+        ) : filtersActive && filteredReadBooks.length === 0 ? (
+          <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center text-center pt-12 gap-3 px-6"
+            >
+              <p className="text-[17px] font-semibold" style={{ color: 'var(--label)' }}>
+                {t.searchNoResults}
+              </p>
+              <button
+                onClick={resetFilters}
+                className="text-[15px] font-medium"
+                style={{ color: 'var(--primary)' }}
+              >
+                {t.filterReset}
+              </button>
+            </motion.div>
         ) : (
           <div className="pb-4">
             {years.map((year) => (
@@ -877,8 +942,25 @@ export default function HomePage() {
               </motion.button>
             </div>
           </motion.div>
+        ) : filtersActive && filteredToRead.length === 0 ? (
+          <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center text-center pt-12 gap-3 px-6"
+            >
+              <p className="text-[17px] font-semibold" style={{ color: 'var(--label)' }}>
+                {t.searchNoResults}
+              </p>
+              <button
+                onClick={resetFilters}
+                className="text-[15px] font-medium"
+                style={{ color: 'var(--primary)' }}
+              >
+                {t.filterReset}
+              </button>
+            </motion.div>
         ) : (
-          <ToReadList books={toReadBooks} viewMode={viewMode} />
+          <ToReadList books={filteredToRead} viewMode={viewMode} />
         )
       )}
 
@@ -914,8 +996,25 @@ export default function HomePage() {
               </motion.button>
             </div>
           </motion.div>
+        ) : filtersActive && filteredWishlist.length === 0 ? (
+          <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center text-center pt-12 gap-3 px-6"
+            >
+              <p className="text-[17px] font-semibold" style={{ color: 'var(--label)' }}>
+                {t.searchNoResults}
+              </p>
+              <button
+                onClick={resetFilters}
+                className="text-[15px] font-medium"
+                style={{ color: 'var(--primary)' }}
+              >
+                {t.filterReset}
+              </button>
+            </motion.div>
         ) : (
-          <WishlistList books={wishlistBooks} viewMode={viewMode} />
+          <WishlistList books={filteredWishlist} viewMode={viewMode} />
         )
       )}
 
@@ -928,7 +1027,7 @@ export default function HomePage() {
           initial="hidden"
           animate="show"
         >
-          {books.length === 0 ? (
+          {dashboardBooks.length === 0 ? (
             /* ── Empty state ── */
             <motion.div
               variants={dashCard}
@@ -967,17 +1066,17 @@ export default function HomePage() {
             <>
               {effectiveYear !== 'all' && (
                 <motion.div variants={dashCard}>
-                  <ReadingPaceChart books={books} year={effectiveYear} />
+                  <ReadingPaceChart books={dashboardBooks} year={effectiveYear} />
                 </motion.div>
               )}
               <motion.div variants={dashCard}>
-                <RatingDistributionChart books={books} />
+                <RatingDistributionChart books={dashboardBooks} />
               </motion.div>
               <motion.div variants={dashCard}>
-                <FavouriteAuthors books={books} />
+                <FavouriteAuthors books={dashboardBooks} />
               </motion.div>
               <motion.div variants={dashCard}>
-                <GenreBreakdown books={books} />
+                <GenreBreakdown books={dashboardBooks} />
               </motion.div>
             </>
           )}
@@ -1150,12 +1249,12 @@ export default function HomePage() {
               {/* View section */}
               <p className="text-[13px] font-semibold uppercase tracking-[0.5px] mb-2"
                  style={{ color: 'var(--label-secondary)' }}>
-                Ansicht
+                {t.filterView}
               </p>
               <div className="flex gap-2 mb-5">
                 {([
-                  { mode: 'grid' as const, label: 'Raster', icon: <LayoutGrid size={18} /> },
-                  { mode: 'list' as const, label: 'Liste',  icon: <List size={18} /> },
+                  { mode: 'grid' as const, label: t.viewGrid, icon: <LayoutGrid size={18} /> },
+                  { mode: 'list' as const, label: t.viewList, icon: <List size={18} /> },
                 ]).map(({ mode, label, icon }) => (
                   <button
                     key={mode}
@@ -1170,6 +1269,115 @@ export default function HomePage() {
                   </button>
                 ))}
               </div>
+
+              {/* Format section */}
+              <p className="text-[13px] font-semibold uppercase tracking-[0.5px] mb-2"
+                 style={{ color: 'var(--label-secondary)' }}>
+                {t.filterFormat}
+              </p>
+              <div className="flex gap-2 mb-5">
+                {([
+                  { value: 'all' as const, label: t.filterAll },
+                  { value: 'audiobook' as const, label: t.audiobook },
+                  { value: 'ebook' as const, label: t.ebook },
+                ]).map(({ value, label }) => (
+                  <button
+                    key={value}
+                    onClick={() => setFilterFormat(value)}
+                    className="flex-1 py-[10px] px-2 rounded-[12px] text-[14px] font-medium transition-colors"
+                    style={{
+                      backgroundColor: filterFormat === value ? 'var(--primary)' : 'var(--fill)',
+                      color: filterFormat === value ? 'white' : 'var(--label)',
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Minimum rating — applies to the Read list */}
+              {activeBookTab === 'read' && (
+                <>
+                  <p className="text-[13px] font-semibold uppercase tracking-[0.5px] mb-2"
+                     style={{ color: 'var(--label-secondary)' }}>
+                    {t.filterMinRating}
+                  </p>
+                  <div className="flex gap-2 mb-5">
+                    {[0, 2, 3, 4, 5].map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setFilterMinRating(r)}
+                        className="flex-1 py-[10px] rounded-[12px] text-[14px] font-medium transition-colors"
+                        style={{
+                          backgroundColor: filterMinRating === r ? 'var(--primary)' : 'var(--fill)',
+                          color: filterMinRating === r ? 'white' : 'var(--label)',
+                        }}
+                      >
+                        {r === 0 ? t.filterAll : r === 5 ? '5★' : `${r}★+`}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Genre — applies to the Read list */}
+              {activeBookTab === 'read' && filterGenres.length > 0 && (
+                <>
+                  <p className="text-[13px] font-semibold uppercase tracking-[0.5px] mb-2"
+                     style={{ color: 'var(--label-secondary)' }}>
+                    {t.genre}
+                  </p>
+                  <div className="flex gap-2 mb-5 overflow-x-auto pb-1 -mx-5 px-5">
+                    {[null, ...filterGenres].map((g) => (
+                      <button
+                        key={g ?? '__all__'}
+                        onClick={() => setFilterGenre(g)}
+                        className="shrink-0 py-[8px] px-4 rounded-full text-[14px] font-medium transition-colors whitespace-nowrap"
+                        style={{
+                          backgroundColor: filterGenre === g ? 'var(--primary)' : 'var(--fill)',
+                          color: filterGenre === g ? 'white' : 'var(--label)',
+                        }}
+                      >
+                        {g ?? t.filterAll}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Hide abandoned — only offered when abandoned books exist */}
+              {activeBookTab === 'read' && hasAbandoned && (
+                <div className="flex items-center justify-between py-1 mb-5">
+                  <span className="text-[15px]" style={{ color: 'var(--label)' }}>
+                    {t.filterHideAbandoned}
+                  </span>
+                  <button
+                    onClick={() => setFilterHideAbandoned(v => !v)}
+                    className="relative w-[51px] h-[31px] rounded-full shrink-0 transition-colors duration-300"
+                    style={{ backgroundColor: filterHideAbandoned ? 'var(--success)' : 'rgba(120,120,128,0.22)' }}
+                    aria-pressed={filterHideAbandoned}
+                  >
+                    <div
+                      className="absolute top-[2px] w-[27px] h-[27px] rounded-full bg-white transition-transform duration-300"
+                      style={{
+                        transform: filterHideAbandoned ? 'translateX(22px)' : 'translateX(2px)',
+                        boxShadow: '0 3px 8px rgba(0,0,0,0.15), 0 1px 1px rgba(0,0,0,0.16)',
+                      }}
+                    />
+                  </button>
+                </div>
+              )}
+
+              {/* Reset */}
+              {filtersActive && (
+                <button
+                  onClick={() => { resetFilters(); setShowFilter(false) }}
+                  className="w-full py-[13px] rounded-[14px] text-[16px] font-semibold"
+                  style={{ backgroundColor: 'var(--fill)', color: 'var(--danger)' }}
+                >
+                  {t.filterReset}
+                </button>
+              )}
 
             </motion.div>
           </motion.div>

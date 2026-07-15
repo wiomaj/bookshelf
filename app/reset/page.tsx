@@ -21,6 +21,8 @@ function ResetContent() {
     // in the hash. The client detects this automatically and fires
     // PASSWORD_RECOVERY. We also check the existing session in case the
     // event already fired before this component mounted.
+    let timer: ReturnType<typeof setTimeout> | null = null
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setStatus('ready')
     })
@@ -29,13 +31,18 @@ function ResetContent() {
       if (session) {
         setStatus('ready')
       } else {
-        // Give the hash-fragment a moment to be processed
-        const timer = setTimeout(() => setStatus('invalid'), 2000)
-        return () => clearTimeout(timer)
+        // Give the hash-fragment a moment to be processed. `setStatus` is
+        // ignored once 'ready' via the functional update below.
+        timer = setTimeout(() => {
+          setStatus(prev => (prev === 'loading' ? 'invalid' : prev))
+        }, 2000)
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      if (timer) clearTimeout(timer)
+    }
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -79,7 +86,7 @@ function ResetContent() {
               {t.resetYourPassword}
             </h1>
             <p className="text-[15px] leading-5" style={{ color: 'var(--danger)' }}>
-              This reset link is invalid or has expired. Please request a new one.
+              {t.resetLinkInvalid}
             </p>
           </div>
           <motion.button whileTap={{ scale: 0.97 }} onClick={() => router.replace('/login')}

@@ -133,7 +133,7 @@ export default function WishlistDetailPage() {
             if (data.publishedYear) setPublishedYear(data.publishedYear)
             setBookDataLoading(false)
           }).catch(() => { if (!cancelled) setBookDataLoading(false) })
-          if (b.title) {
+          if (!b.cover_url && b.title) {
             fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
               if (cancelled || !cover || cover === b.cover_url) return
               updateBook(supabase, user.id, b.id, { cover_url: cover }).catch(() => {})

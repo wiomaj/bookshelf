@@ -195,8 +195,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // ── Loading screen while session restores ────────────────────────────────────
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-7 h-7 border-2 border-gray-200 border-t-[#171717] rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
+        <div className="w-7 h-7 border-2 border-[var(--fill)] rounded-full animate-spin"
+             style={{ borderTopColor: 'var(--primary)' }} />
       </div>
     )
   }

@@ -20,6 +20,9 @@ dist-ssr
 # Build output
 .next/
 
+# TypeScript incremental build cache
+tsconfig.tsbuildinfo
+
 # Claude Code
 .claude/
 

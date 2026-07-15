@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, clientIp } from '@/lib/rateLimit'
 import { fetchWithRetry } from '@/lib/serverFetch'
+import { isbn10to13, normalizeIsbn } from '@/lib/isbn'
 import type { BookMetadata } from '@/types/book'
 
 export const runtime = 'nodejs'
@@ -34,24 +35,6 @@ function supabaseClient() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key) return null
   return createClient(url, key, { auth: { persistSession: false } })
-}
-
-// ─── ISBN helpers ─────────────────────────────────────────────────────────────
-
-function isbn10to13(isbn10: string): string {
-  const base = '978' + isbn10.slice(0, 9)
-  let sum = 0
-  for (let i = 0; i < 12; i++) {
-    sum += parseInt(base[i]) * (i % 2 === 0 ? 1 : 3)
-  }
-  return base + ((10 - (sum % 10)) % 10)
-}
-
-function normalizeIsbn(raw: string): string | null {
-  const digits = raw.replace(/[^\dX]/gi, '')
-  if (digits.length === 13) return digits
-  if (digits.length === 10 && /^\d{9}[\dX]$/i.test(digits)) return isbn10to13(digits)
-  return null
 }
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────

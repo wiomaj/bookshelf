@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Unbounded } from 'next/font/google'
 import './globals.css'
 import { AppProvider } from '@/contexts/AppContext'
 import CozyBody from '@/components/CozyBody'
@@ -7,6 +7,14 @@ import CozyBody from '@/components/CozyBody'
 const inter = Inter({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
+})
+
+// Display font for titles (h1/h2) — see globals.css. latin-ext covers the
+// Polish locale; self-hosted by next/font, so no external font request.
+const unbounded = Unbounded({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['500', '600', '700'],
+  variable: '--font-unbounded',
 })
 
 export const metadata: Metadata = {
@@ -34,8 +42,19 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: the inline theme script adds the `dark` class
+    // to <html> before React hydrates (standard next-themes pattern).
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Apply dark mode before first paint — prevents a white flash for
+            dark-mode users while React hydrates and AppContext loads. */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          try {
+            var th = localStorage.getItem('bookshelf_theme');
+            var dark = th === 'dark' || (th !== 'dark' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (dark) document.documentElement.classList.add('dark');
+          } catch (e) {}
+        `}} />
         {/* Capture beforeinstallprompt as early as possible — before React hydrates */}
         <script dangerouslySetInnerHTML={{ __html: `
           window.addEventListener('beforeinstallprompt', function(e) {
@@ -44,7 +63,7 @@ export default function RootLayout({
           });
         `}} />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} ${unbounded.variable}`}>
         <AppProvider>
           <CozyBody>{children}</CozyBody>
         </AppProvider>

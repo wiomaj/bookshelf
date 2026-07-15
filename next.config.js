@@ -17,11 +17,13 @@ const securityHeaders = [
       // Tighten to nonce-based CSP once Next.js nonce support is wired in.
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
-      // Cover images come from Google Books, Open Library, and Supabase storage.
-      // Everything else is proxied through /api/cover which enforces its own allowlist.
-      "img-src 'self' data: blob: https://books.google.com https://covers.openlibrary.org https://*.supabase.co",
-      // API calls: Supabase (auth + DB), Open Library, Google Books
-      "connect-src 'self' https://*.supabase.co https://openlibrary.org https://www.googleapis.com",
+      // All cover images are served through the /api/cover proxy (which
+      // enforces its own host allowlist), so no external image hosts needed.
+      "img-src 'self' data: blob:",
+      // API calls: Supabase requests go through the /_supabase rewrite ('self');
+      // the direct hosts stay allowlisted as a fallback. Google Books / Open
+      // Library are only called server-side and no longer need an entry.
+      "connect-src 'self' https://*.supabase.co",
       // No external fonts or media
       "font-src 'self'",
       "media-src 'none'",

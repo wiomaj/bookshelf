@@ -108,7 +108,7 @@ export default function ReadingPaceChart({ books, year }: Props) {
               className="text-[11px] leading-[13px] tracking-[0.06px] text-right"
               style={{ color: 'var(--label-secondary)' }}
             >
-              + {uncategorised} without a specific month
+              + {uncategorised} {t.statsWithoutMonth}
             </p>
           )}
         </div>

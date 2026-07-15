@@ -22,6 +22,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, clientIp } from '@/lib/rateLimit'
 import { fetchWithRetry } from '@/lib/serverFetch'
+import { detectISBN, isbn10to13, normalizeIsbn13 } from '@/lib/isbn'
 import type { BookMetadata } from '@/types/book'
 
 export const runtime = 'nodejs'
@@ -47,33 +48,6 @@ function supabaseClient() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key) return null
   return createClient(url, key, { auth: { persistSession: false } })
-}
-
-// ─── ISBN helpers ─────────────────────────────────────────────────────────────
-
-function detectISBN(q: string): string | null {
-  const stripped = q.replace(/^isbn[:\s]*/i, '').trim()
-  const digits = stripped.replace(/[\s\-]/g, '')
-  if ((digits.length === 10 || digits.length === 13) && /^\d+X?$/i.test(digits)) {
-    return digits
-  }
-  return null
-}
-
-function isbn10to13(isbn10: string): string {
-  const base = '978' + isbn10.slice(0, 9)
-  let sum = 0
-  for (let i = 0; i < 12; i++) {
-    sum += parseInt(base[i]) * (i % 2 === 0 ? 1 : 3)
-  }
-  const check = (10 - (sum % 10)) % 10
-  return base + check
-}
-
-function normalizeIsbn13(isbn: string): string {
-  const digits = isbn.replace(/[^\dX]/gi, '')
-  if (digits.length === 10) return isbn10to13(digits)
-  return digits.slice(0, 13)
 }
 
 // ─── Cover helpers ────────────────────────────────────────────────────────────

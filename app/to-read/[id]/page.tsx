@@ -83,6 +83,7 @@ export default function ToReadDetailPage() {
   const [moveNotes, setMoveNotes] = useState('')
 
   const [showStartReadingModal, setShowStartReadingModal] = useState(false)
+  const [startReadingError, setStartReadingError] = useState<string | null>(null)
   const [startDay, setStartDay] = useState<number>(0)   // 0 = not specified
   const [startMonth, setStartMonth] = useState<number>(new Date().getMonth() + 1)
   const [startYear, setStartYear] = useState<number>(new Date().getFullYear())
@@ -153,7 +154,7 @@ export default function ToReadDetailPage() {
             if (data.publishedYear) setPublishedYear(data.publishedYear)
             setBookDataLoading(false)
           }).catch(() => { if (!cancelled) setBookDataLoading(false) })
-          if (b.title) {
+          if (!b.cover_url && b.title) {
             fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
               if (cancelled || !cover || cover === b.cover_url) return
               updateBook(supabase, user.id, b.id, { cover_url: cover }).catch(() => {})
@@ -242,8 +243,8 @@ export default function ToReadDetailPage() {
         const days = Math.round((end.getTime() - start.getTime()) / 86_400_000)
         if (days >= 1) {
           rawDays = days
-          if (days < 30) duration = `${days} Tag${days !== 1 ? 'en' : ''}`
-          else { const m = Math.round(days / 30); duration = `${m} Monat${m !== 1 ? 'en' : ''}` }
+          if (days < 30) duration = `${days} ${days === 1 ? t.durationDay : t.durationDays}`
+          else { const m = Math.round(days / 30); duration = `${m} ${m === 1 ? t.durationMonth : t.durationMonths}` }
         }
       }
       celebrationBookRef.current = book
@@ -295,6 +296,7 @@ export default function ToReadDetailPage() {
   async function handleStartReading() {
     if (!user || !book) return
     setStartReadingLoading(true)
+    setStartReadingError(null)
     try {
       const updated = await updateBook(supabase, user.id, book.id, {
         status: 'currently_reading',
@@ -306,7 +308,7 @@ export default function ToReadDetailPage() {
       setShowStartReadingModal(false)
     } catch (err) {
       console.error('[handleStartReading] DB write failed:', err)
-      alert(`Could not save: ${err instanceof Error ? err.message : String(err)}`)
+      setStartReadingError(err instanceof Error ? err.message : t.errorSomethingWentWrong)
     } finally {
       setStartReadingLoading(false)
     }
@@ -794,6 +796,10 @@ export default function ToReadDetailPage() {
                   </div>
                 </div>
               </div>
+
+              {startReadingError && (
+                <p className="text-[14px] mb-3 px-1" style={{ color: 'var(--danger)' }}>{startReadingError}</p>
+              )}
 
               <div className="flex flex-col gap-3">
                 <motion.button

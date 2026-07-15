@@ -5,7 +5,17 @@
 /* ── Box model + scroll ────────────────────────────────────────────────────── */
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { -webkit-text-size-adjust: 100%; }
+/* Theme-aware body background so pre-hydration frames (auth loading, PWA
+   startup) never flash white in dark mode. */
+body { -webkit-text-size-adjust: 100%; background-color: var(--bg); }
+
+/* ── Title font ────────────────────────────────────────────────────────────── */
+/* Unbounded (Google font, self-hosted via next/font) for all titles.
+   --font-unbounded is set on <body> in app/layout.tsx. */
+h1, h2 {
+  font-family: var(--font-unbounded), 'Inter', -apple-system, sans-serif;
+  letter-spacing: -0.02em;
+}
 
 /* ── iOS 26 Design Tokens ──────────────────────────────────────────────────── */
 :root {

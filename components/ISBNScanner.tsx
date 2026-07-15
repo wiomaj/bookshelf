@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { fetchBookByISBN } from '@/lib/bookMetadata'
+import { useT } from '@/contexts/AppContext'
 
 type BookSuggestion = {
   title: string
@@ -18,6 +19,7 @@ interface ISBNScannerProps {
 type ScanState = 'scanning' | 'looking-up' | 'not-found' | 'error'
 
 export default function ISBNScanner({ onScanned, onClose }: ISBNScannerProps) {
+  const t = useT()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [scanState, setScanState] = useState<ScanState>('scanning')
   const [errorMsg, setErrorMsg] = useState('')
@@ -32,8 +34,10 @@ export default function ISBNScanner({ onScanned, onClose }: ISBNScannerProps) {
       const reader = new BrowserMultiFormatReader()
 
       try {
-        controls = await reader.decodeFromVideoDevice(
-          undefined, // use default (back) camera
+        controls = await reader.decodeFromConstraints(
+          // Prefer the back camera — the default device on some phones is the
+          // front camera, which makes barcode scanning nearly impossible.
+          { video: { facingMode: { ideal: 'environment' } } },
           videoRef.current!,
           async (result, _err) => {
             // Skip frames without a result or already done
@@ -41,8 +45,10 @@ export default function ISBNScanner({ onScanned, onClose }: ISBNScannerProps) {
             if (!result) return
 
             const isbn = result.getText()
-            // Only handle EAN-13 / EAN-8 / UPC-A (book barcodes)
-            if (!/^\d{8,13}$/.test(isbn)) return
+            // Only accept real ISBNs: EAN-13 book codes (978/979 prefix) or a
+            // 10-digit ISBN-10. Other retail barcodes (EAN-8, UPC-A) would
+            // trigger a nonsense lookup and auto-fill the wrong book.
+            if (!/^(?:97[89]\d{10}|\d{9}[\dX])$/i.test(isbn)) return
 
             doneRef.current = true
             if (navigator.vibrate) navigator.vibrate(60)
@@ -65,7 +71,7 @@ export default function ISBNScanner({ onScanned, onClose }: ISBNScannerProps) {
               onScanned(book)
             } catch {
               setScanState('error')
-              setErrorMsg('Could not look up book. Try again.')
+              setErrorMsg('')
               setTimeout(() => {
                 doneRef.current = false
                 setScanState('scanning')
@@ -74,7 +80,7 @@ export default function ISBNScanner({ onScanned, onClose }: ISBNScannerProps) {
           }
         )
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : 'Camera unavailable'
+        const msg = e instanceof Error ? e.message : ''
         setScanState('error')
         setErrorMsg(msg)
       }
@@ -86,13 +92,14 @@ export default function ISBNScanner({ onScanned, onClose }: ISBNScannerProps) {
       doneRef.current = true
       controls?.stop()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onScanned])
 
   const statusLabel = {
-    scanning: 'Point at an ISBN barcode',
-    'looking-up': 'Found! Looking up book…',
-    'not-found': 'Book not found. Try again…',
-    error: errorMsg || 'Something went wrong.',
+    scanning: t.scanPrompt,
+    'looking-up': t.scanLookingUp,
+    'not-found': t.scanNotFound,
+    error: errorMsg || t.scanError,
   }[scanState]
 
   return (
