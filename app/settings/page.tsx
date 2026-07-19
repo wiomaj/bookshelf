@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, ChevronLeft, Check, BookOpenCheck, User, Settings } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Check, BookOpenCheck, User, Settings, Download } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useApp, useT } from '@/contexts/AppContext'
 import { LANGUAGES } from '@/lib/translations'
+import { supabase } from '@/lib/supabase'
+import { getBooks } from '@/lib/bookApi'
+import { booksToCsv, downloadCsv } from '@/lib/csvExport'
 
 type View = 'settings' | 'changePassword'
 
@@ -96,7 +99,7 @@ function ListRow({
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { cozyMode, setCozyMode, theme, setTheme, language, setLanguage, signOut, changePassword, deleteAccount, displayName, updateDisplayName } = useApp()
+  const { user, cozyMode, setCozyMode, theme, setTheme, language, setLanguage, signOut, changePassword, deleteAccount, displayName, updateDisplayName } = useApp()
   const t = useT()
 
   const [view, setView] = useState<View>('settings')
@@ -124,6 +127,25 @@ export default function SettingsPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  const [exportLoading, setExportLoading] = useState(false)
+  const [exportError, setExportError] = useState<string | null>(null)
+
+  async function handleExportCsv() {
+    if (!user || exportLoading) return
+    setExportLoading(true)
+    setExportError(null)
+    try {
+      const books = await getBooks(supabase, user.id)
+      const csv = booksToCsv(books, t.csvHeaders, t.seasonNames)
+      const date = new Date().toISOString().slice(0, 10)
+      downloadCsv(csv, `bookshelf-export-${date}.csv`)
+    } catch {
+      setExportError(t.exportError)
+    } finally {
+      setExportLoading(false)
+    }
+  }
 
   const currentLang = LANGUAGES.find(l => l.code === language)
 
@@ -368,6 +390,34 @@ export default function SettingsPage() {
               </>
             )}
           </div>
+        </div>
+
+        {/* ── Data section ────────────────────────────────────────────── */}
+        <div className="flex flex-col gap-2">
+          <p className="text-[13px] font-medium uppercase tracking-wide px-1"
+             style={{ color: 'var(--label-secondary)' }}>
+            {t.dataSection}
+          </p>
+
+          <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            <ListRow
+              label={exportLoading ? t.exporting : t.exportCsv}
+              sublabel={t.exportCsvDesc}
+              onClick={handleExportCsv}
+              accessory={
+                exportLoading
+                  ? <div className="w-[18px] h-[18px] border-2 border-[var(--fill)] rounded-full animate-spin shrink-0"
+                         style={{ borderTopColor: 'var(--primary)' }} />
+                  : <Download size={18} className="shrink-0" style={{ color: 'var(--label-tertiary)' }} />
+              }
+              first
+              last
+            />
+          </div>
+
+          {exportError && (
+            <p className="text-[14px] px-1" style={{ color: 'var(--danger)' }}>{exportError}</p>
+          )}
         </div>
 
         {/* ── My Account section ──────────────────────────────────────── */}

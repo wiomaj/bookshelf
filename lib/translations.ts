@@ -157,6 +157,13 @@ export type Translations = {
   passwordChangedSuccess: string
   deleteAccount: string
   deleteAccountDesc: string
+  // Settings — Data
+  dataSection: string
+  exportCsv: string
+  exportCsvDesc: string
+  exporting: string
+  exportError: string
+  csvHeaders: [string, string, string, string, string, string, string]
   // Forgot / reset password
   forgotPassword: string
   resetYourPassword: string
@@ -392,6 +399,12 @@ const en: Translations = {
   passwordChangedSuccess: 'Password changed successfully.',
   deleteAccount: 'Delete account',
   deleteAccountDesc: 'This will permanently delete your account and all your books. This cannot be undone.',
+  dataSection: 'Data',
+  exportCsv: 'Export as CSV',
+  exportCsvDesc: 'Download all your books as a CSV file',
+  exporting: 'Exporting…',
+  exportError: 'Export failed. Please try again.',
+  csvHeaders: ['Title', 'Author', 'Date added', 'Started reading', 'Date read', 'Rating', 'Comment'],
   forgotPassword: 'Forgot password?',
   resetYourPassword: 'Reset your password',
   resetPasswordDesc: 'Enter your email and we\'ll send you a reset link.',
@@ -615,6 +628,12 @@ const de: Translations = {
   passwordChangedSuccess: 'Passwort erfolgreich geändert.',
   deleteAccount: 'Konto löschen',
   deleteAccountDesc: 'Dein Konto und alle deine Bücher werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.',
+  dataSection: 'Daten',
+  exportCsv: 'Als CSV exportieren',
+  exportCsvDesc: 'Lade alle deine Bücher als CSV-Datei herunter',
+  exporting: 'Wird exportiert…',
+  exportError: 'Export fehlgeschlagen. Bitte versuche es erneut.',
+  csvHeaders: ['Titel', 'Autor', 'Hinzugefügt am', 'Lesebeginn', 'Gelesen am', 'Bewertung', 'Kommentar'],
   forgotPassword: 'Passwort vergessen?',
   resetYourPassword: 'Passwort zurücksetzen',
   resetPasswordDesc: 'Gib deine E-Mail ein und wir senden dir einen Reset-Link.',
@@ -838,6 +857,12 @@ const fr: Translations = {
   passwordChangedSuccess: 'Mot de passe modifié avec succès.',
   deleteAccount: 'Supprimer le compte',
   deleteAccountDesc: 'Votre compte et tous vos livres seront supprimés définitivement. Cette action est irréversible.',
+  dataSection: 'Données',
+  exportCsv: 'Exporter en CSV',
+  exportCsvDesc: 'Téléchargez tous vos livres dans un fichier CSV',
+  exporting: 'Exportation…',
+  exportError: 'Échec de l\'exportation. Veuillez réessayer.',
+  csvHeaders: ['Titre', 'Auteur', 'Date d\'ajout', 'Début de lecture', 'Date de lecture', 'Note', 'Commentaire'],
   forgotPassword: 'Mot de passe oublié ?',
   resetYourPassword: 'Réinitialiser votre mot de passe',
   resetPasswordDesc: 'Entrez votre e-mail et nous vous enverrons un lien de réinitialisation.',
@@ -1061,6 +1086,12 @@ const es: Translations = {
   passwordChangedSuccess: 'Contraseña cambiada correctamente.',
   deleteAccount: 'Eliminar cuenta',
   deleteAccountDesc: 'Tu cuenta y todos tus libros se eliminarán permanentemente. Esta acción no se puede deshacer.',
+  dataSection: 'Datos',
+  exportCsv: 'Exportar como CSV',
+  exportCsvDesc: 'Descarga todos tus libros en un archivo CSV',
+  exporting: 'Exportando…',
+  exportError: 'Error al exportar. Inténtalo de nuevo.',
+  csvHeaders: ['Título', 'Autor', 'Fecha de adición', 'Inicio de lectura', 'Fecha de lectura', 'Valoración', 'Comentario'],
   forgotPassword: '¿Olvidaste tu contraseña?',
   resetYourPassword: 'Restablecer contraseña',
   resetPasswordDesc: 'Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.',
@@ -1284,6 +1315,12 @@ const pl: Translations = {
   passwordChangedSuccess: 'Hasło zostało pomyślnie zmienione.',
   deleteAccount: 'Usuń konto',
   deleteAccountDesc: 'Twoje konto i wszystkie książki zostaną trwale usunięte. Tej operacji nie można cofnąć.',
+  dataSection: 'Dane',
+  exportCsv: 'Eksportuj do CSV',
+  exportCsvDesc: 'Pobierz wszystkie swoje książki jako plik CSV',
+  exporting: 'Eksportowanie…',
+  exportError: 'Eksport nie powiódł się. Spróbuj ponownie.',
+  csvHeaders: ['Tytuł', 'Autor', 'Data dodania', 'Rozpoczęcie czytania', 'Data przeczytania', 'Ocena', 'Komentarz'],
   forgotPassword: 'Zapomniałeś hasła?',
   resetYourPassword: 'Zresetuj hasło',
   resetPasswordDesc: 'Podaj swój adres e-mail, a wyślemy Ci link do resetowania hasła.',
