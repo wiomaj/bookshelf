@@ -177,7 +177,9 @@ export default function SettingsPage() {
   // ── Change Password sub-view ──────────────────────────────────────────────
   if (view === 'changePassword') {
     return (
-      <div className="min-h-screen pb-[16px]">
+      // pb-[110px] clears the floating bottom nav (fixed, ~90px incl. margin)
+      // so the form can scroll fully into view.
+      <div className="min-h-screen pb-[110px]">
         {/* Back nav */}
         <div className="flex items-center px-2 pt-3 h-[50px]">
           <button
@@ -241,7 +243,9 @@ export default function SettingsPage() {
 
   // ── Main Settings view ────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen pb-[16px]">
+    // pb-[110px] clears the floating bottom nav (fixed, ~90px incl. margin) so
+    // the last section (Konto löschen) can scroll out from behind it.
+    <div className="min-h-screen pb-[110px]">
 
       {/* Large title */}
       <div className="px-5 pt-4 pb-6">
@@ -283,7 +287,7 @@ export default function SettingsPage() {
         <div className="flex flex-col gap-2">
           <p className="text-[13px] font-medium uppercase tracking-wide px-1"
              style={{ color: 'var(--label-secondary)' }}>
-            Preferences
+            {t.preferencesSection}
           </p>
 
           <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
