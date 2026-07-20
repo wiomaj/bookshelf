@@ -2,7 +2,19 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Book } from '@/types/book'
 import { monthSortKey } from '@/lib/month'
 
-const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at, status, acquired_month, acquired_year, read_month, read_year, is_audiobook, is_ebook, started_reading_day, started_reading_month, started_reading_year'
+const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at, status, acquired_month, acquired_year, read_month, read_year, finished_at, is_audiobook, is_ebook, started_reading_day, started_reading_month, started_reading_year'
+
+/**
+ * Newest-first ordering for read books: year, then month (season codes sort by
+ * their midpoint), then the moment the book was actually finished. finished_at
+ * falls back to created_at for rows that predate the column.
+ */
+export function compareByFinishDate(a: Book, b: Book): number {
+  if (b.year !== a.year) return b.year - a.year
+  const diff = monthSortKey(b.month) - monthSortKey(a.month)
+  if (diff !== 0) return diff
+  return new Date(b.finished_at ?? b.created_at).getTime() - new Date(a.finished_at ?? a.created_at).getTime()
+}
 
 /**
  * Fetch every book for a user in a single query, then split by status client-side.
@@ -25,12 +37,7 @@ export async function getAllBooks(supabase: SupabaseClient, userId: string): Pro
 
   const all = data as Book[]
 
-  const sorted = all.slice().sort((a, b) => {
-    if (b.year !== a.year) return b.year - a.year
-    const diff = monthSortKey(b.month) - monthSortKey(a.month)
-    if (diff !== 0) return diff
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  })
+  const sorted = all.slice().sort(compareByFinishDate)
 
   return {
     read:     sorted.filter(b => b.status === 'read' || b.status === 'abandoned'),
@@ -52,12 +59,7 @@ export async function getBooks(supabase: SupabaseClient, userId: string): Promis
 
   // Sort in JS so season codes (13–16) sort by their midpoint month rather than
   // their raw numeric value, which would incorrectly place them above real months.
-  return (data as Book[]).sort((a, b) => {
-    if (b.year !== a.year) return b.year - a.year
-    const diff = monthSortKey(b.month) - monthSortKey(a.month)
-    if (diff !== 0) return diff
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  })
+  return (data as Book[]).sort(compareByFinishDate)
 }
 
 /** Books the user has finished reading (status = 'read'). */
@@ -72,12 +74,7 @@ export async function getReadBooks(supabase: SupabaseClient, userId: string): Pr
 
   if (error) throw new Error(error.message)
 
-  return (data as Book[]).sort((a, b) => {
-    if (b.year !== a.year) return b.year - a.year
-    const diff = monthSortKey(b.month) - monthSortKey(a.month)
-    if (diff !== 0) return diff
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  })
+  return (data as Book[]).sort(compareByFinishDate)
 }
 
 /** Books the user wants to read (status = 'to_read'), newest first. */
@@ -126,9 +123,13 @@ export async function addBook(
   userId: string,
   book: Omit<Book, 'id' | 'user_id' | 'created_at'>
 ): Promise<Book> {
+  // Books created directly in the read shelf are finished right now.
+  const finishedAt = (book.status ?? 'read') === 'read' && !book.finished_at
+    ? { finished_at: new Date().toISOString() }
+    : {}
   const { data, error } = await supabase
     .from('books')
-    .insert({ ...book, user_id: userId })
+    .insert({ ...book, ...finishedAt, user_id: userId })
     .select(COLUMNS)
     .single()
 

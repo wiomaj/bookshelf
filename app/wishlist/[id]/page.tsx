@@ -156,6 +156,9 @@ export default function WishlistDetailPage() {
       if (editStatus === 'read') {
         dateColumns.read_month = data.month
         dateColumns.read_year = data.year
+        // Stamp the finish time on the transition to read (or backfill it for
+        // books that were marked read before finished_at existed).
+        if (book.status !== 'read' || !book.finished_at) dateColumns.finished_at = new Date().toISOString()
       } else if (editStatus === 'to_read') {
         dateColumns.acquired_month = data.month
         dateColumns.acquired_year = data.year
@@ -227,6 +230,7 @@ export default function WishlistDetailPage() {
         acquired_year: moveYear,
         read_month: readMonth,
         read_year: readYear,
+        finished_at: new Date().toISOString(),
       })
       sessionStorage.setItem('bookshelf_returnTab', 'read')
       sessionStorage.setItem('bookshelf_flash', 'markedAsRead')

@@ -34,6 +34,7 @@ export type Book = {
   acquired_year?: number | null
   read_month?: number | null          // month when user finished reading
   read_year?: number | null
+  finished_at?: string | null         // ISO timestamp when the book was marked finished — breaks sort ties within a month
   started_reading_day?: number | null     // day the user started (optional, 1–31)
   started_reading_month?: number | null  // month the user started the current read
   started_reading_year?: number | null
