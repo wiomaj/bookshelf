@@ -223,6 +223,7 @@ export default function HomePage() {
       status: 'to_read',
       month: flashUndo.month,
       year: flashUndo.year,
+      finished_at: null,
     })
     setActiveBookTab('to_read')
     loadBooks()

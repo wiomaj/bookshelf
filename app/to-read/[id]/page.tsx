@@ -196,6 +196,9 @@ export default function ToReadDetailPage() {
       if (effectiveStatus === 'read') {
         dateColumns.read_month = data.month
         dateColumns.read_year = data.year
+        // Stamp the finish time on the transition to read (or backfill it for
+        // books that were marked read before finished_at existed).
+        if (book.status !== 'read' || !book.finished_at) dateColumns.finished_at = new Date().toISOString()
       } else if (effectiveStatus === 'to_read') {
         dateColumns.acquired_month = data.month
         dateColumns.acquired_year = data.year
@@ -229,6 +232,7 @@ export default function ToReadDetailPage() {
         notes: moveNotes.trim() || undefined,
         read_month: moveMonth,
         read_year: moveYear,
+        finished_at: new Date().toISOString(),
       })
       sessionStorage.setItem('bookshelf_returnTab', 'read')
       sessionStorage.setItem('bookshelf_flash', 'markedAsRead')

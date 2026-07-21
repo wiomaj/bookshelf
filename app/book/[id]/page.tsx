@@ -148,6 +148,10 @@ export default function BookDetailPage() {
       if (editStatus === 'read' || editStatus === 'abandoned') {
         dateColumns.read_month = data.month
         dateColumns.read_year = data.year
+        // Stamp the finish time on the transition to read/abandoned (or
+        // backfill it for books marked read before finished_at existed).
+        const wasFinished = book.status === 'read' || book.status === 'abandoned'
+        if (!wasFinished || !book.finished_at) dateColumns.finished_at = new Date().toISOString()
       } else if (editStatus === 'to_read') {
         dateColumns.acquired_month = data.month
         dateColumns.acquired_year = data.year

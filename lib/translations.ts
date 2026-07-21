@@ -99,6 +99,7 @@ export type Translations = {
   cancel: string
   // Settings — Profile
   profileSection: string
+  preferencesSection: string
   yourName: string
   yourNamePlaceholder: string
   // Name prompt overlay
@@ -347,6 +348,7 @@ const en: Translations = {
   deleting: 'Deleting…',
   cancel: 'Cancel',
   profileSection: 'Profile',
+  preferencesSection: 'Preferences',
   yourName: 'Name',
   yourNamePlaceholder: 'Add your name',
   namePromptTitle: 'What\'s your name?',
@@ -576,6 +578,7 @@ const de: Translations = {
   deleting: 'Wird gelöscht…',
   cancel: 'Abbrechen',
   profileSection: 'Profil',
+  preferencesSection: 'Präferenzen',
   yourName: 'Name',
   yourNamePlaceholder: 'Name hinzufügen',
   namePromptTitle: 'Wie heißt du?',
@@ -805,6 +808,7 @@ const fr: Translations = {
   deleting: 'Suppression…',
   cancel: 'Annuler',
   profileSection: 'Profil',
+  preferencesSection: 'Préférences',
   yourName: 'Nom',
   yourNamePlaceholder: 'Ajouter ton nom',
   namePromptTitle: 'Comment tu t\'appelles ?',
@@ -1034,6 +1038,7 @@ const es: Translations = {
   deleting: 'Eliminando…',
   cancel: 'Cancelar',
   profileSection: 'Perfil',
+  preferencesSection: 'Preferencias',
   yourName: 'Nombre',
   yourNamePlaceholder: 'Añadir tu nombre',
   namePromptTitle: '¿Cómo te llamas?',
@@ -1263,6 +1268,7 @@ const pl: Translations = {
   deleting: 'Usuwanie…',
   cancel: 'Anuluj',
   profileSection: 'Profil',
+  preferencesSection: 'Preferencje',
   yourName: 'Imię',
   yourNamePlaceholder: 'Dodaj imię',
   namePromptTitle: 'Jak masz na imię?',
