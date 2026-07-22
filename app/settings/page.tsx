@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, ChevronLeft, Check, BookOpenCheck, User, Settings, Download } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Check, BookOpenCheck, User, Settings, Download, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useApp, useT } from '@/contexts/AppContext'
@@ -39,6 +39,16 @@ function BottomNav({ t, displayName }: { t: ReturnType<typeof useT>; displayName
         >
           <User size={22} strokeWidth={1.5} />
           <span className="text-[10px] font-medium tracking-[-0.1px] max-w-[64px] truncate">{displayName || t.tabDashboard}</span>
+        </button>
+
+        {/* Friends tab */}
+        <button
+          onClick={() => router.push('/friends')}
+          className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
+          style={{ color: 'var(--label-secondary)' }}
+        >
+          <Users size={22} strokeWidth={1.5} />
+          <span className="text-[10px] font-medium tracking-[-0.1px]">{t.tabFriends}</span>
         </button>
 
         {/* Settings tab — active */}

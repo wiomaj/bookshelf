@@ -41,3 +41,23 @@ export type Book = {
   is_audiobook?: boolean
   is_ebook?: boolean
 }
+
+// A friend's public profile, as visible via the `profiles` table.
+export type FriendProfile = {
+  id: string
+  email: string
+  display_name: string | null
+}
+
+// A book belonging to a friend — same shape as Book minus the private `notes`
+// field, which friend-facing queries never select.
+export type FriendBook = Omit<Book, 'notes'>
+
+export type AppNotification = {
+  id: string
+  user_id: string
+  type: 'friend_added'
+  payload: { addedByName?: string | null; addedById?: string }
+  read_at: string | null
+  created_at: string
+}

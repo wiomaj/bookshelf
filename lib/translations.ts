@@ -187,6 +187,26 @@ export type Translations = {
   tabWishlist: string
   tabBooks: string
   tabDashboard: string
+  tabFriends: string
+  // Friends
+  friendsTitle: string
+  friendsEmptyTitle: string
+  friendsEmptyCopy: string
+  addFriend: string
+  addFriendEmailLabel: string
+  addFriendEmailPlaceholder: string
+  addFriendSubmit: string
+  addFriendSuccess: string
+  addFriendNotFound: string
+  addFriendAlreadyAdded: string
+  addFriendCannotSelf: string
+  addFriendGenericError: string
+  friendAddedNotification: string
+  friendProfileRead: string
+  friendProfileToRead: string
+  friendProfileWishlist: string
+  friendProfileEmptySection: string
+  friendRatingLabel: string
   toReadEmptyTitle: string
   toReadEmptyCopy: string
   addToReadingList: string
@@ -430,6 +450,25 @@ const en: Translations = {
   tabWishlist: 'Wishlist',
   tabBooks: 'Books',
   tabDashboard: 'Dashboard',
+  tabFriends: 'Friends',
+  friendsTitle: 'Friends',
+  friendsEmptyTitle: 'No friends yet',
+  friendsEmptyCopy: 'Add a friend by email to see what they’re reading.',
+  addFriend: 'Add friend',
+  addFriendEmailLabel: 'Email address',
+  addFriendEmailPlaceholder: 'friend@example.com',
+  addFriendSubmit: 'Add',
+  addFriendSuccess: 'Friend added!',
+  addFriendNotFound: 'No user found with that email.',
+  addFriendAlreadyAdded: 'You already added this friend.',
+  addFriendCannotSelf: 'You cannot add yourself.',
+  addFriendGenericError: 'Could not add friend. Please try again.',
+  friendAddedNotification: 'added you as a friend',
+  friendProfileRead: 'Read',
+  friendProfileToRead: 'To read',
+  friendProfileWishlist: 'Wishlist',
+  friendProfileEmptySection: 'Nothing here yet.',
+  friendRatingLabel: 'Rating',
   toReadEmptyTitle: 'Unread books',
   toReadEmptyCopy: 'Add the books you already own, but haven\'t read so far... So many books, so little time.',
   addToReadingList: 'Add a book to be read',
@@ -663,6 +702,25 @@ const de: Translations = {
   tabWishlist: 'Wunschliste',
   tabBooks: 'Bücher',
   tabDashboard: 'Dashboard',
+  tabFriends: 'Freunde',
+  friendsTitle: 'Freunde',
+  friendsEmptyTitle: 'Noch keine Freunde',
+  friendsEmptyCopy: 'Füge einen Freund per E-Mail hinzu, um zu sehen, was er liest.',
+  addFriend: 'Freund hinzufügen',
+  addFriendEmailLabel: 'E-Mail-Adresse',
+  addFriendEmailPlaceholder: 'freund@beispiel.de',
+  addFriendSubmit: 'Hinzufügen',
+  addFriendSuccess: 'Freund hinzugefügt!',
+  addFriendNotFound: 'Kein Nutzer mit dieser E-Mail gefunden.',
+  addFriendAlreadyAdded: 'Du hast diesen Freund bereits hinzugefügt.',
+  addFriendCannotSelf: 'Du kannst dich nicht selbst hinzufügen.',
+  addFriendGenericError: 'Freund konnte nicht hinzugefügt werden. Bitte versuche es erneut.',
+  friendAddedNotification: 'hat dich als Freund hinzugefügt',
+  friendProfileRead: 'Gelesen',
+  friendProfileToRead: 'Leseliste',
+  friendProfileWishlist: 'Wunschliste',
+  friendProfileEmptySection: 'Hier gibt es noch nichts.',
+  friendRatingLabel: 'Bewertung',
   toReadEmptyTitle: 'Ungelesene Bücher',
   toReadEmptyCopy: 'Füge Bücher hinzu, die du schon besitzt, aber noch nicht gelesen hast… So viele Bücher, so wenig Zeit.',
   addToReadingList: 'Buch hinzufügen',
@@ -896,6 +954,25 @@ const fr: Translations = {
   tabWishlist: 'Souhaits',
   tabBooks: 'Livres',
   tabDashboard: 'Dashboard',
+  tabFriends: 'Amis',
+  friendsTitle: 'Amis',
+  friendsEmptyTitle: 'Pas encore d’amis',
+  friendsEmptyCopy: 'Ajoutez un ami par e-mail pour voir ce qu’il lit.',
+  addFriend: 'Ajouter un ami',
+  addFriendEmailLabel: 'Adresse e-mail',
+  addFriendEmailPlaceholder: 'ami@exemple.fr',
+  addFriendSubmit: 'Ajouter',
+  addFriendSuccess: 'Ami ajouté !',
+  addFriendNotFound: 'Aucun utilisateur trouvé avec cet e-mail.',
+  addFriendAlreadyAdded: 'Vous avez déjà ajouté cet ami.',
+  addFriendCannotSelf: 'Vous ne pouvez pas vous ajouter vous-même.',
+  addFriendGenericError: 'Impossible d’ajouter cet ami. Veuillez réessayer.',
+  friendAddedNotification: 'vous a ajouté comme ami',
+  friendProfileRead: 'Lus',
+  friendProfileToRead: 'À lire',
+  friendProfileWishlist: 'Liste de souhaits',
+  friendProfileEmptySection: 'Rien ici pour le moment.',
+  friendRatingLabel: 'Note',
   toReadEmptyTitle: 'Livres non lus',
   toReadEmptyCopy: 'Ajoute les livres que tu possèdes déjà mais que tu n\'as pas encore lus… Tant de livres, si peu de temps.',
   addToReadingList: 'Ajouter un livre à lire',
@@ -1129,6 +1206,25 @@ const es: Translations = {
   tabWishlist: 'Deseos',
   tabBooks: 'Libros',
   tabDashboard: 'Dashboard',
+  tabFriends: 'Amigos',
+  friendsTitle: 'Amigos',
+  friendsEmptyTitle: 'Aún no tienes amigos',
+  friendsEmptyCopy: 'Añade un amigo por correo electrónico para ver qué está leyendo.',
+  addFriend: 'Añadir amigo',
+  addFriendEmailLabel: 'Correo electrónico',
+  addFriendEmailPlaceholder: 'amigo@ejemplo.com',
+  addFriendSubmit: 'Añadir',
+  addFriendSuccess: '¡Amigo añadido!',
+  addFriendNotFound: 'No se encontró ningún usuario con ese correo.',
+  addFriendAlreadyAdded: 'Ya has añadido a este amigo.',
+  addFriendCannotSelf: 'No puedes añadirte a ti mismo.',
+  addFriendGenericError: 'No se pudo añadir al amigo. Inténtalo de nuevo.',
+  friendAddedNotification: 'te añadió como amigo',
+  friendProfileRead: 'Leídos',
+  friendProfileToRead: 'Por leer',
+  friendProfileWishlist: 'Lista de deseos',
+  friendProfileEmptySection: 'Todavía no hay nada aquí.',
+  friendRatingLabel: 'Valoración',
   toReadEmptyTitle: 'Libros sin leer',
   toReadEmptyCopy: 'Añade los libros que ya tienes pero aún no has leído… Tantos libros, tan poco tiempo.',
   addToReadingList: 'Añadir un libro por leer',
@@ -1362,6 +1458,25 @@ const pl: Translations = {
   tabWishlist: 'Lista życzeń',
   tabBooks: 'Książki',
   tabDashboard: 'Dashboard',
+  tabFriends: 'Znajomi',
+  friendsTitle: 'Znajomi',
+  friendsEmptyTitle: 'Nie masz jeszcze znajomych',
+  friendsEmptyCopy: 'Dodaj znajomego przez e-mail, aby zobaczyć, co czyta.',
+  addFriend: 'Dodaj znajomego',
+  addFriendEmailLabel: 'Adres e-mail',
+  addFriendEmailPlaceholder: 'znajomy@przyklad.pl',
+  addFriendSubmit: 'Dodaj',
+  addFriendSuccess: 'Dodano znajomego!',
+  addFriendNotFound: 'Nie znaleziono użytkownika z tym adresem e-mail.',
+  addFriendAlreadyAdded: 'Ten znajomy został już dodany.',
+  addFriendCannotSelf: 'Nie możesz dodać samego siebie.',
+  addFriendGenericError: 'Nie udało się dodać znajomego. Spróbuj ponownie.',
+  friendAddedNotification: 'dodał(a) Cię jako znajomego',
+  friendProfileRead: 'Przeczytane',
+  friendProfileToRead: 'Do przeczytania',
+  friendProfileWishlist: 'Lista życzeń',
+  friendProfileEmptySection: 'Nic tu jeszcze nie ma.',
+  friendRatingLabel: 'Ocena',
   toReadEmptyTitle: 'Nieprzeczytane książki',
   toReadEmptyCopy: 'Dodaj książki, które już masz, ale jeszcze nie przeczytałeś… Tyle książek, tak mało czasu.',
   addToReadingList: 'Dodaj książkę do przeczytania',

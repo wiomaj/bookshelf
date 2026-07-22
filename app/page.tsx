@@ -3,7 +3,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpenCheck, User, Settings, Loader2, ChevronDown, Search, X, SlidersHorizontal } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpenCheck, User, Settings, Loader2, ChevronDown, Search, X, SlidersHorizontal, Users } from 'lucide-react'
 import Link from 'next/link'
 import { getAllBooks, updateBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
@@ -1200,6 +1200,16 @@ export default function HomePage() {
               {displayName || t.tabDashboard}
             </span>
           </button>
+
+          {/* Friends tab */}
+          <Link
+            href="/friends"
+            className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px] transition-colors"
+            style={{ color: 'var(--label-secondary)' }}
+          >
+            <Users size={22} strokeWidth={1.5} />
+            <span className="text-[10px] font-medium tracking-[-0.1px]">{t.tabFriends}</span>
+          </Link>
 
           {/* Settings tab */}
           <Link
