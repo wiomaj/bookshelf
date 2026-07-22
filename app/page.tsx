@@ -51,6 +51,7 @@ export default function HomePage() {
   const [toReadBooks, setToReadBooks] = useState<Book[]>([])
   const [wishlistBooks, setWishlistBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [flashMessage, setFlashMessage] = useState<string | null>(null)
   const [flashUndo, setFlashUndo] = useState<{ bookId: string; month: number; year: number } | null>(null)
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -110,8 +111,12 @@ export default function HomePage() {
       setWishlistBooks(wishlist)
       setToReadCount(toRead.length)
       setWishlistCount(wishlist.length)
+      setLoadError(false)
     } catch (err) {
       console.error('[loadBooks] Failed to load books:', err)
+      // Don't clear existing state on a failed refresh — a transient error
+      // shouldn't blank out books that are already showing on screen.
+      setLoadError(true)
     }
   }, [user, setToReadCount, setWishlistCount])
 
@@ -378,6 +383,26 @@ export default function HomePage() {
           <div className="w-7 h-7 border-2 border-[var(--fill)] rounded-full animate-spin"
                style={{ borderTopColor: 'var(--primary)' }} />
           <p className="text-[15px]" style={{ color: 'var(--label-secondary)' }}>{t.loadingBookshelf}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // A failed fetch must never be confused with "you have no books" — show a
+  // dedicated retry screen instead of falling through to the empty states.
+  if (loadError && books.length === 0 && toReadBooks.length === 0 && wishlistBooks.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ backgroundColor: 'var(--bg)' }}>
+        <div className="flex flex-col items-center gap-4 text-center max-w-[320px]">
+          <h2 className="text-[20px] font-bold" style={{ color: 'var(--label)' }}>{t.loadBooksErrorTitle}</h2>
+          <p className="text-[15px] leading-5" style={{ color: 'var(--label-secondary)' }}>{t.loadBooksErrorBody}</p>
+          <button
+            onClick={() => { setLoading(true); loadBooks().finally(() => setLoading(false)) }}
+            className="px-5 py-[12px] rounded-[12px] text-white text-[15px] font-semibold"
+            style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
+          >
+            {t.loadBooksErrorRetry}
+          </button>
         </div>
       </div>
     )
