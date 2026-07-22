@@ -12,6 +12,9 @@ export type Translations = {
   // App / home
   myBookshelf: string
   loadingBookshelf: string
+  loadBooksErrorTitle: string
+  loadBooksErrorBody: string
+  loadBooksErrorRetry: string
   noBooks: string
   addFirstBook: string
   addFirstBookBullet1: string
@@ -266,6 +269,9 @@ export type Translations = {
 const en: Translations = {
   myBookshelf: 'Bookshelf',
   loadingBookshelf: 'Loading your bookshelf…',
+  loadBooksErrorTitle: "Couldn't load your books",
+  loadBooksErrorBody: 'Your books are safe — we just couldn’t reach the server. Check your connection and try again.',
+  loadBooksErrorRetry: 'Try again',
   noBooks: 'Welcome to your bookshelf!',
   addFirstBook: 'Track the books you\'ve read:',
   addFirstBookBullet1: '📘 Remember over time what you read',
@@ -496,6 +502,9 @@ const en: Translations = {
 const de: Translations = {
   myBookshelf: 'Bücherregal',
   loadingBookshelf: 'Bücherregal wird geladen…',
+  loadBooksErrorTitle: 'Bücher konnten nicht geladen werden',
+  loadBooksErrorBody: 'Deine Bücher sind sicher — wir konnten nur den Server nicht erreichen. Prüfe deine Verbindung und versuche es erneut.',
+  loadBooksErrorRetry: 'Erneut versuchen',
   noBooks: 'Willkommen in deinem Bücherregal!',
   addFirstBook: 'Verfolge deine gelesenen Bücher:',
   addFirstBookBullet1: '📘 Erinnere dich, was du gelesen hast',
@@ -726,6 +735,9 @@ const de: Translations = {
 const fr: Translations = {
   myBookshelf: 'Bibliothèque',
   loadingBookshelf: 'Chargement…',
+  loadBooksErrorTitle: 'Impossible de charger tes livres',
+  loadBooksErrorBody: 'Tes livres sont en sécurité — nous n’avons juste pas pu joindre le serveur. Vérifie ta connexion et réessaie.',
+  loadBooksErrorRetry: 'Réessayer',
   noBooks: 'Bienvenue dans ta bibliothèque !',
   addFirstBook: 'Suis les livres que tu as lus :',
   addFirstBookBullet1: '📘 Souviens-toi de tes lectures',
@@ -956,6 +968,9 @@ const fr: Translations = {
 const es: Translations = {
   myBookshelf: 'Estantería',
   loadingBookshelf: 'Cargando tu estantería…',
+  loadBooksErrorTitle: 'No se pudieron cargar tus libros',
+  loadBooksErrorBody: 'Tus libros están a salvo — solo no pudimos conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.',
+  loadBooksErrorRetry: 'Intentar de nuevo',
   noBooks: '¡Bienvenido a tu estantería!',
   addFirstBook: 'Lleva el registro de tus lecturas:',
   addFirstBookBullet1: '📘 Recuerda lo que leíste con el tiempo',
@@ -1186,6 +1201,9 @@ const es: Translations = {
 const pl: Translations = {
   myBookshelf: 'Półka',
   loadingBookshelf: 'Ładowanie półki…',
+  loadBooksErrorTitle: 'Nie udało się wczytać książek',
+  loadBooksErrorBody: 'Twoje książki są bezpieczne — po prostu nie mogliśmy połączyć się z serwerem. Sprawdź połączenie i spróbuj ponownie.',
+  loadBooksErrorRetry: 'Spróbuj ponownie',
   noBooks: 'Witaj na swojej półce!',
   addFirstBook: 'Śledź przeczytane przez siebie książki:',
   addFirstBookBullet1: '📘 Pamiętaj, co czytałeś',
