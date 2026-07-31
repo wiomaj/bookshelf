@@ -22,7 +22,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, clientIp } from '@/lib/rateLimit'
 import { fetchWithRetry } from '@/lib/serverFetch'
-import { detectISBN, isbn10to13, normalizeIsbn13 } from '@/lib/isbn'
+import { detectISBN, isbn10to13, isbnCandidates, normalizeIsbn13 } from '@/lib/isbn'
+import { fetchDnbByIsbn } from '@/lib/dnbIsbn'
 import type { BookMetadata } from '@/types/book'
 
 export const runtime = 'nodejs'
@@ -99,7 +100,8 @@ function firstIsbn13(isbns: string[] | undefined): string | null {
 
 const OL_FIELDS = 'title,author_name,cover_i,cover_edition_key,isbn,first_publish_year,publisher,number_of_pages_median,subject'
 
-async function fetchOLByIsbn(isbn: string, signal: AbortSignal): Promise<OLDoc[]> {
+/** Open Library lookup for one ISBN form. */
+async function fetchOLForIsbn(isbn: string, signal: AbortSignal): Promise<OLDoc[]> {
   try {
     const params = new URLSearchParams({ fields: OL_FIELDS, limit: '5', isbn })
     const res = await fetchWithRetry(`https://openlibrary.org/search.json?${params}`, {
@@ -113,6 +115,18 @@ async function fetchOLByIsbn(isbn: string, signal: AbortSignal): Promise<OLDoc[]
     console.error('Open Library error:', err)
     return []
   }
+}
+
+/**
+ * Open Library across every equivalent ISBN form (13 and 10), in parallel.
+ * OL indexes an edition under the ISBN actually printed on it, so a pre-2007
+ * book scanned as an ISBN-13 is only findable via its ISBN-10.
+ */
+async function fetchOLByIsbn(isbns: string[], signal: AbortSignal): Promise<OLDoc[]> {
+  const settled = await Promise.allSettled(
+    isbns.map(isbn => fetchOLForIsbn(isbn, signal)),
+  )
+  return settled.flatMap(r => (r.status === 'fulfilled' ? r.value : []))
 }
 
 /**
@@ -220,8 +234,8 @@ async function fetchGBFreeText(
   }
 }
 
-/** ISBN-scoped Google Books lookup (ISBN path only). */
-async function fetchGBByIsbn(isbn: string, signal: AbortSignal): Promise<GBVolumeInfo[]> {
+/** ISBN-scoped Google Books lookup for one ISBN form. */
+async function fetchGBForIsbn(isbn: string, signal: AbortSignal): Promise<GBVolumeInfo[]> {
   try {
     const params = new URLSearchParams({ q: `isbn:${isbn}`, maxResults: '3', printType: 'books' })
     const key = gbApiKey()
@@ -234,6 +248,18 @@ async function fetchGBByIsbn(isbn: string, signal: AbortSignal): Promise<GBVolum
     console.error('Google Books error:', err)
     return []
   }
+}
+
+/**
+ * Google Books by ISBN across every equivalent form (13 and 10) in parallel —
+ * `isbn:` is an exact-match index, so the form that isn't printed on the book
+ * returns nothing.
+ */
+async function fetchGBByIsbn(isbns: string[], signal: AbortSignal): Promise<GBVolumeInfo[]> {
+  const settled = await Promise.allSettled(
+    isbns.map(isbn => fetchGBForIsbn(isbn, signal)),
+  )
+  return settled.flatMap(r => (r.status === 'fulfilled' ? r.value : []))
 }
 
 function gbInfoToMetadata(info: GBVolumeInfo): BookMetadata | null {
@@ -334,14 +360,18 @@ async function handleIsbn(isbnRaw: string): Promise<BookMetadata[]> {
     }
   }
 
+  // Query the ISBN-13 and its ISBN-10 equivalent — catalogues index editions
+  // under the ISBN printed on the book, not the one the scanner produced.
+  const forms = isbnCandidates(isbn)
+
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 7_000)
   let olDocs: OLDoc[] = []
   let gbInfos: GBVolumeInfo[] = []
   try {
     const [ol, gb] = await Promise.allSettled([
-      fetchOLByIsbn(isbn, controller.signal),
-      fetchGBByIsbn(isbn, controller.signal),
+      fetchOLByIsbn(forms, controller.signal),
+      fetchGBByIsbn(forms, controller.signal),
     ])
     if (ol.status === 'fulfilled') olDocs = ol.value
     if (gb.status === 'fulfilled') gbInfos = gb.value
@@ -354,7 +384,27 @@ async function handleIsbn(isbnRaw: string): Promise<BookMetadata[]> {
     ...gbInfos.map(gbInfoToMetadata).filter((m): m is BookMetadata => m !== null),
   ])
   merged.sort((a, b) => (b.coverUrl ? 1 : 0) - (a.coverUrl ? 1 : 0))
-  const results = merged.slice(0, 5)
+  let results = merged.slice(0, 5)
+
+  // Last resort: DNB. German/Austrian/Swiss books are frequently absent from
+  // both OL and GB, and they are exactly the books people scan off a shelf.
+  if (results.length === 0) {
+    const dnb = await fetchDnbByIsbn(isbn)
+    if (dnb?.title) {
+      results = [{
+        isbn13: isbn,
+        title: dnb.title,
+        authors: dnb.author ? [dnb.author] : [],
+        description: null,
+        pageCount: null,
+        publishedDate: dnb.publishedYear ? String(dnb.publishedYear) : null,
+        publisher: dnb.publisher ?? null,
+        subjects: [],
+        coverUrl: dnb.cover_url ?? null,
+        source: 'dnb',
+      }]
+    }
+  }
 
   // Cache best result
   if (db && results.length > 0) {

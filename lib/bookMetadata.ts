@@ -9,12 +9,11 @@
  */
 
 import type { BookMetadata } from '@/types/book'
+import { metadataToSuggestion, normalizeAuthorName } from '@/lib/bookSearch'
+import type { BookSuggestion } from '@/lib/bookSearch'
 
-export type BookSuggestion = {
-  title: string
-  author: string
-  cover_url?: string
-}
+// Re-exported so scan and search callers share one suggestion type.
+export type { BookSuggestion }
 
 // ─── URL Normalisation (pure helpers, also used by tests) ─────────────────────
 
@@ -58,29 +57,26 @@ export function googleCoverFromResponse(data: unknown): string | undefined {
 /**
  * Look up a book by ISBN-13 or ISBN-10 via server routes:
  *
- *   1. /api/books/search?q=isbn:… — Supabase metadata cache, then Open Library
- *      and Google Books in parallel (merged + cached for repeat scans).
- *   2. /api/isbn — falls back to DNB (Deutsche Nationalbibliothek), which
- *      covers German/Austrian/Swiss books the other sources miss.
+ *   1. /api/books/search?q=isbn:… — the SAME route the search box uses, so a
+ *      scan resolves through Supabase cache → Open Library + Google Books (both
+ *      ISBN forms) → DNB, and returns the identical suggestion shape: published
+ *      date, publisher, description and subjects included, author names
+ *      normalised out of "Lastname, Firstname" order.
+ *   2. /api/isbn — a second, independent DNB-backed route, used only when the
+ *      search route is unreachable or comes back empty.
  *
  * Returns `null` when no source can identify the book. Never throws.
  */
 export async function fetchBookByISBN(
   isbn: string
 ): Promise<BookSuggestion | null> {
-  // ── Step 1: rich server search (cache + OL + GB) ────────────────────────────
+  // ── Step 1: the shared search route (cache + OL + GB + DNB) ─────────────────
   try {
     const res = await fetch(`/api/books/search?q=isbn:${encodeURIComponent(isbn)}`)
     if (res.ok) {
       const data = await res.json() as { results?: BookMetadata[] }
       const m = data.results?.[0]
-      if (m?.title) {
-        return {
-          title: m.title,
-          author: m.authors?.[0] ?? '',
-          cover_url: m.coverUrl ?? undefined,
-        }
-      }
+      if (m?.title) return metadataToSuggestion(m)
     }
   } catch {
     // fall through to the DNB-backed route
@@ -91,13 +87,26 @@ export async function fetchBookByISBN(
     const res = await fetch(`/api/isbn?isbn=${encodeURIComponent(isbn)}`)
     if (res.ok) {
       const data = await res.json() as {
-        result: { title: string; author: string; cover_url?: string } | null
+        result: {
+          title: string
+          author: string
+          cover_url?: string
+          publishedYear?: number
+          publisher?: string
+        } | null
       }
-      if (data.result?.title) {
+      const r = data.result
+      if (r?.title) {
         return {
-          title: data.result.title,
-          author: data.result.author ?? '',
-          cover_url: data.result.cover_url,
+          title: r.title,
+          author: normalizeAuthorName(r.author ?? ''),
+          cover_url: r.cover_url,
+          isbn13: null,
+          description: null,
+          pageCount: null,
+          publishedDate: r.publishedYear ? String(r.publishedYear) : null,
+          publisher: r.publisher ?? null,
+          subjects: [],
         }
       }
     }

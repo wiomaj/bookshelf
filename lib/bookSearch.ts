@@ -50,7 +50,8 @@ function looksLikeAuthorName(query: string): boolean {
 
 // ─── Author normalisation ─────────────────────────────────────────────────────
 
-function normalizeAuthorName(name: string): string {
+/** Invert "Lastname, Firstname" → "Firstname Lastname" (catalogue name order). */
+export function normalizeAuthorName(name: string): string {
   if (!name) return name
   const commaIdx = name.indexOf(',')
   if (commaIdx === -1) return name
@@ -104,7 +105,12 @@ function dedupPreserveOrder(items: BookSuggestion[]): BookSuggestion[] {
 
 // ─── Server route (GB + OL, secret key) ───────────────────────────────────────
 
-function metadataToSuggestion(m: BookMetadata): BookSuggestion {
+/**
+ * Map a server BookMetadata record to the suggestion shape the add/scan forms
+ * consume. Shared with the ISBN/scan path so a scanned book carries exactly the
+ * same fields (published date, publisher, description…) as a searched one.
+ */
+export function metadataToSuggestion(m: BookMetadata): BookSuggestion {
   return {
     title: m.title,
     author: normalizeAuthorName(m.authors[0] ?? ''),
