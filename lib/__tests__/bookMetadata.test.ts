@@ -224,3 +224,69 @@ describe('fetchBookByISBN', () => {
     expect(result).toBeNull()
   })
 })
+
+// ─── Scan/search parity ──────────────────────────────────────────────────────
+// A scanned book must arrive in the add form with exactly the fields a searched
+// book does — the scan flow goes through the same /api/books/search route and
+// the same metadata → suggestion mapping.
+
+describe('fetchBookByISBN parity with search', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('carries the full metadata set through, not just title/author/cover', async () => {
+    const mockFetch = vi.fn().mockResolvedValueOnce(searchResponse([{
+      isbn13: MOCK_ISBN,
+      title: 'Nineteen Eighty-Four',
+      authors: ['George Orwell'],
+      description: 'A dystopian novel.',
+      pageCount: 328,
+      publishedDate: '1949-06-08',
+      publisher: 'Secker & Warburg',
+      subjects: ['Fiction', 'Dystopia'],
+      coverUrl: 'https://books.google.com/c.jpg?zoom=1',
+    }]))
+    vi.stubGlobal('fetch', mockFetch)
+
+    const result = await fetchBookByISBN(MOCK_ISBN)
+    expect(result).toMatchObject({
+      title: 'Nineteen Eighty-Four',
+      author: 'George Orwell',
+      isbn13: MOCK_ISBN,
+      description: 'A dystopian novel.',
+      pageCount: 328,
+      publishedDate: '1949-06-08',
+      publisher: 'Secker & Warburg',
+      subjects: ['Fiction', 'Dystopia'],
+    })
+  })
+
+  it('normalises catalogue "Lastname, Firstname" author order', async () => {
+    const mockFetch = vi.fn().mockResolvedValueOnce(searchResponse([{
+      title: 'The Hobbit',
+      authors: ['Tolkien, J. R. R.'],
+    }]))
+    vi.stubGlobal('fetch', mockFetch)
+
+    const result = await fetchBookByISBN(MOCK_ISBN)
+    expect(result!.author).toBe('J. R. R. Tolkien')
+  })
+
+  it('carries the published year through the DNB fallback', async () => {
+    const mockFetch = vi.fn()
+    mockFetch.mockResolvedValueOnce(searchResponse([]))
+    mockFetch.mockResolvedValueOnce(isbnResponse({
+      title: 'Fühl dich wohl in deinem Zuhause',
+      author: 'Ramstedt, Frida',
+      publishedYear: 2020,
+      publisher: 'Goldmann',
+    }))
+    vi.stubGlobal('fetch', mockFetch)
+
+    const result = await fetchBookByISBN('9783442484027')
+    expect(result!.publishedDate).toBe('2020')
+    expect(result!.publisher).toBe('Goldmann')
+    expect(result!.author).toBe('Frida Ramstedt')
+  })
+})

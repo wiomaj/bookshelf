@@ -12,7 +12,7 @@ export type BookMetadata = {
   publisher: string | null
   subjects: string[]             // genres/subject tags, max 8
   coverUrl: string | null
-  source: 'openlibrary' | 'googlebooks' | 'cache'
+  source: 'openlibrary' | 'googlebooks' | 'dnb' | 'cache'
 }
 
 // The core data shape for a book in the database.

@@ -52,6 +52,7 @@ export type Translations = {
   scanLookingUp: string
   scanNotFound: string
   scanError: string
+  scanTorch: string
   durationDay: string
   durationDays: string
   durationMonth: string
@@ -307,6 +308,7 @@ const en: Translations = {
   scanLookingUp: 'Found! Looking up book…',
   scanNotFound: 'Book not found. Try again…',
   scanError: 'Could not look up book. Try again.',
+  scanTorch: 'Toggle light',
   durationDay: 'day',
   durationDays: 'days',
   durationMonth: 'month',
@@ -540,6 +542,7 @@ const de: Translations = {
   scanLookingUp: 'Gefunden! Buch wird gesucht…',
   scanNotFound: 'Buch nicht gefunden. Versuch es erneut…',
   scanError: 'Buch konnte nicht gefunden werden. Versuch es erneut.',
+  scanTorch: 'Licht ein-/ausschalten',
   durationDay: 'Tag',
   durationDays: 'Tagen',
   durationMonth: 'Monat',
@@ -773,6 +776,7 @@ const fr: Translations = {
   scanLookingUp: 'Trouvé ! Recherche du livre…',
   scanNotFound: 'Livre introuvable. Réessayez…',
   scanError: 'Impossible de rechercher le livre. Réessayez.',
+  scanTorch: 'Activer la lumière',
   durationDay: 'jour',
   durationDays: 'jours',
   durationMonth: 'mois',
@@ -1006,6 +1010,7 @@ const es: Translations = {
   scanLookingUp: '¡Encontrado! Buscando el libro…',
   scanNotFound: 'Libro no encontrado. Inténtalo de nuevo…',
   scanError: 'No se pudo buscar el libro. Inténtalo de nuevo.',
+  scanTorch: 'Encender la luz',
   durationDay: 'día',
   durationDays: 'días',
   durationMonth: 'mes',
@@ -1239,6 +1244,7 @@ const pl: Translations = {
   scanLookingUp: 'Znaleziono! Wyszukiwanie książki…',
   scanNotFound: 'Nie znaleziono książki. Spróbuj ponownie…',
   scanError: 'Nie udało się wyszukać książki. Spróbuj ponownie.',
+  scanTorch: 'Włącz światło',
   durationDay: 'dzień',
   durationDays: 'dni',
   durationMonth: 'miesiąc',

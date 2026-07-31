@@ -1,14 +1,17 @@
 /**
  * app/api/isbn/route.ts
  *
- * Server-side ISBN lookup — called by the client search when a raw ISBN is typed.
+ * Server-side ISBN lookup — the DNB-backed fallback behind /api/books/search,
+ * used by the barcode scanner and by typing a raw ISBN into search.
  *
  * Strategy (in order):
  *  1. Google Books (fast, has covers, good international coverage)
- *  2. Deutsche Nationalbibliothek — DNB (comprehensive for German/Austrian/Swiss books)
- *     After finding metadata in DNB, attempts a title+author cover search on Google Books.
+ *  2. Deutsche Nationalbibliothek — DNB (comprehensive for German/Austrian/Swiss
+ *     books), via lib/dnbIsbn, which also tries the ISBN-10 form and then looks
+ *     for a cover on Google Books by title+author.
  *
- * Both providers are called server-side to avoid CORS restrictions and browser rate limits.
+ * Both providers are called server-side to avoid CORS restrictions and browser
+ * rate limits.
  *
  * GET /api/isbn?isbn=9783649628101
  * Response: { result: IsbnResult | null }
@@ -18,7 +21,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { gbUrl } from '@/lib/gbUrl'
 import { checkRateLimit, clientIp } from '@/lib/rateLimit'
 import { fetchWithRetry } from '@/lib/serverFetch'
-import { cleanDnbTitle, stripCreatorRole, normaliseCreator } from '@/lib/dnbUtils'
+import { fetchDnbByIsbn } from '@/lib/dnbIsbn'
+import { isbnCandidates, normalizeIsbn } from '@/lib/isbn'
 
 export const runtime = 'nodejs'
 
@@ -27,6 +31,7 @@ export interface IsbnResult {
   author: string
   cover_url?: string
   publishedYear?: number
+  publisher?: string
 }
 
 // ── Google Books ──────────────────────────────────────────────────────────────
@@ -42,6 +47,7 @@ async function fromGoogleBooks(isbn: string): Promise<IsbnResult | null> {
       title?: string
       authors?: string[]
       publishedDate?: string
+      publisher?: string
       imageLinks?: { thumbnail?: string; smallThumbnail?: string }
     } }> }
 
@@ -59,88 +65,10 @@ async function fromGoogleBooks(isbn: string): Promise<IsbnResult | null> {
       author: info.authors?.[0] ?? '',
       cover_url,
       publishedYear: yearMatch ? parseInt(yearMatch[1]) : undefined,
+      publisher: info.publisher,
     }
   } catch (err) {
     console.error('[isbn] Google Books fetch failed:', err)
-    return null
-  }
-}
-
-// ── Cover fallback: GB title+author search ────────────────────────────────────
-
-async function gbCoverByTitleAuthor(title: string, author: string): Promise<string | undefined> {
-  try {
-    // Use first significant word of author + first 4 words of title to avoid over-constraining
-    const authorHint = author.split(/\s+/).slice(0, 2).join(' ')
-    const titleHint = title.split(/\s+/).slice(0, 4).join(' ')
-    const q = `intitle:"${titleHint}" inauthor:"${authorHint}"`
-    const res = await fetchWithRetry(
-      gbUrl({ q, maxResults: '1' }),
-      { next: { revalidate: 86400 } }
-    )
-    if (!res.ok) return undefined
-    const data = await res.json() as { items?: Array<{ volumeInfo?: {
-      imageLinks?: { thumbnail?: string; smallThumbnail?: string }
-    } }> }
-    const links = data.items?.[0]?.volumeInfo?.imageLinks
-    const raw = links?.thumbnail ?? links?.smallThumbnail
-    return raw ? raw.replace(/^http:/, 'https:').replace(/zoom=\d/, 'zoom=1') : undefined
-  } catch (err) {
-    console.error('[isbn] GB title+author cover fetch failed:', err)
-    return undefined
-  }
-}
-
-// ── DNB (Deutsche Nationalbibliothek) ─────────────────────────────────────────
-
-/** Extract text content of a Dublin Core element from SRU XML. */
-function dcField(xml: string, tag: string): string | undefined {
-  const m = new RegExp(`<dc:${tag}[^>]*>([^<]+)</dc:${tag}>`, 'i').exec(xml)
-  return m?.[1]?.trim()
-}
-
-async function fromDNB(isbn: string): Promise<IsbnResult | null> {
-  try {
-    const params = new URLSearchParams({
-      operation: 'searchRetrieve',
-      version: '1.1',
-      query: `isbn=${isbn}`,
-      maximumRecords: '3',
-      recordSchema: 'oai_dc',
-    })
-    const res = await fetchWithRetry(`https://services.dnb.de/sru/dnb?${params}`, {
-      next: { revalidate: 3600 },
-      headers: { Accept: 'application/xml, text/xml' },
-    })
-    if (!res.ok) return null
-
-    const xml = await res.text()
-
-    // Check if any records were found
-    const numRecords = /<numberOfRecords>(\d+)<\/numberOfRecords>/.exec(xml)?.[1]
-    if (!numRecords || numRecords === '0') return null
-
-    const rawTitle = dcField(xml, 'title')
-    if (!rawTitle) return null
-    const title = cleanDnbTitle(rawTitle)
-    if (!title) return null
-
-    const creatorRaw = dcField(xml, 'creator')
-    // Strip role annotations (e.g. [Illustrator]) before inverting name order
-    const author = creatorRaw ? normaliseCreator(stripCreatorRole(creatorRaw)) : ''
-
-    const dateRaw = dcField(xml, 'date')
-    const yearMatch = dateRaw?.match(/\b(\d{4})\b/)
-    const publishedYear = yearMatch ? parseInt(yearMatch[1]) : undefined
-
-    // DNB has no cover images — try Google Books by title+author for a cover
-    const cover_url = author
-      ? await gbCoverByTitleAuthor(title, author)
-      : undefined
-
-    return { title, author, cover_url, publishedYear }
-  } catch (err) {
-    console.error('[isbn] DNB fetch failed:', err)
     return null
   }
 }
@@ -157,26 +85,31 @@ export async function GET(req: NextRequest) {
   }
 
   const raw = req.nextUrl.searchParams.get('isbn')?.trim() ?? ''
-  // Reject oversized inputs before the regex even runs
+  // Reject oversized inputs before any parsing runs
   if (raw.length > 20) {
     return NextResponse.json({ result: null }, { status: 400 })
   }
-  const isbn = raw.replace(/[\s\-]/g, '')
 
-  if (!isbn || !/^\d{10,13}X?$/.test(isbn)) {
+  // Accepts ISBN-10 (including the "…X" check digit) and ISBN-13, with or
+  // without hyphens/spaces, and normalises to ISBN-13.
+  const isbn = normalizeIsbn(raw)
+  if (!isbn) {
     return NextResponse.json({ result: null }, { status: 400 })
   }
 
   const cacheHeaders = { 'Cache-Control': 's-maxage=86400, stale-while-revalidate=604800' }
 
-  // 1. Try Google Books first — fastest and has covers
-  const gb = await fromGoogleBooks(isbn)
-  if (gb?.title) {
-    return NextResponse.json({ result: gb }, { headers: cacheHeaders })
+  // 1. Try Google Books first — fastest and has covers. Query both ISBN forms:
+  //    GB indexes older titles under the ISBN-10 actually printed on them.
+  for (const candidate of isbnCandidates(isbn)) {
+    const gb = await fromGoogleBooks(candidate)
+    if (gb?.title) {
+      return NextResponse.json({ result: gb }, { headers: cacheHeaders })
+    }
   }
 
   // 2. Fall back to DNB — catches German/Austrian/Swiss books that GB misses
-  const dnb = await fromDNB(isbn)
+  const dnb = await fetchDnbByIsbn(isbn)
   if (dnb?.title) {
     return NextResponse.json({ result: dnb }, { headers: cacheHeaders })
   }
