@@ -57,6 +57,11 @@ export type Translations = {
   durationDays: string
   durationMonth: string
   durationMonths: string
+  // Standalone day units for the reading-time chip. durationDay/durationDays are
+  // inflected for the celebration sentence ("in 12 Tagen"), which reads wrong on
+  // its own in German.
+  dayUnit: string
+  daysUnit: string
   statsWithoutMonth: string
   resetLinkInvalid: string
   filterView: string
@@ -205,6 +210,7 @@ export type Translations = {
   chipReceived: string
   chipListened: string
   chipAdded: string
+  chipReadingTime: string
   // Stats
   dashboardTitle: string
   dashboardEmptyTitle: string
@@ -310,6 +316,8 @@ const en: Translations = {
   scanError: 'Could not look up book. Try again.',
   scanTorch: 'Toggle light',
   durationDay: 'day',
+  dayUnit: 'day',
+  daysUnit: 'days',
   durationDays: 'days',
   durationMonth: 'month',
   durationMonths: 'months',
@@ -447,6 +455,7 @@ const en: Translations = {
   chipReceived: 'Received',
   chipListened: 'Listened',
   chipAdded: 'Added',
+  chipReadingTime: 'Reading time',
   toReadNotesPlaceholder: 'Why do you want to read this?',
   whenDidYouGetIt: 'When did you get it?',
   dashboardTitle: 'Dashboard',
@@ -544,6 +553,8 @@ const de: Translations = {
   scanError: 'Buch konnte nicht gefunden werden. Versuch es erneut.',
   scanTorch: 'Licht ein-/ausschalten',
   durationDay: 'Tag',
+  dayUnit: 'Tag',
+  daysUnit: 'Tage',
   durationDays: 'Tagen',
   durationMonth: 'Monat',
   durationMonths: 'Monaten',
@@ -681,6 +692,7 @@ const de: Translations = {
   chipReceived: 'Erhalten',
   chipListened: 'Gehört',
   chipAdded: 'Hinzugefügt',
+  chipReadingTime: 'Lesezeit',
   whenDidYouGetIt: 'Wann hast du es bekommen?',
   toReadNotesPlaceholder: 'Warum möchtest du das lesen?',
   dashboardTitle: 'Dashboard',
@@ -778,6 +790,8 @@ const fr: Translations = {
   scanError: 'Impossible de rechercher le livre. Réessayez.',
   scanTorch: 'Activer la lumière',
   durationDay: 'jour',
+  dayUnit: 'jour',
+  daysUnit: 'jours',
   durationDays: 'jours',
   durationMonth: 'mois',
   durationMonths: 'mois',
@@ -915,6 +929,7 @@ const fr: Translations = {
   chipReceived: 'Reçu',
   chipListened: 'Écouté',
   chipAdded: 'Ajouté',
+  chipReadingTime: 'Temps de lecture',
   whenDidYouGetIt: 'Quand l\'avez-vous reçu ?',
   toReadNotesPlaceholder: 'Pourquoi voulez-vous le lire ?',
   dashboardTitle: 'Tableau de bord',
@@ -1012,6 +1027,8 @@ const es: Translations = {
   scanError: 'No se pudo buscar el libro. Inténtalo de nuevo.',
   scanTorch: 'Encender la luz',
   durationDay: 'día',
+  dayUnit: 'día',
+  daysUnit: 'días',
   durationDays: 'días',
   durationMonth: 'mes',
   durationMonths: 'meses',
@@ -1149,6 +1166,7 @@ const es: Translations = {
   chipReceived: 'Recibido',
   chipListened: 'Escuchado',
   chipAdded: 'Añadido',
+  chipReadingTime: 'Tiempo de lectura',
   whenDidYouGetIt: '¿Cuándo lo conseguiste?',
   toReadNotesPlaceholder: '¿Por qué quieres leerlo?',
   dashboardTitle: 'Panel',
@@ -1246,6 +1264,8 @@ const pl: Translations = {
   scanError: 'Nie udało się wyszukać książki. Spróbuj ponownie.',
   scanTorch: 'Włącz światło',
   durationDay: 'dzień',
+  dayUnit: 'dzień',
+  daysUnit: 'dni',
   durationDays: 'dni',
   durationMonth: 'miesiąc',
   durationMonths: 'miesięcy',
@@ -1383,6 +1403,7 @@ const pl: Translations = {
   chipReceived: 'Otrzymano',
   chipListened: 'Wysłuchano',
   chipAdded: 'Dodano',
+  chipReadingTime: 'Czas czytania',
   whenDidYouGetIt: 'Kiedy ją dostałeś?',
   toReadNotesPlaceholder: 'Dlaczego chcesz to przeczytać?',
   dashboardTitle: 'Dashboard',

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { BookOpen, BookOpenCheck, Pencil, X, Rocket, LibraryBig, type LucideIcon } from 'lucide-react'
+import { BookOpen, BookOpenCheck, Pencil, X, Rocket, LibraryBig, Hourglass, type LucideIcon } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
@@ -14,6 +14,7 @@ import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
 import StatusPicker, { type BookStatus } from '@/components/StatusPicker'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { formatMonthShort } from '@/lib/month'
+import { readingDurationDays } from '@/lib/readingDuration'
 import { useApp, useT } from '@/contexts/AppContext'
 import { heroCoverUrl } from '@/lib/coverUrl'
 import type { Book } from '@/types/book'
@@ -273,6 +274,13 @@ export default function BookDetailPage() {
     ? `${formatMonthShort(book.month)} ${book.year}`
     : book.year?.toString()
 
+  // Days from "currently reading" to finished — hidden when the book has no
+  // start date (e.g. it was added straight to the read shelf).
+  const readingDays = readingDurationDays(book)
+  const readingTime = readingDays === null
+    ? undefined
+    : `${readingDays} ${readingDays === 1 ? t.dayUnit : t.daysUnit}`
+
   // ── View mode ────────────────────────────────────────────────────────────────
   return (
     <>
@@ -438,6 +446,11 @@ export default function BookDetailPage() {
                 value={readDate}
               />
             )}
+            <InfoChip
+              icon={Hourglass}
+              label={t.chipReadingTime}
+              value={readingTime}
+            />
             <InfoChip
               icon={Rocket}
               label={t.released}
