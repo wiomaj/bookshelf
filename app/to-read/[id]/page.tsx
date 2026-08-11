@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { LONG_MONTHS } from '@/lib/month'
+import { readingDurationDays } from '@/lib/readingDuration'
 import { useApp, useT } from '@/contexts/AppContext'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import StarRating from '@/components/StarRating'
@@ -224,6 +225,7 @@ export default function ToReadDetailPage() {
     try {
       const prevMonth = book.month ?? moveMonth
       const prevYear = book.year ?? moveYear
+      const finishedAt = new Date().toISOString()
       await updateBook(supabase, user.id, book.id, {
         status: 'read',
         month: moveMonth,
@@ -232,24 +234,24 @@ export default function ToReadDetailPage() {
         notes: moveNotes.trim() || undefined,
         read_month: moveMonth,
         read_year: moveYear,
-        finished_at: new Date().toISOString(),
+        finished_at: finishedAt,
       })
       sessionStorage.setItem('bookshelf_returnTab', 'read')
       sessionStorage.setItem('bookshelf_flash', 'markedAsRead')
       sessionStorage.setItem('bookshelf_flash_undo', JSON.stringify({ bookId: book.id, month: prevMonth, year: prevYear }))
 
-      // Compute reading duration if start date is known
+      // Reading duration, counted the same way as the "Reading time" chip on the
+      // detail page: start date → the finish stamp just written.
+      const rawDays = readingDurationDays({
+        ...book,
+        finished_at: finishedAt,
+        read_month: moveMonth,
+        read_year: moveYear,
+      })
       let duration: string | null = null
-      let rawDays: number | null = null
-      if (book.started_reading_year && book.started_reading_month) {
-        const start = new Date(book.started_reading_year, book.started_reading_month - 1, book.started_reading_day || 1)
-        const end = new Date(moveYear, moveMonth - 1, 1)
-        const days = Math.round((end.getTime() - start.getTime()) / 86_400_000)
-        if (days >= 1) {
-          rawDays = days
-          if (days < 30) duration = `${days} ${days === 1 ? t.durationDay : t.durationDays}`
-          else { const m = Math.round(days / 30); duration = `${m} ${m === 1 ? t.durationMonth : t.durationMonths}` }
-        }
+      if (rawDays !== null) {
+        if (rawDays < 30) duration = `${rawDays} ${rawDays === 1 ? t.durationDay : t.durationDays}`
+        else { const m = Math.round(rawDays / 30); duration = `${m} ${m === 1 ? t.durationMonth : t.durationMonths}` }
       }
       celebrationBookRef.current = book
       setCelebrationDuration(duration)
