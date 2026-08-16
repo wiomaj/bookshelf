@@ -1,7 +1,7 @@
 /**
- * Backfills the content-metadata columns added by the 20260816 migration —
- * isbn13, subjects, page_count, published_date, publisher and genre — for every
- * book that predates them.
+ * Backfills the content-metadata columns added by the 20260816 migrations —
+ * isbn13, subjects, page_count, published_date, publisher, description and
+ * genre — for every book that predates them.
  *
  * Books opened on their detail page backfill themselves (the page already looks
  * this up to display it), but that only covers read books, and only ones the
@@ -9,8 +9,8 @@
  *
  * Nothing already stored is overwritten, and metadata is only attached when the
  * catalogue result still matches the book's title and author — the same rule
- * lib/bookEnrichment applies in the app. Safe to re-run: rows that already have
- * an ISBN or subjects are skipped.
+ * lib/bookEnrichment applies in the app. Safe to re-run: fully populated rows
+ * are skipped before any request is made.
  *
  * Usage:
  *   SUPABASE_SERVICE_ROLE_KEY=<key> node scripts/backfill-book-metadata.mjs
@@ -36,6 +36,7 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 // ── Matching + extraction (mirrors lib/bookEnrichment.ts) ───────────────────
 
 const MAX_STORED_SUBJECTS = 8
+const MIN_DESCRIPTION_LENGTH = 30
 
 const GENERIC_SUBJECTS = new Set([
   'fiction', 'nonfiction', 'non-fiction', 'general', 'books', 'literature',
@@ -73,6 +74,14 @@ function genreFromSubjects(subjects) {
   const clean = (subjects ?? []).map(s => s.trim()).filter(Boolean)
   if (clean.length === 0) return undefined
   return clean.find(s => !GENERIC_SUBJECTS.has(s.toLowerCase())) ?? clean[0]
+}
+
+/** Google Books descriptions carry markup; the app stores them plain. */
+function stripHtml(html) {
+  return html
+    .replace(/<[^>]*>/g, '')
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/\s+/g, ' ').trim()
 }
 
 function isbn13From(identifiers) {
@@ -115,6 +124,11 @@ function patchFor(book, info) {
   if (!book.published_date && info.publishedDate) patch.published_date = info.publishedDate
   if (!book.publisher && info.publisher) patch.publisher = info.publisher
 
+  const description = stripHtml(info.description ?? '')
+  if (!book.description && description.length >= MIN_DESCRIPTION_LENGTH) {
+    patch.description = description
+  }
+
   const subjects = (info.categories ?? []).map(s => s.trim()).filter(Boolean).slice(0, MAX_STORED_SUBJECTS)
   if (!book.subjects?.length && subjects.length > 0) patch.subjects = subjects
 
@@ -128,18 +142,18 @@ function patchFor(book, info) {
 
 const { data: books, error } = await supabase
   .from('books')
-  .select('id, title, author, genre, isbn13, page_count, published_date, publisher, subjects')
-  .is('isbn13', null)
+  .select('id, title, author, genre, isbn13, page_count, published_date, publisher, subjects, description')
+  .or('isbn13.is.null,description.is.null,subjects.is.null')
 
 if (error) {
   console.error('Failed to fetch books:', error.message)
   process.exit(1)
 }
 
-const pending = books.filter(b => !b.subjects?.length)
+const pending = books.filter(b => !b.isbn13 || !b.subjects?.length || !b.description)
 
 console.log(
-  `${books.length} book(s) without an ISBN, ${pending.length} without any metadata.` +
+  `${pending.length} of ${books.length} book(s) still missing an ISBN, subjects or a description.` +
   `${DRY_RUN ? ' Dry run — nothing will be written.' : ''}\n`
 )
 

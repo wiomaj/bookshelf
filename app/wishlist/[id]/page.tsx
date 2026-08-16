@@ -7,6 +7,7 @@ import { X, Heart, Pencil, BookmarkPlus, Rocket, LibraryBig, type LucideIcon } f
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
+import { enrichmentPatch, needsSynopsisLookup } from '@/lib/bookEnrichment'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { LONG_MONTHS } from '@/lib/month'
 import { useApp, useT } from '@/contexts/AppContext'
@@ -125,14 +126,29 @@ export default function WishlistDetailPage() {
         if (cancelled) return
         setBook(b)
         if (b) {
-          setBookDataLoading(true)
-          fetchBookData(b.title, b.author).then(data => {
-            if (cancelled) return
-            if (data.description) setDescription(data.description)
-            if (data.genre) setApiGenre(data.genre)
-            if (data.publishedYear) setPublishedYear(data.publishedYear)
-            setBookDataLoading(false)
-          }).catch(() => { if (!cancelled) setBookDataLoading(false) })
+          // Nothing to fetch once the row carries the synopsis, genre and
+          // release year this view renders — and what is fetched gets written
+          // back, so the lookup stops after one visit.
+          if (needsSynopsisLookup(b)) {
+            setBookDataLoading(true)
+            fetchBookData(b.title, b.author).then(data => {
+              if (cancelled) return
+              if (data.description) setDescription(data.description)
+              if (data.genre) setApiGenre(data.genre)
+              if (data.publishedYear) setPublishedYear(data.publishedYear)
+              setBookDataLoading(false)
+
+              const patch = enrichmentPatch(b, {
+                description: data.description,
+                genre: data.genre,
+                published_date: data.publishedYear,
+              })
+              if (Object.keys(patch).length > 0) {
+                updateBook(supabase, user.id, b.id, patch).catch(() => {})
+                setBook(prev => prev ? { ...prev, ...patch } : prev)
+              }
+            }).catch(() => { if (!cancelled) setBookDataLoading(false) })
+          }
           if (!b.cover_url && b.title) {
             fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
               if (cancelled || !cover || cover === b.cover_url) return
@@ -325,6 +341,10 @@ export default function WishlistDetailPage() {
 
   const showCover = book.cover_url && !coverFailed
   const displayGenre = book.genre || apiGenre
+  // Stored values first; the api* state only holds anything for books that
+  // predate these columns, where the lookup above filled them in.
+  const displayPublishedYear = book.published_date?.slice(0, 4) ?? publishedYear
+  const displayDescription = book.description ?? description
   const addedDate = formatAddedDate(book.created_at)
 
   // ── View mode ────────────────────────────────────────────────────────────────
@@ -470,7 +490,7 @@ export default function WishlistDetailPage() {
           {/* Info chips — horizontal scroll */}
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
             <InfoChip icon={BookmarkPlus} label={t.chipAdded} value={addedDate} />
-            <InfoChip icon={Rocket} label={t.released} value={publishedYear} />
+            <InfoChip icon={Rocket} label={t.released} value={displayPublishedYear} />
             {displayGenre && (
               <InfoChip icon={LibraryBig} label={t.genre} value={displayGenre} />
             )}
@@ -514,9 +534,9 @@ export default function WishlistDetailPage() {
                      style={{ borderTopColor: 'var(--primary)' }} />
                 <span className="text-[14px]" style={{ color: 'var(--label-tertiary)' }}>{t.loading}</span>
               </div>
-            ) : description ? (
+            ) : displayDescription ? (
               <p className="text-[17px] leading-[22px] tracking-[-0.43px]" style={{ color: 'var(--label)' }}>
-                {description}
+                {displayDescription}
               </p>
             ) : (
               <p className="text-[16px] leading-6 italic" style={{ color: 'var(--label-tertiary)' }}>

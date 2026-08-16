@@ -48,4 +48,7 @@ export type Book = {
   published_date?: string | null  // "2003-06-26" | "2003" — varies by source
   publisher?: string | null
   subjects?: string[] | null      // genre/subject tags, max 8
+  // Only selected by getBook and the insert/update round-trips — descriptions
+  // are large and the list queries load the whole library at once.
+  description?: string | null
 }

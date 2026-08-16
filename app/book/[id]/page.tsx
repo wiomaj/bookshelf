@@ -8,7 +8,7 @@ import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { searchBooks } from '@/lib/bookSearch'
-import { enrichmentFromSuggestion, enrichmentPatch, hasStoredMetadata } from '@/lib/bookEnrichment'
+import { enrichmentFromSuggestion, enrichmentPatch, needsMetadataLookup } from '@/lib/bookEnrichment'
 import StarRating from '@/components/StarRating'
 import BookForm from '@/components/BookForm'
 import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
@@ -80,7 +80,6 @@ export default function BookDetailPage() {
   const [apiPublishedYear, setApiPublishedYear] = useState<string | undefined>(undefined)
   const [apiPageCount, setApiPageCount] = useState<number | null>(null)
   const [apiPublisher, setApiPublisher] = useState<string | null>(null)
-  const [apiSubjects, setApiSubjects] = useState<string[]>([])
   const [bookDataLoading, setBookDataLoading] = useState(false)
   const [descExpanded, setDescExpanded] = useState(false)
   const [coverFailed, setCoverFailed] = useState(false)
@@ -111,37 +110,37 @@ export default function BookDetailPage() {
       if (!b) setNotFound(true)
       else {
         setBook(b)
-        setBookDataLoading(true)
-        searchBooks(b.title, 3).then((results) => {
-          if (cancelled) return
-          const best = results.find((r) =>
-            r.author.toLowerCase().includes((b.author ?? '').toLowerCase().split(' ')[0]) ||
-            (b.author ?? '').toLowerCase().includes(r.author.toLowerCase().split(' ')[0])
-          ) ?? results[0]
-          if (best) {
-            if (best.description) setDescription(best.description)
-            if (best.subjects?.[0]) setApiGenre(best.subjects[0])
-            if (best.publishedDate) setApiPublishedYear(best.publishedDate.slice(0, 4))
-            if (best.pageCount) setApiPageCount(best.pageCount)
-            if (best.publisher) setApiPublisher(best.publisher)
-            if (best.subjects?.length) setApiSubjects(best.subjects.slice(0, 6))
+        // Books stored with their metadata render straight from the row — no
+        // request at all. The lookup below runs only while something is still
+        // missing, and it writes what it finds, so it stops after one visit.
+        if (needsMetadataLookup(b)) {
+          setBookDataLoading(true)
+          searchBooks(b.title, 3).then((results) => {
+            if (cancelled) return
+            const best = results.find((r) =>
+              r.author.toLowerCase().includes((b.author ?? '').toLowerCase().split(' ')[0]) ||
+              (b.author ?? '').toLowerCase().includes(r.author.toLowerCase().split(' ')[0])
+            ) ?? results[0]
+            if (best) {
+              if (best.description) setDescription(best.description)
+              if (best.subjects?.[0]) setApiGenre(best.subjects[0])
+              if (best.publishedDate) setApiPublishedYear(best.publishedDate.slice(0, 4))
+              if (best.pageCount) setApiPageCount(best.pageCount)
+              if (best.publisher) setApiPublisher(best.publisher)
 
-            // Backfill for books added before these columns existed. The lookup
-            // has already happened for the display above, so this costs one
-            // write and only ever runs once per book — hasStoredMetadata is
-            // true on every later visit. enrichmentFromSuggestion re-applies the
-            // title/author match, since `best` is only a best guess from a
-            // title search, and enrichmentPatch never overwrites stored values.
-            if (!hasStoredMetadata(b)) {
+              // Persist it, so this is the last lookup this book ever needs.
+              // enrichmentFromSuggestion re-applies the title/author match —
+              // `best` is only a best guess from a title search — and
+              // enrichmentPatch never overwrites what is already stored.
               const patch = enrichmentPatch(b, enrichmentFromSuggestion(best, b.title, b.author ?? ''))
               if (Object.keys(patch).length > 0) {
                 updateBook(supabase, user.id, b.id, patch).catch(() => {})
                 setBook((prev) => (prev ? { ...prev, ...patch } : prev))
               }
             }
-          }
-          setBookDataLoading(false)
-        }).catch(() => { if (!cancelled) setBookDataLoading(false) })
+            setBookDataLoading(false)
+          }).catch(() => { if (!cancelled) setBookDataLoading(false) })
+        }
         if (!b.cover_url && b.title) {
           fetchCoverByTitleAuthor(b.title, b.author ?? '').then((cover) => {
             if (cancelled || !cover) return
@@ -295,6 +294,14 @@ export default function BookDetailPage() {
   const readingTime = readingDays === null
     ? undefined
     : `${readingDays} ${readingDays === 1 ? t.dayUnit : t.daysUnit}`
+
+  // Stored metadata first; the api* fallbacks only hold anything for books that
+  // predate these columns, where the lookup above filled them in for this view.
+  const displayGenre       = book.genre || apiGenre
+  const displayPublishedYear = book.published_date?.slice(0, 4) ?? apiPublishedYear
+  const displayPageCount   = book.page_count ?? apiPageCount
+  const displayPublisher   = book.publisher ?? apiPublisher
+  const displayDescription = book.description ?? description
 
   // ── View mode ────────────────────────────────────────────────────────────────
   return (
@@ -469,27 +476,27 @@ export default function BookDetailPage() {
             <InfoChip
               icon={Rocket}
               label={t.released}
-              value={apiPublishedYear}
+              value={displayPublishedYear}
             />
-            {(book.genre || apiGenre) && (
+            {displayGenre && (
               <InfoChip
                 icon={LibraryBig}
                 label={t.genre}
-                value={book.genre || apiGenre}
+                value={displayGenre}
               />
             )}
-            {apiPageCount && (
+            {displayPageCount && (
               <InfoChip
                 icon={BookOpen}
                 label={t.pages}
-                value={String(apiPageCount)}
+                value={String(displayPageCount)}
               />
             )}
-            {apiPublisher && (
+            {displayPublisher && (
               <InfoChip
                 icon={LibraryBig}
                 label={t.publisher}
-                value={apiPublisher}
+                value={displayPublisher}
               />
             )}
           </div>
@@ -521,7 +528,7 @@ export default function BookDetailPage() {
                      style={{ borderTopColor: 'var(--primary)' }} />
                 <span className="text-[14px]" style={{ color: 'var(--label-tertiary)' }}>{t.loading}</span>
               </div>
-            ) : description ? (
+            ) : displayDescription ? (
               <div>
                 <p
                   className="text-[17px] leading-[22px] tracking-[-0.43px]"
@@ -533,7 +540,7 @@ export default function BookDetailPage() {
                     WebkitLineClamp: descExpanded ? 'unset' : 3,
                   } as React.CSSProperties}
                 >
-                  {description}
+                  {displayDescription}
                 </p>
                 <button
                   onClick={() => setDescExpanded((v) => !v)}

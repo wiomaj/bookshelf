@@ -24,6 +24,13 @@ import type { BookSuggestion } from '@/lib/bookSearch'
 export const MAX_STORED_SUBJECTS = 8
 
 /**
+ * Shortest synopsis worth storing, matching the threshold /api/book-data
+ * already applies. Below this the catalogues return stubs like "A novel." that
+ * are worse than showing nothing.
+ */
+export const MIN_DESCRIPTION_LENGTH = 30
+
+/**
  * Subjects too broad to be useful as a displayed genre. Google Books tags a
  * large share of its catalogue "Fiction" / "General", which would collapse the
  * dashboard's genre breakdown into a single bar. They stay in `subjects` — a
@@ -47,7 +54,7 @@ const GENERIC_SUBJECTS = new Set([
 /** The subset of Book columns this module writes. */
 export type BookEnrichment = Pick<
   Book,
-  'isbn13' | 'page_count' | 'published_date' | 'publisher' | 'subjects' | 'genre'
+  'isbn13' | 'page_count' | 'published_date' | 'publisher' | 'subjects' | 'genre' | 'description'
 >
 
 // ─── Matching ─────────────────────────────────────────────────────────────────
@@ -129,6 +136,11 @@ export function enrichmentFromSuggestion(
   if (suggestion.publishedDate) enrichment.published_date = suggestion.publishedDate
   if (suggestion.publisher) enrichment.publisher = suggestion.publisher
 
+  const description = suggestion.description?.trim()
+  if (description && description.length >= MIN_DESCRIPTION_LENGTH) {
+    enrichment.description = description
+  }
+
   const subjects = (suggestion.subjects ?? [])
     .map((s) => s.trim())
     .filter(Boolean)
@@ -144,9 +156,33 @@ export function enrichmentFromSuggestion(
 
 // ─── Backfill ─────────────────────────────────────────────────────────────────
 
-/** A book already carries content metadata, so there is nothing to backfill. */
-export function hasStoredMetadata(book: Pick<Book, 'isbn13' | 'subjects'>): boolean {
-  return Boolean(book.isbn13) || (book.subjects?.length ?? 0) > 0
+/**
+ * Whether the read-book detail view still has to hit the catalogue.
+ *
+ * Only the description and subjects count. Publisher and page count are
+ * genuinely absent for plenty of editions, so demanding them would leave the
+ * lookup running forever on exactly the books that can never satisfy it — and
+ * the chips showing them are conditional anyway.
+ *
+ * This page is also where books backfill themselves, so the bar includes
+ * subjects even though nothing on screen renders them directly.
+ */
+export function needsMetadataLookup(
+  book: Pick<Book, 'description' | 'subjects'>,
+): boolean {
+  return !book.description || (book.subjects?.length ?? 0) === 0
+}
+
+/**
+ * The same question for the to-read and wishlist detail views, which render
+ * only the synopsis, genre and release year. They look books up through
+ * /api/book-data, which returns just those three, so their bar can't include
+ * anything the route never provides.
+ */
+export function needsSynopsisLookup(
+  book: Pick<Book, 'description' | 'genre' | 'published_date'>,
+): boolean {
+  return !book.description || !book.genre || !book.published_date
 }
 
 /**
@@ -165,5 +201,6 @@ export function enrichmentPatch(book: Book, enrichment: BookEnrichment): BookEnr
   if (!book.publisher && enrichment.publisher) patch.publisher = enrichment.publisher
   if (!book.subjects?.length && enrichment.subjects?.length) patch.subjects = enrichment.subjects
   if (!book.genre && enrichment.genre) patch.genre = enrichment.genre
+  if (!book.description && enrichment.description) patch.description = enrichment.description
   return patch
 }

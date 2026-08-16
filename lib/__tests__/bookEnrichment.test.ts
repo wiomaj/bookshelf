@@ -4,9 +4,11 @@ import {
   suggestionMatches,
   genreFromSubjects,
   enrichmentFromSuggestion,
-  hasStoredMetadata,
+  needsMetadataLookup,
+  needsSynopsisLookup,
   enrichmentPatch,
   MAX_STORED_SUBJECTS,
+  MIN_DESCRIPTION_LENGTH,
 } from '../bookEnrichment'
 import type { BookSuggestion } from '../bookSearch'
 import type { Book } from '@/types/book'
@@ -19,6 +21,7 @@ const PIRANESI: BookSuggestion = {
   publishedDate: '2020-09-15',
   publisher: 'Bloomsbury',
   subjects: ['Fiction', 'Fantasy', 'Magical realism'],
+  description: 'A man lives alone in a vast labyrinth of halls and statues, keeping a careful journal.',
 }
 
 function book(overrides: Partial<Book> = {}): Book {
@@ -122,7 +125,17 @@ describe('enrichmentFromSuggestion', () => {
       publisher: 'Bloomsbury',
       subjects: ['Fiction', 'Fantasy', 'Magical realism'],
       genre: 'Fantasy',
+      description: 'A man lives alone in a vast labyrinth of halls and statues, keeping a careful journal.',
     })
+  })
+
+  it('trims the description and skips stubs shorter than the minimum', () => {
+    const stub = { ...PIRANESI, description: '  A novel.  ' }
+    expect(enrichmentFromSuggestion(stub, 'Piranesi', 'Susanna Clarke').description).toBeUndefined()
+
+    const long = 'x'.repeat(MIN_DESCRIPTION_LENGTH)
+    const kept = { ...PIRANESI, description: `  ${long}  ` }
+    expect(enrichmentFromSuggestion(kept, 'Piranesi', 'Susanna Clarke').description).toBe(long)
   })
 
   it('returns an empty object for no suggestion', () => {
@@ -164,17 +177,39 @@ describe('enrichmentFromSuggestion', () => {
   })
 })
 
-// ─── hasStoredMetadata ───────────────────────────────────────────────────────
+// ─── needsMetadataLookup ─────────────────────────────────────────────────────
 
-describe('hasStoredMetadata', () => {
-  it('is true once an ISBN or subjects are stored', () => {
-    expect(hasStoredMetadata(book({ isbn13: '9781635575637' }))).toBe(true)
-    expect(hasStoredMetadata(book({ subjects: ['Fantasy'] }))).toBe(true)
+describe('needsMetadataLookup', () => {
+  it('is false once a description and subjects are stored', () => {
+    expect(needsMetadataLookup(book({ description: 'A synopsis.', subjects: ['Fantasy'] }))).toBe(false)
   })
 
-  it('is false for a book with neither', () => {
-    expect(hasStoredMetadata(book())).toBe(false)
-    expect(hasStoredMetadata(book({ isbn13: null, subjects: [] }))).toBe(false)
+  it('is true while either is missing', () => {
+    expect(needsMetadataLookup(book())).toBe(true)
+    expect(needsMetadataLookup(book({ description: 'A synopsis.' }))).toBe(true)
+    expect(needsMetadataLookup(book({ subjects: ['Fantasy'] }))).toBe(true)
+    expect(needsMetadataLookup(book({ description: 'A synopsis.', subjects: [] }))).toBe(true)
+  })
+
+  it('does not require a publisher or page count, which many editions lack', () => {
+    const sparse = book({ description: 'A synopsis.', subjects: ['Fantasy'], publisher: null, page_count: null })
+    expect(needsMetadataLookup(sparse)).toBe(false)
+  })
+})
+
+// ─── needsSynopsisLookup ─────────────────────────────────────────────────────
+
+describe('needsSynopsisLookup', () => {
+  it('is false once the synopsis, genre and release date are stored', () => {
+    expect(needsSynopsisLookup(book({
+      description: 'A synopsis.', genre: 'Fantasy', published_date: '2020',
+    }))).toBe(false)
+  })
+
+  it('is true while any of the three is missing', () => {
+    expect(needsSynopsisLookup(book({ genre: 'Fantasy', published_date: '2020' }))).toBe(true)
+    expect(needsSynopsisLookup(book({ description: 'A synopsis.', published_date: '2020' }))).toBe(true)
+    expect(needsSynopsisLookup(book({ description: 'A synopsis.', genre: 'Fantasy' }))).toBe(true)
   })
 })
 
@@ -188,10 +223,11 @@ describe('enrichmentPatch', () => {
   })
 
   it('never overwrites a value already on the book', () => {
-    const existing = book({ genre: 'Slipstream', page_count: 300 })
+    const existing = book({ genre: 'Slipstream', page_count: 300, description: 'My own summary.' })
     const patch = enrichmentPatch(existing, full)
     expect(patch.genre).toBeUndefined()
     expect(patch.page_count).toBeUndefined()
+    expect(patch.description).toBeUndefined()
     expect(patch.isbn13).toBe('9781635575637')
   })
 
@@ -203,6 +239,7 @@ describe('enrichmentPatch', () => {
       publisher: 'Bloomsbury',
       subjects: ['Fantasy'],
       genre: 'Fantasy',
+      description: 'Already stored.',
     })
     expect(enrichmentPatch(existing, full)).toEqual({})
   })

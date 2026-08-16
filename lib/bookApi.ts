@@ -5,6 +5,15 @@ import { monthSortKey } from '@/lib/month'
 const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at, status, acquired_month, acquired_year, read_month, read_year, finished_at, is_audiobook, is_ebook, started_reading_day, started_reading_month, started_reading_year, isbn13, page_count, published_date, publisher, subjects'
 
 /**
+ * COLUMNS plus the synopsis, for queries that return a single book.
+ *
+ * Descriptions run to several KB and only the detail view renders one, so the
+ * list queries below — which load the entire library in one request — leave the
+ * column out rather than pay for it on every home-screen load.
+ */
+const DETAIL_COLUMNS = `${COLUMNS}, description`
+
+/**
  * Newest-first ordering for read books: year, then month (season codes sort by
  * their midpoint), then the moment the book was actually finished. finished_at
  * falls back to created_at for rows that predate the column.
@@ -107,7 +116,7 @@ export async function getWishlistBooks(supabase: SupabaseClient, userId: string)
 export async function getBook(supabase: SupabaseClient, userId: string, id: string): Promise<Book | null> {
   const { data, error } = await supabase
     .from('books')
-    .select(COLUMNS)
+    .select(DETAIL_COLUMNS)
     .eq('id', id)
     .eq('user_id', userId)
     .single()
@@ -130,7 +139,7 @@ export async function addBook(
   const { data, error } = await supabase
     .from('books')
     .insert({ ...book, ...finishedAt, user_id: userId })
-    .select(COLUMNS)
+    .select(DETAIL_COLUMNS)
     .single()
 
   if (error) throw new Error(error.message)
@@ -149,7 +158,7 @@ export async function updateBook(
     .update(updates)
     .eq('id', id)
     .eq('user_id', userId)
-    .select(COLUMNS)
+    .select(DETAIL_COLUMNS)
     .single()
 
   if (error) throw new Error(error.message)
