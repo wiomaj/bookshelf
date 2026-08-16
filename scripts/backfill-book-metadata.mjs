@@ -76,12 +76,28 @@ function genreFromSubjects(subjects) {
   return clean.find(s => !GENERIC_SUBJECTS.has(s.toLowerCase())) ?? clean[0]
 }
 
-/** Google Books descriptions carry markup; the app stores them plain. */
+const HTML_ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"' }
+
+/**
+ * Google Books descriptions carry markup; the app stores them plain.
+ *
+ * Tags are stripped in a loop rather than a single pass — a lone pass can be
+ * reconstructed by nested markup ("<scr<script>ipt>" strips to "<script>").
+ * Entities are unescaped in one combined pass rather than four chained ones,
+ * so literal text like "&amp;lt;" decodes to "&lt;" and not, incorrectly, "<".
+ */
 function stripHtml(html) {
-  return html
-    .replace(/<[^>]*>/g, '')
-    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
-    .replace(/\s+/g, ' ').trim()
+  let stripped = html
+  let previous
+  do {
+    previous = stripped
+    stripped = stripped.replace(/<[^>]*>/g, '')
+  } while (stripped !== previous)
+
+  return stripped
+    .replace(/&(amp|lt|gt|quot);/g, (_, name) => HTML_ENTITIES[name])
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function isbn13From(identifiers) {
