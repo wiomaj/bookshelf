@@ -11,10 +11,12 @@ import { uploadCoverPhoto } from '@/lib/coverUpload'
 import { supabase } from '@/lib/supabase'
 import { searchBooks } from '@/lib/bookSearch'
 import type { BookSuggestion } from '@/lib/bookSearch'
+import { enrichmentFromSuggestion } from '@/lib/bookEnrichment'
+import type { BookEnrichment } from '@/lib/bookEnrichment'
 
 const currentYear = new Date().getFullYear()
 
-export type ToReadFormData = {
+export type ToReadFormData = BookEnrichment & {
   title: string
   author: string
   month: number | null
@@ -86,6 +88,9 @@ export default function ToReadForm({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const skipNextSearchRef = useRef(false)
+  // Kept whole so its metadata can be re-checked against the (still editable)
+  // title and author at submit time — see lib/bookEnrichment.
+  const selectedSuggestionRef = useRef<BookSuggestion | null>(null)
 
   useEffect(() => {
     if (!titleFocused) return
@@ -117,6 +122,7 @@ export default function ToReadForm({
 
   function selectSuggestion(s: BookSuggestion) {
     skipNextSearchRef.current = true
+    selectedSuggestionRef.current = s
     setTitle(s.title)
     setAuthor(s.author)
     if (s.cover_url) setCoverUrl(s.cover_url)
@@ -156,8 +162,17 @@ export default function ToReadForm({
       })
     }
 
+    // Empty unless a suggestion was picked and still matches what's typed, so
+    // spreading it never clears metadata already stored on the book.
+    const enrichment = enrichmentFromSuggestion(
+      selectedSuggestionRef.current,
+      title.trim(),
+      author.trim(),
+    )
+
     try {
       await onSubmit({
+        ...enrichment,
         title: title.trim(),
         author: author.trim(),
         month,

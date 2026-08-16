@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Book } from '@/types/book'
 import { monthSortKey } from '@/lib/month'
 
-const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at, status, acquired_month, acquired_year, read_month, read_year, finished_at, is_audiobook, is_ebook, started_reading_day, started_reading_month, started_reading_year'
+const COLUMNS = 'id, user_id, title, author, genre, year, month, rating, notes, cover_url, created_at, status, acquired_month, acquired_year, read_month, read_year, finished_at, is_audiobook, is_ebook, started_reading_day, started_reading_month, started_reading_year, isbn13, page_count, published_date, publisher, subjects'
 
 /**
  * Newest-first ordering for read books: year, then month (season codes sort by

@@ -8,6 +8,7 @@ import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchCoverByTitleAuthor } from '@/lib/bookMetadata'
 import { searchBooks } from '@/lib/bookSearch'
+import { enrichmentFromSuggestion, enrichmentPatch, hasStoredMetadata } from '@/lib/bookEnrichment'
 import StarRating from '@/components/StarRating'
 import BookForm from '@/components/BookForm'
 import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
@@ -124,6 +125,20 @@ export default function BookDetailPage() {
             if (best.pageCount) setApiPageCount(best.pageCount)
             if (best.publisher) setApiPublisher(best.publisher)
             if (best.subjects?.length) setApiSubjects(best.subjects.slice(0, 6))
+
+            // Backfill for books added before these columns existed. The lookup
+            // has already happened for the display above, so this costs one
+            // write and only ever runs once per book — hasStoredMetadata is
+            // true on every later visit. enrichmentFromSuggestion re-applies the
+            // title/author match, since `best` is only a best guess from a
+            // title search, and enrichmentPatch never overwrites stored values.
+            if (!hasStoredMetadata(b)) {
+              const patch = enrichmentPatch(b, enrichmentFromSuggestion(best, b.title, b.author ?? ''))
+              if (Object.keys(patch).length > 0) {
+                updateBook(supabase, user.id, b.id, patch).catch(() => {})
+                setBook((prev) => (prev ? { ...prev, ...patch } : prev))
+              }
+            }
           }
           setBookDataLoading(false)
         }).catch(() => { if (!cancelled) setBookDataLoading(false) })
