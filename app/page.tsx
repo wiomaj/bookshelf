@@ -16,6 +16,7 @@ import UserAvatar from '@/components/UserAvatar'
 import RatingDistributionChart from '@/components/RatingDistributionChart'
 import FavouriteAuthors from '@/components/FavouriteAuthors'
 import GenreBreakdown from '@/components/GenreBreakdown'
+import FormatBreakdown from '@/components/FormatBreakdown'
 import BookCover from '@/components/BookCover'
 import { useApp, useT } from '@/contexts/AppContext'
 import type { Book } from '@/types/book'
@@ -1023,6 +1024,9 @@ export default function HomePage() {
               </motion.div>
               <motion.div variants={dashCard}>
                 <GenreBreakdown books={dashboardBooks} />
+              </motion.div>
+              <motion.div variants={dashCard}>
+                <FormatBreakdown books={dashboardBooks} />
               </motion.div>
             </>
           )}

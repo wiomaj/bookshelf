@@ -24,3 +24,17 @@ export function bookFormatToFlags(format: BookFormat): { is_audiobook: boolean; 
     is_ebook: format === 'ebook',
   }
 }
+
+/** Display order for the formats — print first, since it's the default. */
+export const BOOK_FORMATS: readonly BookFormat[] = ['print', 'ebook', 'audiobook']
+
+/**
+ * How many books fall into each format. Every book counts exactly once: a row
+ * with neither flag set is print, so the three counts always add up to
+ * `books.length`.
+ */
+export function countBookFormats(books: readonly FormatFlags[]): Record<BookFormat, number> {
+  const counts: Record<BookFormat, number> = { print: 0, ebook: 0, audiobook: 0 }
+  for (const book of books) counts[bookFormatFromFlags(book)] += 1
+  return counts
+}
