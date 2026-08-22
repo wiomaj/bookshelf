@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useT } from '@/contexts/AppContext'
 import { SHORT_MONTHS } from '@/lib/month'
-import StatScope from '@/components/StatScope'
+import YearPicker from '@/components/YearPicker'
 import type { Book } from '@/types/book'
 
 interface Props {
@@ -87,7 +87,7 @@ export default function ReadingPaceChart({ books }: Props) {
             {t.statsBooksPerMonth}
           </p>
         </div>
-        <StatScope label={String(year)} options={years} onSelect={setPicked} />
+        <YearPicker value={year} options={years} onSelect={setPicked} />
       </div>
 
       {/* Large stat */}
