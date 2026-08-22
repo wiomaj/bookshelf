@@ -113,6 +113,7 @@ export type Translations = {
   preferencesSection: string
   yourName: string
   yourNamePlaceholder: string
+  profileImage: string
   // Name prompt overlay
   namePromptTitle: string
   namePromptSub: string
@@ -371,6 +372,7 @@ const en: Translations = {
   preferencesSection: 'Preferences',
   yourName: 'Name',
   yourNamePlaceholder: 'Add your name',
+  profileImage: 'Profile image',
   namePromptTitle: 'What\'s your name?',
   namePromptSub: 'We\'ll use it to personalise your bookshelf.',
   namePromptCta: 'Continue',
@@ -610,6 +612,7 @@ const de: Translations = {
   preferencesSection: 'Präferenzen',
   yourName: 'Name',
   yourNamePlaceholder: 'Name hinzufügen',
+  profileImage: 'Profilbild',
   namePromptTitle: 'Wie heißt du?',
   namePromptSub: 'Wir nutzen deinen Namen, um dein Bücherregal zu personalisieren.',
   namePromptCta: 'Weiter',
@@ -849,6 +852,7 @@ const fr: Translations = {
   preferencesSection: 'Préférences',
   yourName: 'Nom',
   yourNamePlaceholder: 'Ajouter ton nom',
+  profileImage: 'Photo de profil',
   namePromptTitle: 'Comment tu t\'appelles ?',
   namePromptSub: 'On l\'utilisera pour personnaliser ta bibliothèque.',
   namePromptCta: 'Continuer',
@@ -1088,6 +1092,7 @@ const es: Translations = {
   preferencesSection: 'Preferencias',
   yourName: 'Nombre',
   yourNamePlaceholder: 'Añadir tu nombre',
+  profileImage: 'Imagen de perfil',
   namePromptTitle: '¿Cómo te llamas?',
   namePromptSub: 'Lo usaremos para personalizar tu estantería.',
   namePromptCta: 'Continuar',
@@ -1327,6 +1332,7 @@ const pl: Translations = {
   preferencesSection: 'Preferencje',
   yourName: 'Imię',
   yourNamePlaceholder: 'Dodaj imię',
+  profileImage: 'Zdjęcie profilowe',
   namePromptTitle: 'Jak masz na imię?',
   namePromptSub: 'Użyjemy go, aby spersonalizować twoją półkę.',
   namePromptCta: 'Kontynuuj',

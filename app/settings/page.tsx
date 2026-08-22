@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, ChevronLeft, Check, BookOpenCheck, User, Settings, Download } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Check, BookOpenCheck, Settings, Download } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useApp, useT } from '@/contexts/AppContext'
@@ -10,6 +10,7 @@ import { LANGUAGES } from '@/lib/translations'
 import { supabase } from '@/lib/supabase'
 import { getBooks } from '@/lib/bookApi'
 import { booksToCsv, downloadCsv } from '@/lib/csvExport'
+import UserAvatar from '@/components/UserAvatar'
 
 type View = 'settings' | 'changePassword'
 
@@ -37,7 +38,8 @@ function BottomNav({ t, displayName }: { t: ReturnType<typeof useT>; displayName
           className="flex-1 flex flex-col items-center gap-[3px] py-2 rounded-[22px]"
           style={{ color: 'var(--label-secondary)' }}
         >
-          <User size={22} strokeWidth={1.5} />
+          {/* The tab label already reads the name, so the image is decorative here. */}
+          <UserAvatar size={22} shape="circle" decorative />
           <span className="text-[10px] font-medium tracking-[-0.1px] max-w-[64px] truncate">{displayName || t.tabDashboard}</span>
         </button>
 
@@ -263,6 +265,21 @@ export default function SettingsPage() {
             {t.profileSection}
           </p>
           <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            {/* Generated image — name and email sit beside it, so it's decorative. */}
+            <div className="flex items-center px-4 py-4 gap-3">
+              <UserAvatar size={56} decorative />
+              <div className="flex-1 min-w-0">
+                <p className="text-[17px] truncate" style={{ color: 'var(--label)' }}>
+                  {displayName || t.yourNamePlaceholder}
+                </p>
+                <p className="text-[13px] truncate mt-0.5" style={{ color: 'var(--label-secondary)' }}>
+                  {user?.email}
+                </p>
+              </div>
+            </div>
+
+            <div className="h-px ml-4" style={{ backgroundColor: 'var(--separator)' }} />
+
             <div className="flex items-center px-4 min-h-[52px] gap-3">
               <label className="text-[17px] shrink-0" style={{ color: 'var(--label)' }}>
                 {t.yourName}
