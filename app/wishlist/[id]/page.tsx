@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Heart, Pencil, BookmarkPlus, Rocket, LibraryBig, type LucideIcon } from 'lucide-react'
+import { X, Heart, Pencil, BookmarkPlus, Rocket, LibraryBig, Book as BookIcon, Tablet, Headphones, type LucideIcon } from 'lucide-react'
 import { getBook, updateBook, deleteBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
 import { fetchBookData } from '@/lib/bookDescription'
@@ -13,6 +13,8 @@ import { useApp, useT } from '@/contexts/AppContext'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import StarRating from '@/components/StarRating'
 import StatusPicker, { type BookStatus } from '@/components/StatusPicker'
+import SegmentedControl from '@/components/SegmentedControl'
+import { bookFormatFromFlags, bookFormatToFlags, type BookFormat } from '@/lib/bookFormat'
 import BookForm from '@/components/BookForm'
 import ToReadForm, { type ToReadFormData } from '@/components/ToReadForm'
 import { heroCoverUrl } from '@/lib/coverUrl'
@@ -81,6 +83,7 @@ export default function WishlistDetailPage() {
   const [readYear, setReadYear] = useState<number>(currentDate.getFullYear())
   const [readRating, setReadRating] = useState(0)
   const [readNotes, setReadNotes] = useState('')
+  const [moveFormat, setMoveFormat] = useState<BookFormat>('print')
 
   // Pre-fill dates from stored per-status columns when book loads
   useEffect(() => {
@@ -91,6 +94,8 @@ export default function WishlistDetailPage() {
     if (book.read_year) setReadYear(book.read_year)
     if (book.rating) setReadRating(book.rating)
     if (book.notes) setReadNotes(book.notes)
+    // Pre-fill the format picked when the book was first added
+    setMoveFormat(bookFormatFromFlags(book))
   }, [book?.id])
 
   const [description, setDescription] = useState<string | undefined>(undefined)
@@ -207,6 +212,7 @@ export default function WishlistDetailPage() {
         year: moveYear,
         acquired_month: moveMonth,
         acquired_year: moveYear,
+        ...bookFormatToFlags(moveFormat),
       })
       sessionStorage.setItem('bookshelf_returnTab', 'to_read')
       router.replace('/')
@@ -231,6 +237,7 @@ export default function WishlistDetailPage() {
         read_month: readMonth,
         read_year: readYear,
         finished_at: new Date().toISOString(),
+        ...bookFormatToFlags(moveFormat),
       })
       sessionStorage.setItem('bookshelf_returnTab', 'read')
       sessionStorage.setItem('bookshelf_flash', 'markedAsRead')
@@ -579,7 +586,7 @@ export default function WishlistDetailPage() {
               </h3>
 
               {/* Month + Year pickers */}
-              <div className="rounded-[14px] overflow-hidden mb-6" style={{ backgroundColor: 'var(--fill)' }}>
+              <div className="rounded-[14px] overflow-hidden mb-5" style={{ backgroundColor: 'var(--fill)' }}>
                 <div className="grid grid-cols-3">
                   <div className="col-span-2" style={{ borderRight: '1px solid var(--separator)' }}>
                     <select
@@ -608,6 +615,24 @@ export default function WishlistDetailPage() {
                 </div>
               </div>
 
+              {/* Book type — pre-filled from what was picked when the book was added */}
+              <div className="mb-6">
+                <label className="block text-[13px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--label-secondary)' }}>
+                  {t.bookTypeLabel}
+                </label>
+                <SegmentedControl
+                  value={moveFormat}
+                  onChange={setMoveFormat}
+                  ariaLabel={t.bookTypeLabel}
+                  layoutId="move-format-thumb"
+                  options={[
+                    { value: 'print', label: t.printBook, icon: BookIcon },
+                    { value: 'ebook', label: t.ebook, icon: Tablet },
+                    { value: 'audiobook', label: t.audiobook, icon: Headphones },
+                  ]}
+                />
+              </div>
+
               <div className="flex flex-col gap-3">
                 <motion.button
                   whileTap={{ scale: 0.97 }}
@@ -623,7 +648,7 @@ export default function WishlistDetailPage() {
                   className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white"
                   style={{ backgroundColor: 'var(--success)' }}
                 >
-                  {book.is_audiobook ? t.markAsListened : t.markAsRead}
+                  {moveFormat === 'audiobook' ? t.markAsListened : t.markAsRead}
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.97 }}
@@ -665,7 +690,7 @@ export default function WishlistDetailPage() {
                    style={{ backgroundColor: 'var(--separator-opaque)' }} />
 
               <h3 className="text-[22px] font-bold tracking-[-0.3px] mb-5" style={{ color: 'var(--label)' }}>
-                {book.is_audiobook ? t.whenDidYouListen : t.whenDidYouRead}
+                {moveFormat === 'audiobook' ? t.whenDidYouListen : t.whenDidYouRead}
               </h3>
 
               {/* Month + Year pickers */}
@@ -735,7 +760,7 @@ export default function WishlistDetailPage() {
                   className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold text-white"
                   style={{ backgroundColor: 'var(--primary)', boxShadow: 'var(--btn-shadow)' }}
                 >
-                  {book.is_audiobook ? t.markAsListened : t.markAsRead}
+                  {moveFormat === 'audiobook' ? t.markAsListened : t.markAsRead}
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.97 }}

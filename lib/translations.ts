@@ -48,6 +48,8 @@ export type Translations = {
   notesPlaceholder: string
   audiobook: string
   ebook: string
+  printBook: string
+  bookTypeLabel: string
   scanPrompt: string
   scanLookingUp: string
   scanNotFound: string
@@ -310,6 +312,8 @@ const en: Translations = {
   notesPlaceholder: 'What do you think about this book?',
   audiobook: 'Audiobook',
   ebook: 'E-book',
+  printBook: 'Book',
+  bookTypeLabel: 'Type',
   scanPrompt: 'Point at an ISBN barcode',
   scanLookingUp: 'Found! Looking up book…',
   scanNotFound: 'Book not found. Try again…',
@@ -547,6 +551,8 @@ const de: Translations = {
   notesPlaceholder: 'Was denkst du über dieses Buch?',
   audiobook: 'Hörbuch',
   ebook: 'E-Book',
+  printBook: 'Buch',
+  bookTypeLabel: 'Art',
   scanPrompt: 'Auf einen ISBN-Barcode richten',
   scanLookingUp: 'Gefunden! Buch wird gesucht…',
   scanNotFound: 'Buch nicht gefunden. Versuch es erneut…',
@@ -784,6 +790,8 @@ const fr: Translations = {
   notesPlaceholder: "Que pensez-vous de ce livre ?",
   audiobook: 'Livre audio',
   ebook: 'Livre numérique',
+  printBook: 'Livre',
+  bookTypeLabel: 'Type',
   scanPrompt: 'Visez un code-barres ISBN',
   scanLookingUp: 'Trouvé ! Recherche du livre…',
   scanNotFound: 'Livre introuvable. Réessayez…',
@@ -1021,6 +1029,8 @@ const es: Translations = {
   notesPlaceholder: '¿Qué piensas de este libro?',
   audiobook: 'Audiolibro',
   ebook: 'Libro electrónico',
+  printBook: 'Libro',
+  bookTypeLabel: 'Tipo',
   scanPrompt: 'Apunta a un código de barras ISBN',
   scanLookingUp: '¡Encontrado! Buscando el libro…',
   scanNotFound: 'Libro no encontrado. Inténtalo de nuevo…',
@@ -1258,6 +1268,8 @@ const pl: Translations = {
   notesPlaceholder: 'Co myślisz o tej książce?',
   audiobook: 'Audiobook',
   ebook: 'E-book',
+  printBook: 'Książka',
+  bookTypeLabel: 'Rodzaj',
   scanPrompt: 'Skieruj na kod kreskowy ISBN',
   scanLookingUp: 'Znaleziono! Wyszukiwanie książki…',
   scanNotFound: 'Nie znaleziono książki. Spróbuj ponownie…',
