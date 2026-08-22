@@ -1,16 +1,29 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useT } from '@/contexts/AppContext'
 import { SHORT_MONTHS } from '@/lib/month'
+import YearPicker from '@/components/YearPicker'
 import type { Book } from '@/types/book'
 
 interface Props {
+  /** Every book on the Read shelf — abandoned ones included, counted separately. */
   books: Book[]
-  year: number
 }
 
-export default function ReadingPaceChart({ books, year }: Props) {
+// A book belongs to the year and month it was *finished*. read_year/read_month
+// are the canonical finish date; year/month are the older columns they replaced,
+// so they stay as the fallback for rows written before the split. Same rule as
+// csvExport and readingDuration.
+const finishYear  = (b: Book): number        => b.read_year ?? b.year
+const finishMonth = (b: Book): number | null => b.read_month ?? b.month ?? null
+
+// Season codes 13–16 (Spring/Summer/Fall/Winter) are a real answer to "when did
+// you read it?", just a coarser one than a month. They can't sit in a month bar
+// without inventing a month, so they get their own row under the chart.
+const SEASON_CODES = [13, 14, 15, 16] as const
+
+export default function ReadingPaceChart({ books }: Props) {
   const t = useT()
   const [ready, setReady] = useState(false)
   useEffect(() => {
@@ -18,41 +31,72 @@ export default function ReadingPaceChart({ books, year }: Props) {
     return () => cancelAnimationFrame(raf)
   }, [])
 
-  const counts = Array.from({ length: 12 }, (_, i) => {
-    const m = i + 1
-    return books.filter((b) => b.year === year && b.month === m).length
-  })
+  // Years come from every book on the shelf, abandoned included — a year where
+  // you only ever gave up on books is still a year worth showing.
+  const years = useMemo(
+    () => [...new Set(books.map(finishYear))].sort((a, b) => b - a),
+    [books],
+  )
 
-  const maxCount = Math.max(...counts, 1)
-  const totalThisYear = books.filter((b) => b.year === year).length
-  const uncategorised = totalThisYear - counts.reduce((s, c) => s + c, 0)
+  // null until the reader picks one, so the default follows the data as it loads.
+  const [picked, setPicked] = useState<number | null>(null)
+  const year = picked ?? years[0] ?? new Date().getFullYear()
+
+  const stats = useMemo(() => {
+    const ofYear = books.filter(b => finishYear(b) === year)
+    const finished = ofYear.filter(b => b.status !== 'abandoned')
+
+    const counts = Array.from({ length: 12 }, (_, i) =>
+      finished.filter(b => finishMonth(b) === i + 1).length,
+    )
+    const seasons = SEASON_CODES.map(code =>
+      finished.filter(b => finishMonth(b) === code).length,
+    )
+    const dated = counts.reduce((s, c) => s + c, 0) + seasons.reduce((s, c) => s + c, 0)
+
+    return {
+      counts,
+      seasons,
+      total: finished.length,
+      undated: finished.length - dated,
+      abandoned: ofYear.length - finished.length,
+    }
+  }, [books, year])
+
+  // Seasons render as chips, not bars, so they must not scale the month bars.
+  const maxCount = Math.max(...stats.counts, 1)
 
   return (
     <div
       className="mx-4 mb-4 rounded-[16px] p-[16px]"
       style={{ backgroundColor: 'var(--bg-elevated)' }}
     >
-      {/* Card title */}
-      <p
-        className="text-[17px] font-semibold tracking-[-0.43px]"
-        style={{ color: 'var(--label)' }}
-      >
-        {t.statsReadingPace}
-      </p>
-      <p
-        className="text-[12px] mt-[2px] mb-[24px]"
-        style={{ color: 'var(--label-secondary)' }}
-      >
-        {t.statsBooksPerMonth}
-      </p>
+      {/* Card title + the year this card — and only this card — covers */}
+      <div className="flex items-start gap-2">
+        <div className="flex-1 min-w-0">
+          <p
+            className="text-[17px] font-semibold tracking-[-0.43px]"
+            style={{ color: 'var(--label)' }}
+          >
+            {t.statsReadingPace}
+          </p>
+          <p
+            className="text-[12px] mt-[2px]"
+            style={{ color: 'var(--label-secondary)' }}
+          >
+            {t.statsBooksPerMonth}
+          </p>
+        </div>
+        <YearPicker value={year} options={years} onSelect={setPicked} />
+      </div>
 
       {/* Large stat */}
-      <div className="flex items-baseline gap-[8px] mb-[24px]">
+      <div className="flex items-baseline gap-[8px] mt-[24px] mb-[24px]">
         <span
           className="text-[40px] font-bold leading-none tracking-[0.38px]"
           style={{ color: 'var(--label)' }}
         >
-          {totalThisYear}
+          {stats.total}
         </span>
         <span
           className="text-[12px] font-medium"
@@ -60,9 +104,17 @@ export default function ReadingPaceChart({ books, year }: Props) {
         >
           {t.statsBooks}
         </span>
+        {stats.abandoned > 0 && (
+          <span
+            className="text-[12px] font-medium"
+            style={{ color: 'var(--label-tertiary)' }}
+          >
+            · {stats.abandoned} {t.statsNotFinished}
+          </span>
+        )}
       </div>
 
-      {totalThisYear === 0 ? (
+      {stats.total === 0 ? (
         <p className="text-[13px] text-center py-4" style={{ color: 'var(--label-tertiary)' }}>
           {t.statsNoBooks}
         </p>
@@ -70,7 +122,7 @@ export default function ReadingPaceChart({ books, year }: Props) {
         <div className="flex flex-col gap-[8px]">
           {/* Bar chart */}
           <div className="flex items-end gap-[4px]">
-            {counts.map((count, i) => {
+            {stats.counts.map((count, i) => {
               const barH = count === 0 ? 3 : Math.max(16, Math.round((count / maxCount) * 72))
               return (
                 <div key={i} className="flex-1 flex flex-col items-center gap-[4px]">
@@ -102,13 +154,33 @@ export default function ReadingPaceChart({ books, year }: Props) {
             })}
           </div>
 
-          {/* Uncategorised note */}
-          {uncategorised > 0 && (
+          {/* Books logged to a season rather than a month */}
+          {stats.seasons.some(c => c > 0) && (
+            <div className="flex flex-wrap gap-[6px] pt-[4px]">
+              {stats.seasons.map((count, i) =>
+                count === 0 ? null : (
+                  <span
+                    key={SEASON_CODES[i]}
+                    className="rounded-full px-[8px] py-[3px] text-[11px] leading-[13px] tracking-[0.06px]"
+                    style={{ backgroundColor: 'var(--fill)', color: 'var(--label-secondary)' }}
+                  >
+                    {t.seasonNames[i]}
+                    <span className="font-semibold ml-[4px]" style={{ color: 'var(--label)' }}>
+                      {count}
+                    </span>
+                  </span>
+                ),
+              )}
+            </div>
+          )}
+
+          {/* Books with no month or season at all */}
+          {stats.undated > 0 && (
             <p
               className="text-[11px] leading-[13px] tracking-[0.06px] text-right"
               style={{ color: 'var(--label-secondary)' }}
             >
-              + {uncategorised} {t.statsWithoutMonth}
+              + {stats.undated} {t.statsWithoutMonth}
             </p>
           )}
         </div>
