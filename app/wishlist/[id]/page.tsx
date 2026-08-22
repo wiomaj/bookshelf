@@ -617,9 +617,6 @@ export default function WishlistDetailPage() {
 
               {/* Book type — pre-filled from what was picked when the book was added */}
               <div className="mb-6">
-                <label className="block text-[13px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--label-secondary)' }}>
-                  {t.bookTypeLabel}
-                </label>
                 <SegmentedControl
                   value={moveFormat}
                   onChange={setMoveFormat}
