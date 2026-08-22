@@ -37,13 +37,14 @@ export default function GenreBreakdown({ books }: Props) {
       className="mx-4 mb-6 rounded-[20px] px-4 pt-4 pb-5"
       style={{ backgroundColor: 'var(--bg-elevated)' }}
     >
-      {/* Header */}
+      {/* Header. The subtitle leads with the period the card covers — genres
+          are always all-time, whatever year the pace card is showing. */}
       <div className="mb-1">
         <p className="text-[13px] font-semibold tracking-[-0.1px]" style={{ color: 'var(--label)' }}>
           {t.statsGenreBreakdown}
         </p>
         <p className="text-[11px]" style={{ color: 'var(--label-secondary)' }}>
-          {t.statsByBooksRead}
+          {t.allTime} · {t.statsGenreBreakdownSub}
         </p>
       </div>
 

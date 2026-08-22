@@ -3,7 +3,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpenCheck, Settings, Loader2, ChevronDown, Search, X, SlidersHorizontal } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpenCheck, Settings, Loader2, Search, X, SlidersHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { getAllBooks, updateBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
@@ -57,8 +57,6 @@ export default function HomePage() {
   const [flashUndo, setFlashUndo] = useState<{ bookId: string; month: number; year: number } | null>(null)
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [scrolled, setScrolled] = useState(false)
-  const [dashboardYear, setDashboardYear] = useState<number | 'all' | null>(null)
-  const [yearPickerSource, setYearPickerSource] = useState<'large' | 'top' | null>(null)
 
   // Name prompt overlay
   const [showNamePrompt, setShowNamePrompt] = useState(false)
@@ -92,9 +90,7 @@ export default function HomePage() {
     setFilterHideAbandoned(false)
   }
 
-  const yearPickerRef    = useRef<HTMLDivElement>(null)
-  const yearPickerTopRef = useRef<HTMLDivElement>(null)
-  const titleRef         = useRef<HTMLHeadingElement>(null)
+  const titleRef = useRef<HTMLHeadingElement>(null)
 
   // Mutable refs so touch handlers don't form stale closures
   const pullStartYRef  = useRef(0)
@@ -161,19 +157,6 @@ export default function HomePage() {
     ro.observe(el)
     return () => ro.disconnect()
   }, [activeTab, loading, displayName, t, books.length, toReadBooks.length, wishlistBooks.length])
-
-  // ── Year picker click-outside ─────────────────────────────────────────────
-  useEffect(() => {
-    if (!yearPickerSource) return
-    function handler(e: MouseEvent) {
-      const target = e.target as Node
-      const insideLarge = yearPickerRef.current?.contains(target)
-      const insideTop   = yearPickerTopRef.current?.contains(target)
-      if (!insideLarge && !insideTop) setYearPickerSource(null)
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [yearPickerSource])
 
   // ── Initial data load ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -354,11 +337,11 @@ export default function HomePage() {
   }, {})
   const years = Object.keys(booksByYear).map(Number).sort((a, b) => b - a)
 
-  // ── Dashboard data — abandoned books don't count as read ─────────────────
+  // ── Dashboard data ───────────────────────────────────────────────────────
+  // Ratings, authors and genres describe books you actually finished, so
+  // abandoned ones are left out. The reading-pace card takes the full shelf and
+  // counts them separately, under the year it scopes itself to.
   const dashboardBooks = books.filter(b => b.status !== 'abandoned')
-  const dashYears = [...new Set(dashboardBooks.map(b => b.year))].sort((a, b) => b - a)
-  // null = not yet picked → default to most recent year; 'all' = explicit all-time
-  const effectiveYear: number | 'all' = dashboardYear ?? (dashYears.length > 0 ? dashYears[0] : 'all')
 
 
   // ── Search ───────────────────────────────────────────────────────────────
@@ -419,7 +402,7 @@ export default function HomePage() {
 
   const isEmptyState =
     (activeTab === 'books' && !hasAnyBooks) ||
-    (activeTab === 'dashboard' && dashboardBooks.length === 0)
+    (activeTab === 'dashboard' && books.length === 0)
 
   const title =
     activeTab === 'dashboard' ? (displayName || t.dashboardTitle) : t.myBookshelf
@@ -499,66 +482,6 @@ export default function HomePage() {
                       style={{ color: 'var(--label)' }}>
                   {title}
                 </span>
-              )}
-
-              {/* Year picker — dashboard, scrolled top bar */}
-              {activeTab === 'dashboard' && (
-                <div className="relative" ref={yearPickerTopRef}>
-                  <button
-                    onClick={() => setYearPickerSource(s => s === 'top' ? null : 'top')}
-                    className="flex items-center gap-[5px] rounded-full px-[12px] py-[6px]"
-                    style={{ backgroundColor: 'var(--fill)' }}
-                  >
-                    <span className="text-[13px] font-semibold" style={{ color: 'var(--label)' }}>
-                      {effectiveYear === 'all' ? t.allTime : String(effectiveYear)}
-                    </span>
-                    <ChevronDown size={12} style={{ color: 'var(--label-secondary)' }} />
-                  </button>
-
-                  <AnimatePresence>
-                    {yearPickerSource === 'top' && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: -4 }}
-                        transition={{ duration: 0.12 }}
-                        className="absolute right-0 top-full mt-[6px] rounded-[12px] overflow-hidden z-[60]"
-                        style={{
-                          backgroundColor: 'var(--bg-elevated)',
-                          boxShadow: '0 4px 24px rgba(0,0,0,0.14)',
-                          minWidth: '110px',
-                        }}
-                      >
-                        {dashYears.map(y => (
-                          <button
-                            key={y}
-                            onClick={() => { setDashboardYear(y); setYearPickerSource(null) }}
-                            className="w-full px-[16px] py-[10px] text-left text-[15px]"
-                            style={{
-                              color: effectiveYear === y ? 'var(--primary)' : 'var(--label)',
-                              fontWeight: effectiveYear === y ? 600 : 400,
-                            }}
-                          >
-                            {y}
-                          </button>
-                        ))}
-                        {dashYears.length > 0 && (
-                          <div className="mx-[12px] h-px" style={{ backgroundColor: 'var(--separator)' }} />
-                        )}
-                        <button
-                          onClick={() => { setDashboardYear('all'); setYearPickerSource(null) }}
-                          className="w-full px-[16px] py-[10px] text-left text-[15px]"
-                          style={{
-                            color: effectiveYear === 'all' ? 'var(--primary)' : 'var(--label)',
-                            fontWeight: effectiveYear === 'all' ? 600 : 400,
-                          }}
-                        >
-                          {t.allTime}
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
               )}
 
               {fabRoute && (
@@ -708,49 +631,6 @@ export default function HomePage() {
 
             {/* Right: action buttons */}
             <div className="flex items-center gap-2 shrink-0 pb-1">
-              {/* Year picker — dashboard only */}
-              {activeTab === 'dashboard' && (
-                <div className="relative" ref={yearPickerRef}>
-                  <button
-                    onClick={() => setYearPickerSource(s => s === 'large' ? null : 'large')}
-                    className="flex items-center gap-[5px] rounded-full px-[12px] py-[7px]"
-                    style={{ backgroundColor: 'var(--fill)' }}
-                  >
-                    <span className="text-[13px] font-semibold" style={{ color: 'var(--label)' }}>
-                      {effectiveYear === 'all' ? t.allTime : String(effectiveYear)}
-                    </span>
-                    <ChevronDown size={12} style={{ color: 'var(--label-secondary)' }} />
-                  </button>
-                  <AnimatePresence>
-                    {yearPickerSource === 'large' && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: -4 }}
-                        transition={{ duration: 0.12 }}
-                        className="absolute right-0 top-full mt-[6px] rounded-[12px] overflow-hidden z-[60]"
-                        style={{ backgroundColor: 'var(--bg-elevated)', boxShadow: '0 4px 24px rgba(0,0,0,0.14)', minWidth: '110px' }}
-                      >
-                        {dashYears.map(y => (
-                          <button
-                            key={y}
-                            onClick={() => { setDashboardYear(y); setYearPickerSource(null) }}
-                            className="w-full px-[16px] py-[10px] text-left text-[15px]"
-                            style={{ color: effectiveYear === y ? 'var(--primary)' : 'var(--label)', fontWeight: effectiveYear === y ? 600 : 400 }}
-                          >{y}</button>
-                        ))}
-                        {dashYears.length > 0 && <div className="mx-[12px] h-px" style={{ backgroundColor: 'var(--separator)' }} />}
-                        <button
-                          onClick={() => { setDashboardYear('all'); setYearPickerSource(null) }}
-                          className="w-full px-[16px] py-[10px] text-left text-[15px]"
-                          style={{ color: effectiveYear === 'all' ? 'var(--primary)' : 'var(--label)', fontWeight: effectiveYear === 'all' ? 600 : 400 }}
-                        >{t.allTime}</button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
-
               {/* Filter + Search buttons — collapse width when search is open */}
               {activeTab === 'books' && hasAnyBooks && (
                 <motion.div
@@ -1095,7 +975,7 @@ export default function HomePage() {
           initial="hidden"
           animate="show"
         >
-          {dashboardBooks.length === 0 ? (
+          {books.length === 0 ? (
             /* ── Empty state ── */
             <motion.div
               variants={dashCard}
@@ -1132,11 +1012,9 @@ export default function HomePage() {
             </motion.div>
           ) : (
             <>
-              {effectiveYear !== 'all' && (
-                <motion.div variants={dashCard}>
-                  <ReadingPaceChart books={dashboardBooks} year={effectiveYear} />
-                </motion.div>
-              )}
+              <motion.div variants={dashCard}>
+                <ReadingPaceChart books={books} />
+              </motion.div>
               <motion.div variants={dashCard}>
                 <RatingDistributionChart books={dashboardBooks} />
               </motion.div>

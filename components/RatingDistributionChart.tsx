@@ -33,7 +33,8 @@ export default function RatingDistributionChart({ books }: Props) {
       className="mx-4 mb-4 rounded-[16px] p-[16px]"
       style={{ backgroundColor: 'var(--bg-elevated)' }}
     >
-      {/* Card title */}
+      {/* Card title. The subtitle leads with the period the card covers —
+          ratings are always all-time, whatever year the pace card is showing. */}
       <p
         className="text-[17px] font-semibold tracking-[-0.43px]"
         style={{ color: 'var(--label)' }}
@@ -44,7 +45,7 @@ export default function RatingDistributionChart({ books }: Props) {
         className="text-[12px] mt-[2px] mb-[24px]"
         style={{ color: 'var(--label-secondary)' }}
       >
-        {t.statsAllTime}
+        {t.allTime} · {t.statsAllTime}
       </p>
 
       {/* Average rating */}

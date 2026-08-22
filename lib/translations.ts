@@ -232,6 +232,8 @@ export type Translations = {
   statsByBooksRead: string
   statsFavouriteAuthorsSub: string
   statsGenreBreakdown: string
+  statsGenreBreakdownSub: string
+  statsNotFinished: string
   allTime: string
   // Relative time
   relativeJustNow: string
@@ -484,6 +486,8 @@ const en: Translations = {
   statsByBooksRead: 'My top 5 authors',
   statsFavouriteAuthorsSub: 'My favourite authors',
   statsGenreBreakdown: 'Genre Breakdown',
+  statsGenreBreakdownSub: 'Which genres I read most',
+  statsNotFinished: 'not finished',
   allTime: 'All time',
   relativeJustNow: 'just now',
   relativeMonth: 'month',
@@ -727,6 +731,8 @@ const de: Translations = {
   statsByBooksRead: 'Meine Top-5-Autoren',
   statsFavouriteAuthorsSub: 'Meine Lieblingsautoren',
   statsGenreBreakdown: 'Genre-Übersicht',
+  statsGenreBreakdownSub: 'Welche Genres ich am meisten lese',
+  statsNotFinished: 'nicht beendet',
   allTime: 'Alle Jahre',
   relativeJustNow: 'gerade eben',
   relativeMonth: 'Monat',
@@ -970,6 +976,8 @@ const fr: Translations = {
   statsByBooksRead: 'Mes 5 auteurs préférés',
   statsFavouriteAuthorsSub: 'Mes auteurs préférés',
   statsGenreBreakdown: 'Répartition par genre',
+  statsGenreBreakdownSub: 'Les genres que je lis le plus',
+  statsNotFinished: 'non terminés',
   allTime: 'Toute la période',
   relativeJustNow: 'à l\'instant',
   relativeMonth: 'mois',
@@ -1213,6 +1221,8 @@ const es: Translations = {
   statsByBooksRead: 'Mis 5 autores favoritos',
   statsFavouriteAuthorsSub: 'Mis autores favoritos',
   statsGenreBreakdown: 'Por género',
+  statsGenreBreakdownSub: 'Los géneros que más leo',
+  statsNotFinished: 'sin terminar',
   allTime: 'Todo el tiempo',
   relativeJustNow: 'ahora mismo',
   relativeMonth: 'mes',
@@ -1456,6 +1466,8 @@ const pl: Translations = {
   statsByBooksRead: 'Moi 5 ulubionych autorów',
   statsFavouriteAuthorsSub: 'Moi ulubieni autorzy',
   statsGenreBreakdown: 'Podział gatunków',
+  statsGenreBreakdownSub: 'Gatunki, które czytam najczęściej',
+  statsNotFinished: 'nieukończone',
   allTime: 'Cały czas',
   relativeJustNow: 'przed chwilą',
   relativeMonth: 'miesiąc',
