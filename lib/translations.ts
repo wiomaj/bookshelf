@@ -228,6 +228,7 @@ export type Translations = {
   statsByBooksRead: string
   statsFavouriteAuthorsSub: string
   statsGenreBreakdown: string
+  statsNotFinished: string
   allTime: string
   // Relative time
   relativeJustNow: string
@@ -476,6 +477,7 @@ const en: Translations = {
   statsByBooksRead: 'My top 5 authors',
   statsFavouriteAuthorsSub: 'My favourite authors',
   statsGenreBreakdown: 'Genre Breakdown',
+  statsNotFinished: 'not finished',
   allTime: 'All time',
   relativeJustNow: 'just now',
   relativeMonth: 'month',
@@ -715,6 +717,7 @@ const de: Translations = {
   statsByBooksRead: 'Meine Top-5-Autoren',
   statsFavouriteAuthorsSub: 'Meine Lieblingsautoren',
   statsGenreBreakdown: 'Genre-Übersicht',
+  statsNotFinished: 'nicht beendet',
   allTime: 'Alle Jahre',
   relativeJustNow: 'gerade eben',
   relativeMonth: 'Monat',
@@ -954,6 +957,7 @@ const fr: Translations = {
   statsByBooksRead: 'Mes 5 auteurs préférés',
   statsFavouriteAuthorsSub: 'Mes auteurs préférés',
   statsGenreBreakdown: 'Répartition par genre',
+  statsNotFinished: 'non terminés',
   allTime: 'Toute la période',
   relativeJustNow: 'à l\'instant',
   relativeMonth: 'mois',
@@ -1193,6 +1197,7 @@ const es: Translations = {
   statsByBooksRead: 'Mis 5 autores favoritos',
   statsFavouriteAuthorsSub: 'Mis autores favoritos',
   statsGenreBreakdown: 'Por género',
+  statsNotFinished: 'sin terminar',
   allTime: 'Todo el tiempo',
   relativeJustNow: 'ahora mismo',
   relativeMonth: 'mes',
@@ -1432,6 +1437,7 @@ const pl: Translations = {
   statsByBooksRead: 'Moi 5 ulubionych autorów',
   statsFavouriteAuthorsSub: 'Moi ulubieni autorzy',
   statsGenreBreakdown: 'Podział gatunków',
+  statsNotFinished: 'nieukończone',
   allTime: 'Cały czas',
   relativeJustNow: 'przed chwilą',
   relativeMonth: 'miesiąc',

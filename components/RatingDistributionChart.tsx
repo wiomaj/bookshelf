@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useT } from '@/contexts/AppContext'
 import StarRating from '@/components/StarRating'
+import StatScope from '@/components/StatScope'
 import type { Book } from '@/types/book'
 
 interface Props {
@@ -33,22 +34,27 @@ export default function RatingDistributionChart({ books }: Props) {
       className="mx-4 mb-4 rounded-[16px] p-[16px]"
       style={{ backgroundColor: 'var(--bg-elevated)' }}
     >
-      {/* Card title */}
-      <p
-        className="text-[17px] font-semibold tracking-[-0.43px]"
-        style={{ color: 'var(--label)' }}
-      >
-        {t.statsRatingDistribution}
-      </p>
-      <p
-        className="text-[12px] mt-[2px] mb-[24px]"
-        style={{ color: 'var(--label-secondary)' }}
-      >
-        {t.statsAllTime}
-      </p>
+      {/* Card title + the period it covers — ratings are always all-time */}
+      <div className="flex items-start gap-2">
+        <div className="flex-1 min-w-0">
+          <p
+            className="text-[17px] font-semibold tracking-[-0.43px]"
+            style={{ color: 'var(--label)' }}
+          >
+            {t.statsRatingDistribution}
+          </p>
+          <p
+            className="text-[12px] mt-[2px]"
+            style={{ color: 'var(--label-secondary)' }}
+          >
+            {t.statsAllTime}
+          </p>
+        </div>
+        <StatScope label={t.allTime} />
+      </div>
 
       {/* Average rating */}
-      <div className="flex items-baseline gap-[8px] mb-[24px]">
+      <div className="flex items-baseline gap-[8px] mt-[24px] mb-[24px]">
         <span
           className="text-[40px] font-bold leading-none tracking-[0.38px]"
           style={{ color: 'var(--label)' }}

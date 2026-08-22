@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useT } from '@/contexts/AppContext'
+import StatScope from '@/components/StatScope'
 import type { Book } from '@/types/book'
 
 interface Props {
@@ -37,14 +38,17 @@ export default function GenreBreakdown({ books }: Props) {
       className="mx-4 mb-6 rounded-[20px] px-4 pt-4 pb-5"
       style={{ backgroundColor: 'var(--bg-elevated)' }}
     >
-      {/* Header */}
-      <div className="mb-1">
-        <p className="text-[13px] font-semibold tracking-[-0.1px]" style={{ color: 'var(--label)' }}>
-          {t.statsGenreBreakdown}
-        </p>
-        <p className="text-[11px]" style={{ color: 'var(--label-secondary)' }}>
-          {t.statsByBooksRead}
-        </p>
+      {/* Header + the period it covers — genres are always all-time */}
+      <div className="flex items-start gap-2 mb-1">
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] font-semibold tracking-[-0.1px]" style={{ color: 'var(--label)' }}>
+            {t.statsGenreBreakdown}
+          </p>
+          <p className="text-[11px]" style={{ color: 'var(--label-secondary)' }}>
+            {t.statsByBooksRead}
+          </p>
+        </div>
+        <StatScope label={t.allTime} />
       </div>
 
       {/* Total badge */}

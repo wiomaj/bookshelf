@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useT } from '@/contexts/AppContext'
+import StatScope from '@/components/StatScope'
 import type { Book } from '@/types/book'
 
 interface Props {
@@ -42,19 +43,24 @@ export default function FavouriteAuthors({ books }: Props) {
       className="mx-4 mb-4 rounded-[16px] p-[16px]"
       style={{ backgroundColor: 'var(--bg-elevated)' }}
     >
-      {/* Card title */}
-      <p
-        className="text-[17px] font-semibold tracking-[-0.43px]"
-        style={{ color: 'var(--label)' }}
-      >
-        {t.statsFavouriteAuthors}
-      </p>
-      <p
-        className="text-[12px] mt-[2px] mb-[24px]"
-        style={{ color: 'var(--label-secondary)' }}
-      >
-        {sorted.length >= MAX_AUTHORS ? t.statsByBooksRead : t.statsFavouriteAuthorsSub}
-      </p>
+      {/* Card title + the period it covers — authors are always all-time */}
+      <div className="flex items-start gap-2 mb-[24px]">
+        <div className="flex-1 min-w-0">
+          <p
+            className="text-[17px] font-semibold tracking-[-0.43px]"
+            style={{ color: 'var(--label)' }}
+          >
+            {t.statsFavouriteAuthors}
+          </p>
+          <p
+            className="text-[12px] mt-[2px]"
+            style={{ color: 'var(--label-secondary)' }}
+          >
+            {sorted.length >= MAX_AUTHORS ? t.statsByBooksRead : t.statsFavouriteAuthorsSub}
+          </p>
+        </div>
+        <StatScope label={t.allTime} />
+      </div>
 
       {/* Author rows */}
       <div className="flex flex-col gap-[12px]">
