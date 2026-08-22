@@ -136,6 +136,14 @@ export default function WishlistDetailPage() {
             if (data.description) setDescription(data.description)
             if (data.genre) setApiGenre(data.genre)
             if (data.publishedYear) setPublishedYear(data.publishedYear)
+            // The genre was display-only until now, so the dashboard's genre
+            // breakdown had nothing to count once this book is read. Store it
+            // once, the same way the cover is backfilled below.
+            if (data.genre && !b.genre) {
+              const genre = data.genre
+              updateBook(supabase, user.id, b.id, { genre }).catch(() => {})
+              setBook(prev => prev ? { ...prev, genre } : prev)
+            }
             setBookDataLoading(false)
           }).catch(() => { if (!cancelled) setBookDataLoading(false) })
           if (!b.cover_url && b.title) {

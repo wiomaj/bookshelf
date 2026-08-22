@@ -125,6 +125,14 @@ export default function BookDetailPage() {
             if (best.publisher) setApiPublisher(best.publisher)
             if (best.subjects?.length) setApiSubjects(best.subjects.slice(0, 6))
           }
+          // The genre was display-only until now, so the dashboard's genre
+          // breakdown had nothing to count. Store it once, the same way the
+          // cover is backfilled below.
+          const genre = best?.subjects?.[0]
+          if (genre && !b.genre) {
+            updateBook(supabase, user.id, b.id, { genre }).catch(() => {})
+            setBook((prev) => prev ? { ...prev, genre } : prev)
+          }
           setBookDataLoading(false)
         }).catch(() => { if (!cancelled) setBookDataLoading(false) })
         if (!b.cover_url && b.title) {
