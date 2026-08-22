@@ -44,7 +44,7 @@ export default function GenreBreakdown({ books }: Props) {
           {t.statsGenreBreakdown}
         </p>
         <p className="text-[11px]" style={{ color: 'var(--label-secondary)' }}>
-          {t.allTime} · {t.statsByBooksRead}
+          {t.allTime} · {t.statsGenreBreakdownSub}
         </p>
       </div>
 
