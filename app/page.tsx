@@ -3,7 +3,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, List, BookOpenCheck, User, Settings, Loader2, Search, X, SlidersHorizontal } from 'lucide-react'
+import { Plus, LayoutGrid, List, BookOpenCheck, Settings, Loader2, Search, X, SlidersHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { getAllBooks, updateBook } from '@/lib/bookApi'
 import { supabase } from '@/lib/supabase'
@@ -12,6 +12,7 @@ import ToReadList from '@/components/ToReadList'
 import WishlistList from '@/components/WishlistList'
 import AddToHomeScreen from '@/components/AddToHomeScreen'
 import ReadingPaceChart from '@/components/ReadingPaceChart'
+import UserAvatar from '@/components/UserAvatar'
 import RatingDistributionChart from '@/components/RatingDistributionChart'
 import FavouriteAuthors from '@/components/FavouriteAuthors'
 import GenreBreakdown from '@/components/GenreBreakdown'
@@ -561,6 +562,13 @@ export default function HomePage() {
           {/* Single row: left content + right buttons, always same height */}
           <div className="flex items-end gap-2">
 
+            {/* Dashboard only — the title is the reader's name, so this is their
+                picture next to it. Not rendered on the books tab, where the
+                search bar overlays the title. */}
+            {activeTab === 'dashboard' && (
+              <UserAvatar size={40} decorative className="mb-[6px]" />
+            )}
+
             {/* Left: title always in DOM (fixes height), search bar overlays it */}
             <div className="flex-1 min-w-0 relative">
               {/* Title — always rendered to hold the row height. Auto-shrinks
@@ -1067,12 +1075,8 @@ export default function HomePage() {
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
               />
             )}
-            <User
-              size={22}
-              strokeWidth={activeTab === 'dashboard' ? 2 : 1.5}
-              className="relative"
-              style={{ color: activeTab === 'dashboard' ? 'var(--primary)' : 'var(--label-secondary)' }}
-            />
+            {/* The tab label already reads the name, so the image is decorative here. */}
+            <UserAvatar size={22} shape="circle" decorative className="relative" />
             <span className="text-[10px] font-medium relative tracking-[-0.1px] max-w-[64px] truncate"
                   style={{ color: activeTab === 'dashboard' ? 'var(--primary)' : 'var(--label-secondary)' }}>
               {displayName || t.tabDashboard}
