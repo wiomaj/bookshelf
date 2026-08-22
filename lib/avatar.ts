@@ -67,6 +67,12 @@ export function hashSeed(input: string): number {
   return h >>> 0
 }
 
+/** Shortest distance between two hues on the wheel, 0–180. */
+export function hueDistance(a: number, b: number): number {
+  const d = (((a - b) % 360) + 360) % 360
+  return Math.min(d, 360 - d)
+}
+
 /** One hash, three decisions: where on the wheel, how far it travels, which way it runs. */
 export function deriveAvatar(seed: string): AvatarSpec {
   const h = hashSeed(seed)
@@ -169,4 +175,32 @@ export function resolveAvatarSeed(userId: string, stored?: unknown): string {
     if (trimmed) return trimmed
   }
   return userId
+}
+
+/** A fresh random seed. Only ever called from a tap, so entropy quality is moot. */
+export function randomAvatarSeed(): string {
+  const c = globalThis.crypto
+  if (typeof c?.randomUUID === 'function') return c.randomUUID()
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+}
+
+/** Shuffling should look like it did something, so keep the hue this far away. */
+const MIN_SHUFFLE_TRAVEL = 40
+const MAX_SHUFFLE_TRIES = 12
+
+/**
+ * A seed whose hue is visibly different from the current one.
+ *
+ * A purely random seed lands near the current hue often enough that Shuffle
+ * would sometimes look broken. Rerolling a bounded number of times fixes that
+ * without ever blocking — if every try lands close, the last one still ships.
+ */
+export function nextAvatarSeed(currentSeed: string): string {
+  const current = deriveAvatar(currentSeed).hue
+  let candidate = randomAvatarSeed()
+  for (let i = 0; i < MAX_SHUFFLE_TRIES; i++) {
+    if (hueDistance(deriveAvatar(candidate).hue, current) >= MIN_SHUFFLE_TRAVEL) return candidate
+    candidate = randomAvatarSeed()
+  }
+  return candidate
 }

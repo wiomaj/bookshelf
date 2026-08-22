@@ -7,6 +7,9 @@ import {
   contrastWithWhite,
   solveLightness,
   resolveAvatarSeed,
+  randomAvatarSeed,
+  nextAvatarSeed,
+  hueDistance,
   GRADIENT_DIRS,
 } from '../avatar'
 
@@ -55,8 +58,7 @@ describe('deriveAvatar', () => {
   it('moves the second stop away from the first, so the gradient reads', () => {
     for (let i = 0; i < 500; i++) {
       const { hue, hue2 } = deriveAvatar(`user-${i}`)
-      const travel = Math.abs(((hue2 - hue + 540) % 360) - 180)
-      expect(180 - travel).toBeGreaterThanOrEqual(26)
+      expect(hueDistance(hue, hue2)).toBeGreaterThanOrEqual(26)
     }
   })
 
@@ -156,5 +158,54 @@ describe('resolveAvatarSeed', () => {
     for (const stored of [undefined, null, '', '   ', 42, {}, [], true]) {
       expect(resolveAvatarSeed(userId, stored)).toBe(userId)
     }
+  })
+})
+
+describe('hueDistance', () => {
+  it('measures the short way round the wheel', () => {
+    expect(hueDistance(10, 350)).toBe(20)
+    expect(hueDistance(350, 10)).toBe(20)
+    expect(hueDistance(0, 180)).toBe(180)
+    expect(hueDistance(90, 90)).toBe(0)
+  })
+
+  it('never exceeds half the wheel', () => {
+    for (let a = 0; a < 360; a += 7) {
+      for (let b = 0; b < 360; b += 11) {
+        const d = hueDistance(a, b)
+        expect(d).toBeGreaterThanOrEqual(0)
+        expect(d).toBeLessThanOrEqual(180)
+      }
+    }
+  })
+})
+
+describe('randomAvatarSeed', () => {
+  it('returns a non-empty string that survives the pipeline', () => {
+    const seed = randomAvatarSeed()
+    expect(seed.length).toBeGreaterThan(0)
+    expect(resolveAvatarSeed('user-id', seed)).toBe(seed)
+    expect(deriveAvatar(seed).hue).toBeGreaterThanOrEqual(0)
+  })
+
+  it('does not repeat itself', () => {
+    const seen = new Set(Array.from({ length: 200 }, () => randomAvatarSeed()))
+    expect(seen.size).toBe(200)
+  })
+})
+
+describe('nextAvatarSeed', () => {
+  it('lands a visibly different hue, so Shuffle never looks broken', () => {
+    for (let i = 0; i < 200; i++) {
+      const current = `user-${i}`
+      const next = nextAvatarSeed(current)
+      const moved = hueDistance(deriveAvatar(next).hue, deriveAvatar(current).hue)
+      expect(moved).toBeGreaterThanOrEqual(40)
+    }
+  })
+
+  it('returns a seed, never the one it was given', () => {
+    const current = 'a7c1f2e0-9b34-4d51-8f6a-2e0d7c4b91aa'
+    expect(nextAvatarSeed(current)).not.toBe(current)
   })
 })

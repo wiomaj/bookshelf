@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { type Locale, type Translations, translations } from '@/lib/translations'
+import { resolveAvatarSeed } from '@/lib/avatar'
 
 export type ViewMode = 'grid' | 'list'
 export type Theme = 'system' | 'dark'
@@ -40,6 +41,10 @@ interface AppContextValue {
   isAuthLoading: boolean
   displayName: string
   updateDisplayName: (name: string) => Promise<{ error: string | null }>
+  /** Seed the user's generated image is drawn from — their shuffle, else the account id. */
+  avatarSeed: string
+  /** Pass null to go back to the account id. */
+  updateAvatarSeed: (seed: string | null) => Promise<{ error: string | null }>
   signIn: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>
   signUp: (email: string, password: string) => Promise<{ error: string | null; needsConfirmation: boolean }>
   signOut: () => Promise<void>
@@ -61,6 +66,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isAuthLoading, setIsAuthLoading] = useState(true)
   const [displayName, setDisplayName] = useState('')
+  const [avatarSeed, setAvatarSeed] = useState('')
 
   const router = useRouter()
   const pathname = usePathname()
@@ -107,6 +113,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const u = data.session?.user ?? null
       setUser(u)
       setDisplayName(u?.user_metadata?.display_name ?? '')
+      setAvatarSeed(resolveAvatarSeed(u?.id ?? '', u?.user_metadata?.avatar_seed))
       setIsAuthLoading(false)
     })
 
@@ -114,6 +121,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const u = session?.user ?? null
       setUser(u)
       setDisplayName(u?.user_metadata?.display_name ?? '')
+      setAvatarSeed(resolveAvatarSeed(u?.id ?? '', u?.user_metadata?.avatar_seed))
     })
 
     return () => subscription.unsubscribe()
@@ -186,6 +194,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null }
   }
 
+  async function updateAvatarSeed(seed: string | null): Promise<{ error: string | null }> {
+    // GoTrue merges `data` into user_metadata and drops keys set to null, so
+    // passing null resets the image without touching display_name.
+    const { error } = await supabase.auth.updateUser({ data: { avatar_seed: seed } })
+    if (!error) setAvatarSeed(resolveAvatarSeed(user?.id ?? '', seed))
+    return { error: error?.message ?? null }
+  }
+
   async function deleteAccount(): Promise<{ error: string | null }> {
     const { error } = await supabase.rpc('delete_user')
     if (!error) await supabase.auth.signOut()
@@ -213,6 +229,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       language, setLanguage,
       user, isAuthLoading,
       displayName, updateDisplayName,
+      avatarSeed, updateAvatarSeed,
       signIn, signUp, signOut, resetPassword, changePassword, deleteAccount,
     }}>
       {children}

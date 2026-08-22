@@ -1,13 +1,7 @@
 'use client'
 
 import { useApp, useT } from '@/contexts/AppContext'
-import {
-  avatarColors,
-  avatarInitials,
-  deriveAvatar,
-  hashSeed,
-  resolveAvatarSeed,
-} from '@/lib/avatar'
+import { avatarColors, avatarInitials, deriveAvatar, hashSeed } from '@/lib/avatar'
 
 /** Below this, a second letter stops being readable and turns into texture. */
 const SINGLE_INITIAL_BELOW_PX = 28
@@ -40,10 +34,10 @@ export default function UserAvatar({
   decorative = false,
   className,
 }: UserAvatarProps) {
-  const { user, displayName } = useApp()
+  const { user, displayName, avatarSeed } = useApp()
   const t = useT()
 
-  const resolvedSeed = seed ?? resolveAvatarSeed(user?.id ?? '', user?.user_metadata?.avatar_seed)
+  const resolvedSeed = seed ?? avatarSeed
   const resolvedName = name ?? displayName
   const resolvedEmail = email !== undefined ? email : user?.email
 

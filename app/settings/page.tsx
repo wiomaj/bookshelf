@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase'
 import { getBooks } from '@/lib/bookApi'
 import { booksToCsv, downloadCsv } from '@/lib/csvExport'
 import UserAvatar from '@/components/UserAvatar'
+import AvatarPicker from '@/components/AvatarPicker'
 
 type View = 'settings' | 'changePassword'
 
@@ -108,6 +109,7 @@ export default function SettingsPage() {
   const [langOpen, setLangOpen] = useState(false)
   const [nameValue, setNameValue] = useState(displayName)
   const [nameSaving, setNameSaving] = useState(false)
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
 
   // Sync once displayName is loaded from Supabase
   useEffect(() => { setNameValue(displayName) }, [displayName])
@@ -265,18 +267,23 @@ export default function SettingsPage() {
             {t.profileSection}
           </p>
           <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated)' }}>
-            {/* Generated image — name and email sit beside it, so it's decorative. */}
-            <div className="flex items-center px-4 py-4 gap-3">
+            {/* Generated image — the name beside it says who this is, so the
+                image itself is decorative. Tapping opens the shuffle sheet. */}
+            <button
+              onClick={() => setAvatarPickerOpen(true)}
+              className="w-full flex items-center px-4 py-4 gap-3 text-left transition-colors active:opacity-60"
+            >
               <UserAvatar size={56} decorative />
               <div className="flex-1 min-w-0">
                 <p className="text-[17px] truncate" style={{ color: 'var(--label)' }}>
                   {displayName || t.yourNamePlaceholder}
                 </p>
                 <p className="text-[13px] truncate mt-0.5" style={{ color: 'var(--label-secondary)' }}>
-                  {user?.email}
+                  {t.shuffleImage}
                 </p>
               </div>
-            </div>
+              <ChevronRight size={18} strokeWidth={2.5} style={{ color: 'var(--label-tertiary)' }} />
+            </button>
 
             <div className="h-px ml-4" style={{ backgroundColor: 'var(--separator)' }} />
 
@@ -527,6 +534,8 @@ export default function SettingsPage() {
       )}
 
       <BottomNav t={t} displayName={displayName} />
+
+      <AvatarPicker open={avatarPickerOpen} onClose={() => setAvatarPickerOpen(false)} />
     </div>
   )
 }

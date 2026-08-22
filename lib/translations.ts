@@ -114,6 +114,9 @@ export type Translations = {
   yourName: string
   yourNamePlaceholder: string
   profileImage: string
+  profileImageHint: string
+  shuffleImage: string
+  resetImage: string
   // Name prompt overlay
   namePromptTitle: string
   namePromptSub: string
@@ -373,6 +376,9 @@ const en: Translations = {
   yourName: 'Name',
   yourNamePlaceholder: 'Add your name',
   profileImage: 'Profile image',
+  profileImageHint: 'Shuffle until it feels like yours.',
+  shuffleImage: 'Shuffle',
+  resetImage: 'Reset to default',
   namePromptTitle: 'What\'s your name?',
   namePromptSub: 'We\'ll use it to personalise your bookshelf.',
   namePromptCta: 'Continue',
@@ -613,6 +619,9 @@ const de: Translations = {
   yourName: 'Name',
   yourNamePlaceholder: 'Name hinzufügen',
   profileImage: 'Profilbild',
+  profileImageHint: 'Mische, bis es sich nach dir anfühlt.',
+  shuffleImage: 'Mischen',
+  resetImage: 'Auf Standard zurücksetzen',
   namePromptTitle: 'Wie heißt du?',
   namePromptSub: 'Wir nutzen deinen Namen, um dein Bücherregal zu personalisieren.',
   namePromptCta: 'Weiter',
@@ -853,6 +862,9 @@ const fr: Translations = {
   yourName: 'Nom',
   yourNamePlaceholder: 'Ajouter ton nom',
   profileImage: 'Photo de profil',
+  profileImageHint: 'Mélange jusqu\'à ce que ça te ressemble.',
+  shuffleImage: 'Mélanger',
+  resetImage: 'Rétablir par défaut',
   namePromptTitle: 'Comment tu t\'appelles ?',
   namePromptSub: 'On l\'utilisera pour personnaliser ta bibliothèque.',
   namePromptCta: 'Continuer',
@@ -1093,6 +1105,9 @@ const es: Translations = {
   yourName: 'Nombre',
   yourNamePlaceholder: 'Añadir tu nombre',
   profileImage: 'Imagen de perfil',
+  profileImageHint: 'Baraja hasta que sientas que es tuya.',
+  shuffleImage: 'Barajar',
+  resetImage: 'Restablecer',
   namePromptTitle: '¿Cómo te llamas?',
   namePromptSub: 'Lo usaremos para personalizar tu estantería.',
   namePromptCta: 'Continuar',
@@ -1333,6 +1348,9 @@ const pl: Translations = {
   yourName: 'Imię',
   yourNamePlaceholder: 'Dodaj imię',
   profileImage: 'Zdjęcie profilowe',
+  profileImageHint: 'Losuj, aż poczujesz, że to ty.',
+  shuffleImage: 'Losuj',
+  resetImage: 'Przywróć domyślne',
   namePromptTitle: 'Jak masz na imię?',
   namePromptSub: 'Użyjemy go, aby spersonalizować twoją półkę.',
   namePromptCta: 'Kontynuuj',
