@@ -8,9 +8,17 @@
  *
  * Uses the same sources and the same first-category rule as /api/book-data.
  *
+ * Both env vars are required. This is a plain Node script, so it does not pick
+ * up .env.local the way `next dev` does — pass them inline, or on Node 20.6+
+ * use `node --env-file=.env.local` once the key is in that file.
+ *
  * Usage:
- *   SUPABASE_SERVICE_ROLE_KEY=<key> node scripts/backfill-genres.mjs
- *   SUPABASE_SERVICE_ROLE_KEY=<key> node scripts/backfill-genres.mjs --dry-run
+ *   NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co \
+ *   SUPABASE_SERVICE_ROLE_KEY=<key> \
+ *   node scripts/backfill-genres.mjs --dry-run
+ *
+ * Drop --dry-run to write. The key bypasses row-level security — keep it out of
+ * anything that gets committed or shared.
  */
 
 import { createClient } from '@supabase/supabase-js'
