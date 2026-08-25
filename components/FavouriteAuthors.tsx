@@ -20,19 +20,28 @@ export default function FavouriteAuthors({ books }: Props) {
 
   if (books.length === 0) return null
 
-  // Count books per author
+  // Count books per author, and sum ratings so ties can break by how much
+  // the reader liked what they read rather than shelf order.
   const countMap = new Map<string, number>()
+  const ratingSumMap = new Map<string, number>()
   for (const b of books) {
     const author = b.author?.trim()
     if (!author) continue
     countMap.set(author, (countMap.get(author) ?? 0) + 1)
+    ratingSumMap.set(author, (ratingSumMap.get(author) ?? 0) + b.rating)
   }
 
   if (countMap.size === 0) return null
 
-  // Sort by count descending, take top N
+  // Sort by count descending; authors tied on count (most often everyone
+  // with a single book) fall back to average rating, highest first.
   const sorted = [...countMap.entries()]
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => {
+      if (b[1] !== a[1]) return b[1] - a[1]
+      const avgA = ratingSumMap.get(a[0])! / a[1]
+      const avgB = ratingSumMap.get(b[0])! / b[1]
+      return avgB - avgA
+    })
     .slice(0, MAX_AUTHORS)
 
   const maxCount = sorted[0][1]
@@ -54,7 +63,7 @@ export default function FavouriteAuthors({ books }: Props) {
         className="text-[12px] mt-[2px] mb-[24px]"
         style={{ color: 'var(--label-secondary)' }}
       >
-        {t.allTime} · {sorted.length >= MAX_AUTHORS ? t.statsByBooksRead : t.statsFavouriteAuthorsSub}
+        {sorted.length >= MAX_AUTHORS ? t.statsByBooksRead : t.statsFavouriteAuthorsSub}
       </p>
 
       {/* Author rows */}

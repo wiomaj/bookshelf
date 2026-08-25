@@ -17,6 +17,7 @@ interface UserAvatarProps {
   /** Set when the name sits right next to it, so screen readers don't say it twice. */
   decorative?: boolean
   className?: string
+  style?: React.CSSProperties
 }
 
 /**
@@ -33,6 +34,7 @@ export default function UserAvatar({
   shape = 'squircle',
   decorative = false,
   className,
+  style,
 }: UserAvatarProps) {
   const { user, displayName, avatarSeed } = useApp()
   const t = useT()
@@ -67,6 +69,7 @@ export default function UserAvatar({
         display: 'block',
         flexShrink: 0,
         borderRadius: shape === 'circle' ? '50%' : size * 0.28,
+        ...style,
       }}
     >
       <defs>

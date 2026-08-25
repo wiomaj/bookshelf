@@ -63,7 +63,7 @@ export default function FormatBreakdown({ books }: Props) {
         className="text-[12px] mt-[2px] mb-[24px]"
         style={{ color: 'var(--label-secondary)' }}
       >
-        {t.allTime} · {t.statsFormatSplitSub}
+        {t.statsFormatSplitSub}
       </p>
 
       {/* Headline: the format that takes the biggest share of the shelf */}

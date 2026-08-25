@@ -1079,8 +1079,28 @@ export default function HomePage() {
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
               />
             )}
-            {/* The tab label already reads the name, so the image is decorative here. */}
-            <UserAvatar size={22} shape="circle" decorative className="relative" />
+            {/* A 22px slot matches the other tabs' icon size, so the bar's height never
+                changes. The image is decorative — the label already reads the name —
+                and floats above the slot via absolute positioning: raised and oversized
+                when idle, scaling back inline when selected. */}
+            <div className="relative w-[22px] h-[22px]">
+              <motion.div
+                className="absolute"
+                style={{ top: -11.5, left: -11.5, width: 45, height: 45, transformOrigin: 'center' }}
+                animate={{
+                  scale: activeTab === 'dashboard' ? 22 / 45 : 1,
+                  y: activeTab === 'dashboard' ? 0 : -18,
+                }}
+                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+              >
+                <UserAvatar
+                  size={45}
+                  shape="circle"
+                  decorative
+                  style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.18)' }}
+                />
+              </motion.div>
+            </div>
             <span className="text-[10px] font-medium relative tracking-[-0.1px] max-w-[64px] truncate"
                   style={{ color: activeTab === 'dashboard' ? 'var(--primary)' : 'var(--label-secondary)' }}>
               {displayName || t.tabDashboard}
