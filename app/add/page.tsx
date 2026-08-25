@@ -244,6 +244,11 @@ function AddBookContent() {
 
     setSaveLoading(true)
     try {
+      // The picked suggestion carries subjects; keep the first as the genre so
+      // the dashboard's genre breakdown has something to count. A book typed in
+      // by hand has none — the detail page backfills it on first view.
+      const genre = selected?.subjects?.[0]
+
       const enrichCover = async (id: string) => {
         if (coverUrl || !title) return
         try {
@@ -254,7 +259,7 @@ function AddBookContent() {
 
       if (tab === 'read') {
         const saved = await addBook(supabase, user.id, {
-          title: title.trim(), author: author.trim(),
+          title: title.trim(), author: author.trim(), genre,
           year, month, rating, notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,
           is_audiobook: isAudiobook,
@@ -266,7 +271,7 @@ function AddBookContent() {
         router.push('/')
       } else if (tab === 'to_read') {
         const saved = await addBook(supabase, user.id, {
-          title: title.trim(), author: author.trim(),
+          title: title.trim(), author: author.trim(), genre,
           status: 'to_read', year: trYear, month: trMonth, rating: 0,
           notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,
@@ -279,7 +284,7 @@ function AddBookContent() {
         router.push('/')
       } else {
         const saved = await addBook(supabase, user.id, {
-          title: title.trim(), author: author.trim(),
+          title: title.trim(), author: author.trim(), genre,
           status: 'wishlist', year: 0, month: null, rating: 0,
           notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,

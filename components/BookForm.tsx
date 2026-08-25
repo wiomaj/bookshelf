@@ -149,6 +149,10 @@ export default function BookForm({
     setTitle(s.title)
     setAuthor(s.author)
     if (s.cover_url) setCoverUrl(s.cover_url)
+    // Carry the genre through to the row — it has no field in the form, so
+    // without this it is dropped and the dashboard's genre breakdown stays
+    // empty. Same first-subject rule the detail page displays.
+    if (s.subjects?.[0]) genreRef.current = s.subjects[0]
     // Pre-fill year from publishedDate if available and user hasn't set a custom year
     if (s.publishedDate) {
       const y = parseInt(s.publishedDate.slice(0, 4))
