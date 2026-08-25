@@ -48,6 +48,8 @@ export type Translations = {
   notesPlaceholder: string
   audiobook: string
   ebook: string
+  printBook: string
+  bookTypeLabel: string
   scanPrompt: string
   scanLookingUp: string
   scanNotFound: string
@@ -111,6 +113,10 @@ export type Translations = {
   preferencesSection: string
   yourName: string
   yourNamePlaceholder: string
+  profileImage: string
+  profileImageHint: string
+  shuffleImage: string
+  resetImage: string
   // Name prompt overlay
   namePromptTitle: string
   namePromptSub: string
@@ -226,6 +232,12 @@ export type Translations = {
   statsByBooksRead: string
   statsFavouriteAuthorsSub: string
   statsGenreBreakdown: string
+  statsGenreBreakdownSub: string
+  statsNotFinished: string
+  statsVsYear: string
+  statsSameAsYear: string
+  statsFormatSplit: string
+  statsFormatSplitSub: string
   allTime: string
   // Relative time
   relativeJustNow: string
@@ -310,6 +322,8 @@ const en: Translations = {
   notesPlaceholder: 'What do you think about this book?',
   audiobook: 'Audiobook',
   ebook: 'E-book',
+  printBook: 'Book',
+  bookTypeLabel: 'Type',
   scanPrompt: 'Point at an ISBN barcode',
   scanLookingUp: 'Found! Looking up book…',
   scanNotFound: 'Book not found. Try again…',
@@ -367,6 +381,10 @@ const en: Translations = {
   preferencesSection: 'Preferences',
   yourName: 'Name',
   yourNamePlaceholder: 'Add your name',
+  profileImage: 'Profile image',
+  profileImageHint: 'Shuffle until it feels like yours.',
+  shuffleImage: 'Shuffle',
+  resetImage: 'Reset to default',
   namePromptTitle: 'What\'s your name?',
   namePromptSub: 'We\'ll use it to personalise your bookshelf.',
   namePromptCta: 'Continue',
@@ -472,6 +490,12 @@ const en: Translations = {
   statsByBooksRead: 'My top 5 authors',
   statsFavouriteAuthorsSub: 'My favourite authors',
   statsGenreBreakdown: 'Genre Breakdown',
+  statsGenreBreakdownSub: 'Which genres I read most',
+  statsNotFinished: 'not finished',
+  statsVsYear: 'vs',
+  statsSameAsYear: 'same as',
+  statsFormatSplit: 'Formats',
+  statsFormatSplitSub: 'Print, e-book and audiobook',
   allTime: 'All time',
   relativeJustNow: 'just now',
   relativeMonth: 'month',
@@ -547,6 +571,8 @@ const de: Translations = {
   notesPlaceholder: 'Was denkst du über dieses Buch?',
   audiobook: 'Hörbuch',
   ebook: 'E-Book',
+  printBook: 'Buch',
+  bookTypeLabel: 'Art',
   scanPrompt: 'Auf einen ISBN-Barcode richten',
   scanLookingUp: 'Gefunden! Buch wird gesucht…',
   scanNotFound: 'Buch nicht gefunden. Versuch es erneut…',
@@ -604,6 +630,10 @@ const de: Translations = {
   preferencesSection: 'Präferenzen',
   yourName: 'Name',
   yourNamePlaceholder: 'Name hinzufügen',
+  profileImage: 'Profilbild',
+  profileImageHint: 'Mische, bis es sich nach dir anfühlt.',
+  shuffleImage: 'Mischen',
+  resetImage: 'Auf Standard zurücksetzen',
   namePromptTitle: 'Wie heißt du?',
   namePromptSub: 'Wir nutzen deinen Namen, um dein Bücherregal zu personalisieren.',
   namePromptCta: 'Weiter',
@@ -709,6 +739,12 @@ const de: Translations = {
   statsByBooksRead: 'Meine Top-5-Autoren',
   statsFavouriteAuthorsSub: 'Meine Lieblingsautoren',
   statsGenreBreakdown: 'Genre-Übersicht',
+  statsGenreBreakdownSub: 'Welche Genres ich am meisten lese',
+  statsNotFinished: 'nicht beendet',
+  statsVsYear: 'ggü.',
+  statsSameAsYear: 'genauso wie',
+  statsFormatSplit: 'Formate',
+  statsFormatSplitSub: 'Buch, E-Book und Hörbuch',
   allTime: 'Alle Jahre',
   relativeJustNow: 'gerade eben',
   relativeMonth: 'Monat',
@@ -784,6 +820,8 @@ const fr: Translations = {
   notesPlaceholder: "Que pensez-vous de ce livre ?",
   audiobook: 'Livre audio',
   ebook: 'Livre numérique',
+  printBook: 'Livre',
+  bookTypeLabel: 'Type',
   scanPrompt: 'Visez un code-barres ISBN',
   scanLookingUp: 'Trouvé ! Recherche du livre…',
   scanNotFound: 'Livre introuvable. Réessayez…',
@@ -841,6 +879,10 @@ const fr: Translations = {
   preferencesSection: 'Préférences',
   yourName: 'Nom',
   yourNamePlaceholder: 'Ajouter ton nom',
+  profileImage: 'Photo de profil',
+  profileImageHint: 'Mélange jusqu\'à ce que ça te ressemble.',
+  shuffleImage: 'Mélanger',
+  resetImage: 'Rétablir par défaut',
   namePromptTitle: 'Comment tu t\'appelles ?',
   namePromptSub: 'On l\'utilisera pour personnaliser ta bibliothèque.',
   namePromptCta: 'Continuer',
@@ -946,6 +988,12 @@ const fr: Translations = {
   statsByBooksRead: 'Mes 5 auteurs préférés',
   statsFavouriteAuthorsSub: 'Mes auteurs préférés',
   statsGenreBreakdown: 'Répartition par genre',
+  statsGenreBreakdownSub: 'Les genres que je lis le plus',
+  statsNotFinished: 'non terminés',
+  statsVsYear: 'vs',
+  statsSameAsYear: 'comme en',
+  statsFormatSplit: 'Formats',
+  statsFormatSplitSub: 'Papier, numérique et audio',
   allTime: 'Toute la période',
   relativeJustNow: 'à l\'instant',
   relativeMonth: 'mois',
@@ -1021,6 +1069,8 @@ const es: Translations = {
   notesPlaceholder: '¿Qué piensas de este libro?',
   audiobook: 'Audiolibro',
   ebook: 'Libro electrónico',
+  printBook: 'Libro',
+  bookTypeLabel: 'Tipo',
   scanPrompt: 'Apunta a un código de barras ISBN',
   scanLookingUp: '¡Encontrado! Buscando el libro…',
   scanNotFound: 'Libro no encontrado. Inténtalo de nuevo…',
@@ -1078,6 +1128,10 @@ const es: Translations = {
   preferencesSection: 'Preferencias',
   yourName: 'Nombre',
   yourNamePlaceholder: 'Añadir tu nombre',
+  profileImage: 'Imagen de perfil',
+  profileImageHint: 'Baraja hasta que sientas que es tuya.',
+  shuffleImage: 'Barajar',
+  resetImage: 'Restablecer',
   namePromptTitle: '¿Cómo te llamas?',
   namePromptSub: 'Lo usaremos para personalizar tu estantería.',
   namePromptCta: 'Continuar',
@@ -1183,6 +1237,12 @@ const es: Translations = {
   statsByBooksRead: 'Mis 5 autores favoritos',
   statsFavouriteAuthorsSub: 'Mis autores favoritos',
   statsGenreBreakdown: 'Por género',
+  statsGenreBreakdownSub: 'Los géneros que más leo',
+  statsNotFinished: 'sin terminar',
+  statsVsYear: 'vs',
+  statsSameAsYear: 'igual que en',
+  statsFormatSplit: 'Formatos',
+  statsFormatSplitSub: 'Papel, digital y audio',
   allTime: 'Todo el tiempo',
   relativeJustNow: 'ahora mismo',
   relativeMonth: 'mes',
@@ -1258,6 +1318,8 @@ const pl: Translations = {
   notesPlaceholder: 'Co myślisz o tej książce?',
   audiobook: 'Audiobook',
   ebook: 'E-book',
+  printBook: 'Książka',
+  bookTypeLabel: 'Rodzaj',
   scanPrompt: 'Skieruj na kod kreskowy ISBN',
   scanLookingUp: 'Znaleziono! Wyszukiwanie książki…',
   scanNotFound: 'Nie znaleziono książki. Spróbuj ponownie…',
@@ -1315,6 +1377,10 @@ const pl: Translations = {
   preferencesSection: 'Preferencje',
   yourName: 'Imię',
   yourNamePlaceholder: 'Dodaj imię',
+  profileImage: 'Zdjęcie profilowe',
+  profileImageHint: 'Losuj, aż poczujesz, że to ty.',
+  shuffleImage: 'Losuj',
+  resetImage: 'Przywróć domyślne',
   namePromptTitle: 'Jak masz na imię?',
   namePromptSub: 'Użyjemy go, aby spersonalizować twoją półkę.',
   namePromptCta: 'Kontynuuj',
@@ -1420,6 +1486,12 @@ const pl: Translations = {
   statsByBooksRead: 'Moi 5 ulubionych autorów',
   statsFavouriteAuthorsSub: 'Moi ulubieni autorzy',
   statsGenreBreakdown: 'Podział gatunków',
+  statsGenreBreakdownSub: 'Gatunki, które czytam najczęściej',
+  statsNotFinished: 'nieukończone',
+  statsVsYear: 'wzgl.',
+  statsSameAsYear: 'tyle samo co w',
+  statsFormatSplit: 'Formaty',
+  statsFormatSplitSub: 'Papier, e-book i audiobook',
   allTime: 'Cały czas',
   relativeJustNow: 'przed chwilą',
   relativeMonth: 'miesiąc',

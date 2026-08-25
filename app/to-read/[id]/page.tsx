@@ -86,7 +86,7 @@ export default function ToReadDetailPage() {
 
   const [showStartReadingModal, setShowStartReadingModal] = useState(false)
   const [startReadingError, setStartReadingError] = useState<string | null>(null)
-  const [startDay, setStartDay] = useState<number>(0)   // 0 = not specified
+  const [startDay, setStartDay] = useState<number>(new Date().getDate())
   const [startMonth, setStartMonth] = useState<number>(new Date().getMonth() + 1)
   const [startYear, setStartYear] = useState<number>(new Date().getFullYear())
   const [startReadingLoading, setStartReadingLoading] = useState(false)
@@ -313,6 +313,15 @@ export default function ToReadDetailPage() {
       setAbandonLoading(false)
       setShowAbandonConfirm(false)
     }
+  }
+
+  // Preselect today's date unless the book already carries a start date
+  function openStartReadingModal() {
+    const now = new Date()
+    if (!book?.started_reading_day) setStartDay(now.getDate())
+    if (!book?.started_reading_month) setStartMonth(now.getMonth() + 1)
+    if (!book?.started_reading_year) setStartYear(now.getFullYear())
+    setShowStartReadingModal(true)
   }
 
   async function handleStartReading() {
@@ -683,7 +692,7 @@ export default function ToReadDetailPage() {
 
                     {/* Start Reading */}
                     <button
-                      onClick={() => { setShowCtaDropdown(false); setShowStartReadingModal(true) }}
+                      onClick={() => { setShowCtaDropdown(false); openStartReadingModal() }}
                       className="w-full flex items-center gap-3 px-4 py-[14px] text-left text-[16px] font-medium"
                       style={{ color: 'var(--label)' }}
                     >
