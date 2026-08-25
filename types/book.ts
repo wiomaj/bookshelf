@@ -40,4 +40,15 @@ export type Book = {
   started_reading_year?: number | null
   is_audiobook?: boolean
   is_ebook?: boolean
+  // ── Content metadata, captured from the search result the book was added from.
+  // Populated by lib/bookEnrichment; see the 20260816 migration for why these
+  // are stored rather than re-fetched on every view.
+  isbn13?: string | null          // join key into book_metadata_cache
+  page_count?: number | null
+  published_date?: string | null  // "2003-06-26" | "2003" — varies by source
+  publisher?: string | null
+  subjects?: string[] | null      // genre/subject tags, max 8
+  // Only selected by getBook and the insert/update round-trips — descriptions
+  // are large and the list queries load the whole library at once.
+  description?: string | null
 }

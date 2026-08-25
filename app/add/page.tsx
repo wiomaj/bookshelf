@@ -14,6 +14,7 @@ import { uploadCoverPhoto } from '@/lib/coverUpload'
 import { coverUrl as proxiedCoverUrl } from '@/lib/coverUrl'
 import { searchBooksPage } from '@/lib/bookSearch'
 import type { BookSuggestion } from '@/lib/bookSearch'
+import { enrichmentFromSuggestion } from '@/lib/bookEnrichment'
 
 type ListTab = 'read' | 'to_read' | 'wishlist'
 
@@ -243,12 +244,13 @@ function AddBookContent() {
     if (!user) return
 
     setSaveLoading(true)
-    try {
-      // The picked suggestion carries subjects; keep the first as the genre so
-      // the dashboard's genre breakdown has something to count. A book typed in
-      // by hand has none — the detail page backfills it on first view.
-      const genre = selected?.subjects?.[0]
 
+    // Content metadata from the result this book was picked from. Empty when
+    // the book was entered by hand, or when the title/author were edited away
+    // from the selection — see lib/bookEnrichment.
+    const enrichment = enrichmentFromSuggestion(selected, title.trim(), author.trim())
+
+    try {
       const enrichCover = async (id: string) => {
         if (coverUrl || !title) return
         try {
@@ -259,7 +261,8 @@ function AddBookContent() {
 
       if (tab === 'read') {
         const saved = await addBook(supabase, user.id, {
-          title: title.trim(), author: author.trim(), genre,
+          ...enrichment,
+          title: title.trim(), author: author.trim(),
           year, month, rating, notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,
           is_audiobook: isAudiobook,
@@ -271,7 +274,8 @@ function AddBookContent() {
         router.push('/')
       } else if (tab === 'to_read') {
         const saved = await addBook(supabase, user.id, {
-          title: title.trim(), author: author.trim(), genre,
+          ...enrichment,
+          title: title.trim(), author: author.trim(),
           status: 'to_read', year: trYear, month: trMonth, rating: 0,
           notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,
@@ -284,7 +288,8 @@ function AddBookContent() {
         router.push('/')
       } else {
         const saved = await addBook(supabase, user.id, {
-          title: title.trim(), author: author.trim(), genre,
+          ...enrichment,
+          title: title.trim(), author: author.trim(),
           status: 'wishlist', year: 0, month: null, rating: 0,
           notes: notes.trim() || undefined,
           cover_url: coverUrl.trim() || undefined,

@@ -14,6 +14,7 @@ import { uploadCoverPhoto } from '@/lib/coverUpload'
 import { supabase } from '@/lib/supabase'
 import { searchBooks } from '@/lib/bookSearch'
 import type { BookSuggestion } from '@/lib/bookSearch'
+import { enrichmentFromSuggestion } from '@/lib/bookEnrichment'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -73,6 +74,10 @@ export default function BookForm({
   const [rating, setRating]   = useState(initialData?.rating ?? 0)
   const [notes, setNotes]     = useState(initialData?.notes ?? '')
   const genreRef = useRef(initialData?.genre)
+  // The suggestion the user picked, kept whole rather than flattened on
+  // selection: the title and author stay editable afterwards, so whether its
+  // metadata still applies can only be decided at submit time.
+  const selectedSuggestionRef = useRef<BookSuggestion | null>(null)
   const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? '')
   const [isAudiobook, setIsAudiobook] = useState(initialData?.is_audiobook ?? false)
   const [isEbook, setIsEbook] = useState(initialData?.is_ebook ?? false)
@@ -146,13 +151,10 @@ export default function BookForm({
 
   function selectSuggestion(s: BookSuggestion) {
     skipNextSearchRef.current = true
+    selectedSuggestionRef.current = s
     setTitle(s.title)
     setAuthor(s.author)
     if (s.cover_url) setCoverUrl(s.cover_url)
-    // Carry the genre through to the row — it has no field in the form, so
-    // without this it is dropped and the dashboard's genre breakdown stays
-    // empty. Same first-subject rule the detail page displays.
-    if (s.subjects?.[0]) genreRef.current = s.subjects[0]
     // Pre-fill year from publishedDate if available and user hasn't set a custom year
     if (s.publishedDate) {
       const y = parseInt(s.publishedDate.slice(0, 4))
@@ -195,11 +197,21 @@ export default function BookForm({
       })
     }
 
+    // Empty when nothing was picked from the dropdown, or when the picked
+    // suggestion no longer matches the edited title — so the spread below
+    // leaves any metadata already on the row untouched.
+    const enrichment = enrichmentFromSuggestion(
+      selectedSuggestionRef.current,
+      title.trim(),
+      author.trim(),
+    )
+
     try {
       await onSubmit({
         title:     title.trim(),
         author:    author.trim(),
-        genre:     genreRef.current || undefined,
+        ...enrichment,
+        genre:     enrichment.genre ?? genreRef.current ?? undefined,
         year:      status === 'wishlist' ? 0 : year,
         month:     status === 'wishlist' ? null : month,
         rating:    status === 'read' ? rating : 0,
