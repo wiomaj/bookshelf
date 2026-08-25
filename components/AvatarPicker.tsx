@@ -12,17 +12,31 @@ interface AvatarPickerProps {
   onClose: () => void
 }
 
+/** Three seeds, each visibly apart from the last, so the choices read as
+ *  distinct options rather than near-duplicates. */
+function generateOptions(fromSeed: string): string[] {
+  const seeds: string[] = []
+  let last = fromSeed
+  for (let i = 0; i < 3; i++) {
+    last = nextAvatarSeed(last)
+    seeds.push(last)
+  }
+  return seeds
+}
+
 /**
- * Bottom sheet for rerolling the generated profile image.
+ * Bottom sheet for picking the generated profile image.
  *
- * Shuffling only moves a local preview — the account is written once, on Save,
- * so a run of taps doesn't turn into a run of network calls.
+ * Presents three generated options at once — tapping one only moves a local
+ * preview, and the account is written once, on Save, so a run of taps
+ * doesn't turn into a run of network calls.
  */
 export default function AvatarPicker({ open, onClose }: AvatarPickerProps) {
   const { user, avatarSeed, updateAvatarSeed } = useApp()
   const t = useT()
 
   const [preview, setPreview] = useState(avatarSeed)
+  const [options, setOptions] = useState<string[]>(() => generateOptions(avatarSeed))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -31,6 +45,7 @@ export default function AvatarPicker({ open, onClose }: AvatarPickerProps) {
   useEffect(() => {
     if (open) {
       setPreview(avatarSeed)
+      setOptions(generateOptions(avatarSeed))
       setError(null)
     }
   }, [open, avatarSeed])
@@ -57,6 +72,31 @@ export default function AvatarPicker({ open, onClose }: AvatarPickerProps) {
     setSaving(false)
     if (saveError) setError(saveError)
     else onClose()
+  }
+
+  function renderAvatarTile(seed: string) {
+    const selected = seed === preview
+    return (
+      <motion.button
+        key={seed}
+        type="button"
+        whileTap={{ scale: 0.94 }}
+        animate={{ scale: selected ? 1.06 : 1 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        onClick={() => setPreview(seed)}
+        disabled={saving}
+        aria-pressed={selected}
+        aria-label={t.profileImage}
+        className="rounded-full disabled:opacity-50"
+        style={{
+          boxShadow: selected
+            ? `0 0 0 3px var(--bg-elevated), 0 0 0 5px var(--primary)`
+            : 'none',
+        }}
+      >
+        <UserAvatar size={76} seed={seed} shape="circle" decorative />
+      </motion.button>
+    )
   }
 
   return (
@@ -101,22 +141,20 @@ export default function AvatarPicker({ open, onClose }: AvatarPickerProps) {
               </p>
             </div>
 
-            {/* Preview — the heading above already names it. */}
-            <div className="flex justify-center mb-6">
-              <motion.div
-                key={preview}
-                initial={{ scale: 0.94, opacity: 0.6 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              >
-                <UserAvatar size={96} seed={preview} decorative />
-              </motion.div>
+            {/* The current picture stays on the left, set apart from the
+                three generated options so it doesn't read as a fourth
+                sibling — the heading above already names what they're for. */}
+            <div className="flex justify-center items-center gap-8 mb-6">
+              {renderAvatarTile(avatarSeed)}
+              <div className="flex gap-5">
+                {options.map(renderAvatarTile)}
+              </div>
             </div>
 
             <div className="flex flex-col gap-3">
               <motion.button
                 whileTap={{ scale: 0.97 }}
-                onClick={() => setPreview(nextAvatarSeed(preview))}
+                onClick={() => setOptions(generateOptions(preview))}
                 disabled={saving}
                 className="w-full py-[15px] rounded-[14px] text-[17px] font-semibold
                            flex items-center justify-center gap-2 disabled:opacity-50"
