@@ -5,31 +5,52 @@ import { useT } from '@/contexts/AppContext'
 
 const POLL_INTERVAL = 5 * 60 * 1000 // 5 minutes
 
+async function fetchBuildId(): Promise<string | null> {
+  try {
+    const res = await fetch('/api/version', { cache: 'no-store' })
+    if (!res.ok) return null
+    const data = (await res.json()) as { buildId: string | null }
+    return data.buildId
+  } catch {
+    return null
+  }
+}
+
 export default function NewVersionBanner() {
   const [available, setAvailable] = useState(false)
   const t = useT()
-  const buildId = useRef<string | null>(null)
+  const baseline = useRef<string | null>(null)
 
   useEffect(() => {
-    const nextData = (window as Window & { __NEXT_DATA__?: { buildId?: string } }).__NEXT_DATA__
-    if (!nextData?.buildId) return
-    buildId.current = nextData.buildId
+    let cancelled = false
 
     async function check() {
-      if (!buildId.current) return
-      try {
-        const res = await fetch(
-          `/_next/static/${buildId.current}/_buildManifest.js`,
-          { cache: 'no-store' }
-        )
-        if (!res.ok) setAvailable(true)
-      } catch {
-        // network error — ignore, don't show banner
+      const current = await fetchBuildId()
+      if (cancelled || !current) return
+      if (baseline.current === null) {
+        baseline.current = current
+        return
       }
+      if (current !== baseline.current) setAvailable(true)
+    }
+
+    // Check immediately, not just after the first interval — on iOS the app
+    // is often backgrounded (and its timers suspended) well within
+    // POLL_INTERVAL, so waiting for the interval alone can mean it never
+    // fires during a typical session.
+    check()
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') check()
     }
 
     const id = setInterval(check, POLL_INTERVAL)
-    return () => clearInterval(id)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      cancelled = true
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [])
 
   if (!available) return null
