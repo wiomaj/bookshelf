@@ -45,7 +45,7 @@ export default function RatingDistributionChart({ books }: Props) {
         className="text-[12px] mt-[2px] mb-[24px]"
         style={{ color: 'var(--label-secondary)' }}
       >
-        {t.allTime} · {t.statsAllTime}
+        {t.statsAllTime}
       </p>
 
       {/* Average rating */}

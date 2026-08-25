@@ -233,6 +233,8 @@ export type Translations = {
   statsFavouriteAuthorsSub: string
   statsGenreBreakdown: string
   statsGenreBreakdownSub: string
+  statsGenreBreakdownCaption: string
+  statsOtherGenres: string
   statsNotFinished: string
   statsVsYear: string
   statsSameAsYear: string
@@ -491,6 +493,8 @@ const en: Translations = {
   statsFavouriteAuthorsSub: 'My favourite authors',
   statsGenreBreakdown: 'Genre Breakdown',
   statsGenreBreakdownSub: 'Which genres I read most',
+  statsGenreBreakdownCaption: '{shown} of your {total} read books have a saved genre',
+  statsOtherGenres: 'Other',
   statsNotFinished: 'not finished',
   statsVsYear: 'vs',
   statsSameAsYear: 'same as',
@@ -632,7 +636,7 @@ const de: Translations = {
   yourNamePlaceholder: 'Name hinzufügen',
   profileImage: 'Profilbild',
   profileImageHint: 'Mische, bis es sich nach dir anfühlt.',
-  shuffleImage: 'Mischen',
+  shuffleImage: 'Profilfarbe generieren',
   resetImage: 'Auf Standard zurücksetzen',
   namePromptTitle: 'Wie heißt du?',
   namePromptSub: 'Wir nutzen deinen Namen, um dein Bücherregal zu personalisieren.',
@@ -735,16 +739,18 @@ const de: Translations = {
   statsRatingDistribution: 'Meine Bewertungen',
   statsAllTime: 'Was ich über die gelesenen Bücher dachte',
   statsAverageRating: 'Durchschnittsbewertung',
-  statsFavouriteAuthors: 'Lieblingsautoren',
+  statsFavouriteAuthors: 'Meistgelesene Autoren',
   statsByBooksRead: 'Meine Top-5-Autoren',
   statsFavouriteAuthorsSub: 'Meine Lieblingsautoren',
   statsGenreBreakdown: 'Genre-Übersicht',
   statsGenreBreakdownSub: 'Welche Genres ich am meisten lese',
+  statsGenreBreakdownCaption: '{shown} von {total} gelesenen Büchern haben ein gespeichertes Genre',
+  statsOtherGenres: 'Andere',
   statsNotFinished: 'nicht beendet',
   statsVsYear: 'ggü.',
   statsSameAsYear: 'genauso wie',
   statsFormatSplit: 'Formate',
-  statsFormatSplitSub: 'Buch, E-Book und Hörbuch',
+  statsFormatSplitSub: 'Bücher, E-Books und Hörbücher',
   allTime: 'Alle Jahre',
   relativeJustNow: 'gerade eben',
   relativeMonth: 'Monat',
@@ -989,6 +995,8 @@ const fr: Translations = {
   statsFavouriteAuthorsSub: 'Mes auteurs préférés',
   statsGenreBreakdown: 'Répartition par genre',
   statsGenreBreakdownSub: 'Les genres que je lis le plus',
+  statsGenreBreakdownCaption: '{shown} de vos {total} livres lus ont un genre enregistré',
+  statsOtherGenres: 'Autres',
   statsNotFinished: 'non terminés',
   statsVsYear: 'vs',
   statsSameAsYear: 'comme en',
@@ -1238,6 +1246,8 @@ const es: Translations = {
   statsFavouriteAuthorsSub: 'Mis autores favoritos',
   statsGenreBreakdown: 'Por género',
   statsGenreBreakdownSub: 'Los géneros que más leo',
+  statsGenreBreakdownCaption: '{shown} de tus {total} libros leídos tienen un género guardado',
+  statsOtherGenres: 'Otros',
   statsNotFinished: 'sin terminar',
   statsVsYear: 'vs',
   statsSameAsYear: 'igual que en',
@@ -1487,6 +1497,8 @@ const pl: Translations = {
   statsFavouriteAuthorsSub: 'Moi ulubieni autorzy',
   statsGenreBreakdown: 'Podział gatunków',
   statsGenreBreakdownSub: 'Gatunki, które czytam najczęściej',
+  statsGenreBreakdownCaption: '{shown} z {total} przeczytanych książek ma zapisany gatunek',
+  statsOtherGenres: 'Inne',
   statsNotFinished: 'nieukończone',
   statsVsYear: 'wzgl.',
   statsSameAsYear: 'tyle samo co w',

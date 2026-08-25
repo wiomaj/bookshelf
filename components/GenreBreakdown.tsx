@@ -8,6 +8,13 @@ interface Props {
   books: Book[]  // all read books
 }
 
+const MAX_SLICES = 5
+
+// One accent, decreasing weights — same "shades of the brand colour" system
+// FormatBreakdown uses, so the wedges read as one family rather than a
+// rainbow of unrelated hues.
+const SLICE_OPACITIES = [100, 78, 58, 42, 30, 18]
+
 export default function GenreBreakdown({ books }: Props) {
   const t = useT()
   const [ready, setReady] = useState(false)
@@ -27,71 +34,100 @@ export default function GenreBreakdown({ books }: Props) {
   // Hide if no genre data
   if (countMap.size === 0) return null
 
-  // Sort by count descending
   const sorted = [...countMap.entries()].sort((a, b) => b[1] - a[1])
-  const maxCount = sorted[0][1]
-  const total = sorted.reduce((s, [, c]) => s + c, 0)
+  const shown = sorted.reduce((s, [, c]) => s + c, 0)
+
+  // Group anything past the top slices into one "Other" wedge, so the chart
+  // stays legible instead of splintering into a dozen slivers.
+  const top = sorted.slice(0, MAX_SLICES)
+  const rest = sorted.slice(MAX_SLICES)
+  const restTotal = rest.reduce((s, [, c]) => s + c, 0)
+  const slices: [string, number][] = restTotal > 0 ? [...top, [t.statsOtherGenres, restTotal]] : top
+
+  const colorFor = (i: number) =>
+    `color-mix(in srgb, var(--primary) ${SLICE_OPACITIES[i] ?? 15}%, transparent)`
+
+  // Conic-gradient stops for the donut
+  let acc = 0
+  const stops = slices.map(([, count], i) => {
+    const from = (acc / shown) * 100
+    acc += count
+    return `${colorFor(i)} ${from}% ${(acc / shown) * 100}%`
+  })
 
   return (
     <div
-      className="mx-4 mb-6 rounded-[20px] px-4 pt-4 pb-5"
+      className="mx-4 mb-4 rounded-[16px] p-[16px]"
       style={{ backgroundColor: 'var(--bg-elevated)' }}
     >
-      {/* Header. The subtitle leads with the period the card covers — genres
-          are always all-time, whatever year the pace card is showing. */}
-      <div className="mb-1">
-        <p className="text-[13px] font-semibold tracking-[-0.1px]" style={{ color: 'var(--label)' }}>
-          {t.statsGenreBreakdown}
-        </p>
-        <p className="text-[11px]" style={{ color: 'var(--label-secondary)' }}>
-          {t.allTime} · {t.statsGenreBreakdownSub}
-        </p>
-      </div>
-
-      {/* Total badge */}
-      <p className="text-[28px] font-bold tracking-[-0.5px] mb-3" style={{ color: 'var(--label)' }}>
-        {total}
-        <span className="text-[13px] font-normal ml-1" style={{ color: 'var(--label-secondary)' }}>
-          {total === 1 ? t.singularBook : t.pluralBooks}
-        </span>
+      {/* Card title. The subtitle leads with the period the card covers —
+          genres are always all-time, whatever year the pace card is showing. */}
+      <p className="text-[17px] font-semibold tracking-[-0.43px]" style={{ color: 'var(--label)' }}>
+        {t.statsGenreBreakdown}
+      </p>
+      <p className="text-[12px] mt-[2px] mb-[24px]" style={{ color: 'var(--label-secondary)' }}>
+        {t.statsGenreBreakdownSub}
       </p>
 
-      {/* Horizontal bar list */}
-      <div className="flex flex-col gap-[10px]">
-        {sorted.map(([genre, count], i) => {
-          const isMax = count === maxCount
-          const barW = Math.max(8, Math.round((count / maxCount) * 100))
-          return (
-            <div key={genre} className="flex items-center gap-2">
-              {/* Genre name */}
+      <div className="flex items-center gap-[20px]">
+        {/* Donut */}
+        <div
+          className="relative shrink-0 rounded-full"
+          style={{
+            width: 120,
+            height: 120,
+            background: ready ? `conic-gradient(${stops.join(', ')})` : 'var(--fill)',
+            transition: 'background 0.6s cubic-bezier(0.34,1.56,0.64,1)',
+          }}
+        >
+          <div
+            className="absolute rounded-full flex items-center justify-center"
+            style={{ inset: 18, backgroundColor: 'var(--bg-elevated)' }}
+          >
+            <span
+              className="text-[24px] font-bold leading-none tracking-[0.2px]"
+              style={{ color: 'var(--label)' }}
+            >
+              {shown}
+            </span>
+          </div>
+        </div>
+
+        {/* Legend */}
+        <div className="flex flex-col gap-[10px] min-w-0 flex-1">
+          {slices.map(([genre, count], i) => (
+            <div key={genre} className="flex items-center gap-[8px]">
+              <span
+                className="w-[8px] h-[8px] rounded-full shrink-0"
+                style={{ backgroundColor: colorFor(i) }}
+              />
               <span
                 className="text-[12px] font-medium leading-none truncate"
                 style={{ color: 'var(--label)', minWidth: 0, flex: '1 1 0' }}
               >
                 {genre}
               </span>
-              {/* Bar + count */}
-              <div className="flex items-center gap-[6px] shrink-0">
-                <div
-                  className="h-[8px] rounded-full"
-                  style={{
-                    width: ready ? `${barW}px` : 0,
-                    maxWidth: '100px',
-                    backgroundColor: isMax ? 'var(--primary)' : 'var(--primary-muted)',
-                    transition: `width 0.5s cubic-bezier(0.34,1.56,0.64,1) ${i * 0.07}s`,
-                  }}
-                />
-                <span
-                  className="text-[11px] font-semibold tabular-nums w-4 text-right"
-                  style={{ color: isMax ? 'var(--primary)' : 'var(--label-secondary)' }}
-                >
-                  {count}
-                </span>
-              </div>
+              <span
+                className="text-[11px] font-semibold tabular-nums shrink-0"
+                style={{ color: 'var(--label)' }}
+              >
+                {count}
+              </span>
             </div>
-          )
-        })}
+          ))}
+        </div>
       </div>
+
+      {/* Caption: the tally only ever covers books with a saved genre, so it
+          explains why that count trails the full shelf. */}
+      <p
+        className="text-[11px] mt-[16px] pt-[12px]"
+        style={{ color: 'var(--label-secondary)', borderTop: '1px solid var(--separator)' }}
+      >
+        {t.statsGenreBreakdownCaption
+          .replace('{shown}', String(shown))
+          .replace('{total}', String(books.length))}
+      </p>
     </div>
   )
 }
